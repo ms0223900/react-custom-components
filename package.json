@@ -18,6 +18,7 @@
   "dependencies": {
     "@material-ui/core": "^4.0.1",
     "@material-ui/icons": "^4.0.1",
+    "@material-ui/styles": "^4.0.1",
     "compression": "^1.7.3",
     "css-loader": "^2.1.0",
     "dotenv": "^6.2.0",

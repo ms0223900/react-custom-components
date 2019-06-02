@@ -105,10 +105,20 @@ export default () => {
 
 
   const handleCalcFunc = useCallback((txt) => {
+    const lastTxt = calNow[calNow.length - 1]
     switch (txt) {
       case 'del':
-        if(calNow.length > 1) {
-          setCalNow( arrDel(calNow) )
+        if(calNow.length > 0) {
+          if(checkIsOpe(lastTxt)) {
+            setCalNow( arrDel(calNow) )
+          } else {
+            if(lastTxt.length === 1) {
+              setCalNow( calNow.slice(0, -1) )
+            } else {
+              const res = lastTxt.slice(0, -1)
+              setCalNow( [...calNow.slice(0, -2), res] )
+            }
+          }
         } else {
           setCalNow(['0'])
         }
@@ -123,27 +133,36 @@ export default () => {
     }
   }, [calNow])
   const handleButton = useCallback((txt) => {
-    const lastNum = calNow[calNow.length - 1]
+    const lastTxt = calNow[calNow.length - 1]
     if(checkIsNum(txt) || checkIsOpe(txt)) {
-      setCalRes(false)
+      setCalRes(false) //reset calculator 
       // + - * /
       if(calNow[0] === '0' || isCalRes) {
         if(checkIsNum(txt)) {
           setCalNow([txt])
+        } else {
+          setCalNow([ ...calNow, txt ])
         }
         return 
       }
-      if(checkIsOpe(lastNum)) {
-        //if num
-        if(calNow.length === 1) {
+      //operations
+      if(checkIsOpe(lastTxt)) {
+        //if num is not typed
+        if(calNow.length === 1 && lastTxt === '0') {
           setCalNow([ txt ])
         } else if(checkIsNum(txt)) {
           setCalNow([ ...calNow, txt ])
         } else {
           setCalNow([ ...arrDel(calNow), txt ])
         }
+      // numbers
       } else {
-        setCalNow([ ...calNow, txt ])
+        if( checkIsOpe(txt) ) {
+          setCalNow([ ...calNow, txt ])
+        } else {
+          const res = lastTxt + txt
+          setCalNow([ ...calNow.slice(0, -1), res ])
+        }
       }
     } else if(buttonFuncTexts.includes(txt)) {
       handleCalcFunc(txt)

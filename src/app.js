@@ -1,6 +1,7 @@
 import React from 'react'
 import Calendar from './components/Calendar'
 import Calculator from './components/Calculator'
+import ComicViewer from './components/ComicViewer'
 
 export default () => {
 
@@ -8,6 +9,7 @@ export default () => {
     <div>
       <Calendar />
       <Calculator />
+      <ComicViewer />
     </div>
   )
 }

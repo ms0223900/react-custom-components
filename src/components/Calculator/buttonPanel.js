@@ -6,6 +6,7 @@ import SingleButton from './singleButton'
 const buttonNumberTexts = [...Array(10).keys()].map(a => a.toString())
 const buttonCalTexts = ['+', '-', '/', '*']
 const buttonFuncTexts = ['del', 'clear', '=']
+// const buttonMemoryTexts = ['m+', 'm-', 'm=']
 const buttonTexts = [...buttonNumberTexts, ...buttonCalTexts, ...buttonFuncTexts]
 const useStyles = makeStyles({
   calContainer: {
@@ -134,6 +135,8 @@ export default () => {
   }, [calNow])
   const handleButton = useCallback((txt) => {
     const lastTxt = calNow[calNow.length - 1]
+    const addText = () => setCalNow([ ...calNow, txt ])
+    //
     if(checkIsNum(txt) || checkIsOpe(txt)) {
       setCalRes(false) //reset calculator 
       // + - * /
@@ -141,7 +144,7 @@ export default () => {
         if(checkIsNum(txt)) {
           setCalNow([txt])
         } else {
-          setCalNow([ ...calNow, txt ])
+          addText()
         }
         return 
       }
@@ -151,14 +154,14 @@ export default () => {
         if(calNow.length === 1 && lastTxt === '0') {
           setCalNow([ txt ])
         } else if(checkIsNum(txt)) {
-          setCalNow([ ...calNow, txt ])
+          addText()
         } else {
           setCalNow([ ...arrDel(calNow), txt ])
         }
       // numbers
       } else {
         if( checkIsOpe(txt) ) {
-          setCalNow([ ...calNow, txt ])
+          addText()
         } else {
           const res = lastTxt + txt
           setCalNow([ ...calNow.slice(0, -1), res ])

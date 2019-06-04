@@ -24,54 +24,11 @@ const useStyles = makeStyles({
 })
 
 export default ({ imgSrc }) => {
-  const isResize = useRef('no click')
-  const clientY = useRef()
-  const [ picHeight, setPicHeight ] = useState(400)
   const classes = useStyles()
-
-  const mearsureRef = useCallback((el) => {
-    if(el !== null) {
-      setPicHeight(el.getBoundingClientRect().height)
-      console.log('ref')
-    }
-  })
-
-  const handleResizeStart = useCallback((e) => {
-    isResize.current = 'clicked'
-    clientY.current = e.clientY
-    window.addEventListener('mousemove', handleResize)
-    // console.log(isResize)
-  })
-  const handleResize = useCallback((e) => {
-    if(isResize.current === 'clicked') {
-      // console.log(picHeight, clientY.current, e.clientY)
-      const newHeight = picHeight + e.clientY - clientY.current
-      setPicHeight(newHeight)
-    }
-  }, [picHeight])
-  const handleResizeOver = useCallback(() => {
-    isResize.current = 'no click'
-    window.removeEventListener('mousemove', handleResize)
-    // clientY.current = 
-  })
-  useEffect(() => {
-    console.log(picHeight)
-    window.addEventListener('mouseup', handleResizeOver)
-  }, [])
-  const resisis = isResize.current
+  //
   return (
-    <div 
-      // ref={ mearsureRef } 
-      style={{ height: picHeight, }} 
-      className={ classes.picContainer }>
+    <>
       <img className={ classes.picImg } src={ 'data/' + imgSrc } />
-      <span>{ picHeight }</span>
-      <div 
-        className={ classes.rootBorder }
-        onMouseDown={ handleResizeStart }
-        // onMouseMove={ handleResize }
-        // onMouseUp={ handleResizeOver } 
-        />
-    </div>
+    </>
   )
 }

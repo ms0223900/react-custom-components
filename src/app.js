@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React from 'react'
 import Calendar from './components/Calendar'
 import Calculator from './components/Calculator'
@@ -7,8 +8,8 @@ export default () => {
 
   return (
     <div>
-      <Calendar />
-      <Calculator />
+      {/* <Calendar /> */}
+      {/* <Calculator /> */}
       <ComicViewer />
     </div>
   )

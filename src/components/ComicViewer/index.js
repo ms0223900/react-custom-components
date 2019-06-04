@@ -1,26 +1,26 @@
+/* eslint-disable no-unused-vars */
 import React, { 
   useEffect, 
   useState 
 } from 'react'
+import SinglePic from './singlePic'
 
-// function getLocalFiles(path, fileFormat) {
-//   // const req = require.context(path, false, fileFormat)
-//   return require.context(path, false, fileFormat).keys()
-// }
+const filePath = '../../../public/data'
+const fileFormat = /\.(jpe?g|png|gif|svg)$/i
 
 export default () => {
   const [ pics, setPics ] = useState([])
+  const [ picNow, setPicNow ] = useState(0)
   useEffect(() => {
-    // const pics = getLocalFiles('../../../public/data', /\.(jpe?g|png|gif|svg)$/i)
     const req = require.context('../../../public/data', false, /\.(jpe?g|png|gif|svg)$/i)
     // console.log(pics)
     setPics(req.keys())
   }, [])
   return (
     <div>
-      {pics.length > 0 ? pics.map((pic, i) => (
-        <img key={ i } src={ 'data/' + pic } />
-      )) : 'loading...'}
+      {pics.length > 0 ? (
+        <SinglePic imgSrc={ pics[picNow] } />
+      ) : ('loading...')}
     </div>
   )
 }

@@ -1,7 +1,8 @@
 /* eslint-disable no-unused-vars */
 import React, { 
   useEffect, 
-  useState 
+  useState,
+  useCallback 
 } from 'react'
 import PicContainer from './picContainer'
 import SinglePic from './singlePic'
@@ -20,12 +21,22 @@ export default () => {
     setPics(req.keys())
   }, [])
   //
+  const handlePage = useCallback(
+    (page) => {
+      setPicNow(page)
+    },
+    [picNow],
+  )
   return (
     <div>
       {pics.length > 0 ? (
         <PicContainer>
           <SinglePic imgSrc={ pics[picNow] } />
-          <PageButtonList pageCount={ pics.length } pageNow={ picNow }  />
+          <PageButtonList 
+            pageCount={ pics.length } 
+            pageNow={ picNow } 
+            toOtherPage={ handlePage }
+          />
         </PicContainer>
       ) : ('loading...')}
     </div>

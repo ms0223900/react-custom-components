@@ -51,14 +51,16 @@ export default ({ pageCount=mockPageCount, pageNow=10, toOtherPage }) => {
   console.log(pageCount, pageNow)
   return (
     <div>
+      <PageButton pageText={ 'prev' } clickFn={ toOtherPage.bind(this, 'prev') } />
       {PAGEs.map((p, i) => (
         <GetPage
           key={ i } 
           txt={p}
           pageNow={pageNow}
           pageCount={pageCount}
-          toOtherPage={toOtherPage}  />
+          toOtherPage={ toOtherPage }  />
       ))}
+      <PageButton pageText={ 'next' } clickFn={ toOtherPage.bind(this, 'next') } />
     </div>
   )
 }

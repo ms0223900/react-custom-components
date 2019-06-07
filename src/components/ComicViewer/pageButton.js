@@ -6,12 +6,13 @@ const useStyles = ({ pageNow }) => makeStyles({
     display: 'inline-block',
     backgroundColor: pageNow ? '#a00' : '#ddd',
     color: pageNow ? '#fff' : '#111',
-    width: 20,
+    minWidth: 20,
     height: 20,
     padding: '3px',
     margin: 3,
     textAlign: 'center',
     cursor: 'pointer',
+    userSelect: 'none',
     '&:hover': {
       backgroundColor: '#a00',
       color: '#fff',
@@ -19,12 +20,29 @@ const useStyles = ({ pageNow }) => makeStyles({
   },
 })
 
-export default ({ pageText, pageNow, clickFn }) => {
+export default ({ pageText='', pageNow=false, clickFn }) => {
   const classes = useStyles({ pageNow })()
-  console.log(pageNow)
+  // console.log(pageNow)
+  const pageTxt = typeof(pageText) === 'number' ? pageText + 1 : pageText
   return (
     <a  className={ classes.pageButton } onClick={ clickFn }>
-      { pageText + 1 }
+      { pageTxt }
     </a>
   )
 }
+
+
+//
+{/* <div className="keypanel__row">
+  <Button type="primary" onButtonPress={this.props.onButtonPress}>C</Button>
+  <Button type="primary" onButtonPress={this.props.onButtonPress}>&larr;</Button>
+  <Button type="operator" onButtonPress={this.props.onButtonPress}>%</Button>
+  <Button type="operator" onButtonPress={this.props.onButtonPress}>/</Button>
+</div>
+<div className="keypanel__row">
+  <Button onButtonPress={this.props.onButtonPress}>7</Button>
+  <Button onButtonPress={this.props.onButtonPress}>8</Button>
+  <Button onButtonPress={this.props.onButtonPress}>9</Button>
+  <Button type="operator" onButtonPress={this.props.onButtonPress}>*</Button>
+</div> */}
+

@@ -24,7 +24,7 @@ const useStyles = makeStyles({
   }
 })
 
-export default ({ imgSrc, ...props }) => {
+export default ({ pics, picNow, ...props }) => {
   const isResize = useRef('no click')
   const clientY = useRef()
   const [ picHeight, setPicHeight ] = useState(400)
@@ -63,9 +63,9 @@ export default ({ imgSrc, ...props }) => {
   return (
     <div 
       // ref={ mearsureRef } 
-      style={{ height: picHeight, }} 
       className={ classes.picContainer }
     >
+      <SinglePic imgSrc={ pics[picNow] } picHeight={ picHeight } />
       { props.children }
       <span>{ picHeight }</span>
       <div 

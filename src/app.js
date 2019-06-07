@@ -3,6 +3,7 @@ import React from 'react'
 import Calendar from './components/Calendar'
 import Calculator from './components/Calculator'
 import ComicViewer from './components/ComicViewer'
+import SUDOKU from './components/SUDOKU'
 
 export default () => {
 
@@ -11,6 +12,7 @@ export default () => {
       {/* <Calendar /> */}
       {/* <Calculator /> */}
       <ComicViewer />
+      <SUDOKU />
     </div>
   )
 }

@@ -23,12 +23,12 @@ const useStyles = makeStyles({
   }
 })
 
-export default ({ imgSrc }) => {
+export default ({ imgSrc, picHeight }) => {
   const classes = useStyles()
   //
   return (
-    <>
+    <div style={{ height: picHeight }}>
       <img className={ classes.picImg } src={ 'data/' + imgSrc } />
-    </>
+    </div>
   )
 }

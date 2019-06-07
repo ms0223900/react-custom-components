@@ -23,15 +23,22 @@ export default () => {
   //
   const handlePage = useCallback(
     (page) => {
-      setPicNow(page)
+      if(page === 'prev') {
+        if(picNow >= 1)
+          setPicNow(picNow - 1)
+      } else if(page === 'next') {
+        if(picNow <= pics.length - 2)
+          setPicNow(picNow + 1)
+      } else {
+        setPicNow(page)
+      }
     },
-    [picNow],
+    [picNow, pics],
   )
   return (
     <div>
       {pics.length > 0 ? (
-        <PicContainer>
-          <SinglePic imgSrc={ pics[picNow] } />
+        <PicContainer pics={ pics } picNow={ picNow }>
           <PageButtonList 
             pageCount={ pics.length } 
             pageNow={ picNow } 

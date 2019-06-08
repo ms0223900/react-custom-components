@@ -18,21 +18,21 @@ const useStyles = makeStyles({
 
 export const useClickPos = () => {
   const [pos, setPos] = useState([0, 0])
-  const getPos = (e, blockPos) => {
-    console.log(e.clientX, e.clientY, blockPos)
-    setPos([e.clientX, e.clientY])
+  const getPos = (e, blockPos, txt) => {
+    console.log(e.clientX, e.clientY, blockPos, txt)
+    setPos([e.clientX, e.clientY, blockPos])
   }
   return [pos, getPos]
 }
 
 
-export default ({ sudokuTxt, blockPos, isChosen=false, getBlockPos }) => {
+export default ({ sudokuTxt, blockPos, isPosNow=false, getBlockPos }) => {
   const classes = useStyles()
   
   return (
     <span 
-      onClick={ e => getBlockPos(e, blockPos) } 
-      className={ isChosen ? classes['sudoku'] + ' active' : classes['sudoku'] }>
+      onClick={ e => getBlockPos(e, blockPos, sudokuTxt) } 
+      className={ isPosNow ? classes['sudoku'] + ' active' : classes['sudoku'] }>
       { sudokuTxt }
     </span>
   )

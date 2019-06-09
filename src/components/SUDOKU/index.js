@@ -3,7 +3,8 @@
 import React, {
   useCallback,
   useState,
-  useEffect
+  useEffect,
+  useRef
 } from 'react'
 import { cloneDeep } from 'Lodash'
 import '../../styles/style.scss'
@@ -34,6 +35,18 @@ const getShiftedSudoku = (sudokuArr) => {
   return res
 }
 
+const getBlankedSudoku = (sudokuArr) => {
+  const newArr = _.cloneDeep(sudokuArr)
+  newArr[1][2][0] = ''
+  newArr[3][1][0] = ''
+  newArr[4][0][1] = ''
+  newArr[6][1][2] = ''
+  newArr[8][2][1] = ''
+  newArr[8][1][2] = ''
+  return newArr
+}
+
+
 const useClass = makeStyles({
   popContainer: {
     position: 'absolute',
@@ -61,17 +74,29 @@ const handledSudokuArr = getShiftedSudoku(sudokuArrDefault)
 
 export default () => {
   const classes = useClass()
+  const containerTop = useRef(0)
+  const popUpDisplay = useRef(false)
+  const REF = useRef()
+  //
   const [pos, getPos] = useClickPos()
-  const [ sudokuArr, setBlockNumber ] = useSetBlockNumber(handledSudokuArr)
+  const [ sudokuArr, setBlockNumber ] = useSetBlockNumber( getBlankedSudoku(handledSudokuArr) )
   console.log(sudokuArr)
 
+  const getContainer = (el) => {
+    containerTop.current = el && el.getBoundingClientRect().top
+    // console.log(containerTop.current)
+    // containerTop.current = el.offsetTop + window.scrollY
+  }
   useEffect(() => {
-    console.log('hi')
+    console.log(handledSudokuArr)
+    if(handledSudokuArr.toString() === sudokuArr.toString()) {
+      window.alert('win~')
+    }
   }, [ sudokuArr ])
 
 
   return (
-    <div style={{ padding: 6, }}>
+    <div ref={ getContainer } style={{ position: 'relative', padding: 6, }}>
       <h2>{ 'sudoku' }</h2>
       {sudokuArr.map((su, i) => (
         <div key={ i }>

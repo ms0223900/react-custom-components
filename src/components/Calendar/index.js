@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useEffect, useReducer } from 'react'
+import { makeStyles } from '@material-ui/styles'
 import AllDays from './allDays'
 import { getWholeMonthDates } from './functions'
 
@@ -6,7 +7,20 @@ const selectedStartEndInit = {
   start: null, end: null,
 }
 
+const useStyles = makeStyles({
+  monthButton: {
+    cursor: 'pointer',
+    backgroundColor: '#aaa',
+    color: '#fff',
+    '&:hover': {
+      backgroundColor: '#111',
+    }
+  }
+})
+
+
 export default () => {
+  const classes = useStyles()
   const style = {
     width: 36 * 7,
   }
@@ -91,9 +105,17 @@ export default () => {
   return (
     <div style={ style }>
       <div style={{ textAlign: 'center', }}>
-        <span onClick={ () => handleSetMonth('minus') }>{ ' < ' }</span>
+        <span 
+          className={ classes.monthButton } 
+          onClick={ () => handleSetMonth('minus') }>
+          { ' < ' }
+        </span>
         <span>{ dateDataState.month }</span>
-        <span onClick={ () => handleSetMonth('add') }>{ ' > ' }</span>
+        <span 
+          className={ classes.monthButton } 
+          onClick={ () => handleSetMonth('add') }>
+          { ' > ' }
+        </span>
       </div>
       
       <AllDays 

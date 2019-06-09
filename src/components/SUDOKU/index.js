@@ -6,7 +6,7 @@ import React, {
   useEffect,
   useRef
 } from 'react'
-import { cloneDeep } from 'Lodash'
+import { cloneDeep } from 'lodash'
 import '../../styles/style.scss'
 import { makeStyles } from '@material-ui/styles'
 import SingleBlock, { useClickPos } from './singleBlock'

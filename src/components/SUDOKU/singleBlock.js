@@ -2,7 +2,7 @@
 import React, { useCallback, useState, useRef } from 'react'
 import { makeStyles } from '@material-ui/styles'
 
-const useStyles = (blockPos) => makeStyles({
+const useStyles = (blockPos, isBlanked) => makeStyles({
   sudoku: {
     display: 'inline-block',
     verticalAlign: 'top',
@@ -14,6 +14,7 @@ const useStyles = (blockPos) => makeStyles({
     border: '1px solid #aaa',
     userSelect: 'none',
     borderBottomWidth: (blockPos[0]) % 3 === 2 ? '3px' : '1px',
+    backgroundColor: isBlanked ? '#d1c4e9' : '#fff',
     '&:nth-child(3n)': {
       borderRightWidth: '3px',
       
@@ -37,8 +38,8 @@ export const useClickPos = () => {
 }
 
 
-export default ({ sudokuTxt, blockPos, isPosNow=false, getBlockPos, getBlockRef }) => {
-  const classes = useStyles(blockPos)()
+export default ({ sudokuTxt, blockPos, isPosNow=false, getBlockPos, getBlockRef, isBlanked }) => {
+  const classes = useStyles(blockPos, isBlanked)()
   // console.log(blockPos[0])
 
   return (

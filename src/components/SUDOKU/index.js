@@ -38,8 +38,8 @@ const getShiftedSudoku = (sudokuArr) => {
 
 const convertNumberToSudoKuPos = (sudokuArr=[], number=0, newValue=null, arrNum=[9, 3, 3]) => {
   const i = ~~(number / arrNum[0])
-  const j = ~~( (number % arrNum[0]) / arrNum[1] )
-  const k = number % arrNum[0] % arrNum[2] - 1
+  const j = ~~( (number % arrNum[0] - 1) / arrNum[1] )
+  const k = (number % arrNum[0] - 1) % arrNum[1] 
   sudokuArr[i][j][k] = newValue
   return [i, j, k]
 }
@@ -110,7 +110,6 @@ export default () => {
   //
   const [pos, getPos] = useClickPos()
   const [ sudokuArr, setBlockNumber ] = useSetBlockNumber(initBlankedSudoku, blankedPostion)
-  console.log(sudokuArr)
 
   const getContainer = (el) => {
     containerTop.current = el && el.getBoundingClientRect().top
@@ -118,7 +117,7 @@ export default () => {
     // containerTop.current = el.offsetTop + window.scrollY
   }
   useEffect(() => {
-    console.log(handledSudokuArr)
+    console.log(initBlankedSudoku)
     if(handledSudokuArr.toString() === sudokuArr.toString()) {
       window.alert('win~')
     }
@@ -136,6 +135,7 @@ export default () => {
                 key={ i * 9 + j * 3 + k }
                 isPosNow={ pos[2] && arrIsEqual([i, j, k], pos[2]) } 
                 getBlockPos={ getPos }
+                isBlanked={ blankedPostion.includes(convertPosToNum([i, j, k])) }
                 blockPos={ [i, j, k] } 
                 sudokuTxt={ ss } />))) 
           }

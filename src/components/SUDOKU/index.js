@@ -8,6 +8,7 @@ import React, {
 } from 'react'
 import { cloneDeep } from 'lodash'
 import '../../styles/style.scss'
+import { styleConfig } from './config'
 import { makeStyles } from '@material-ui/styles'
 import SingleBlock, { useClickPos } from './singleBlock'
 
@@ -35,14 +36,24 @@ const getShiftedSudoku = (sudokuArr) => {
   return res
 }
 
+const convertNumberToSudoKuPos = (sudokuArr=[], number=0, newValue=null, arrNum=[9, 3, 3]) => {
+  const i = ~~(number / arrNum[0])
+  const j = ~~( (number % arrNum[0]) / arrNum[1] )
+  const k = number % arrNum[0] % arrNum[2] - 1
+  sudokuArr[i][j][k] = newValue
+  return [i, j, k]
+}
+const convertPosToNum = (posArr=[]) => (
+  posArr[0] * 9 + posArr[1] * 3 + posArr[2] + 1
+)
+
+const blankedPostion = [ 16, 31, 38, 60, 78, 80 ]
+
+
+//generate blanked sudoku from origin sudoku array
 const getBlankedSudoku = (sudokuArr) => {
   const newArr = _.cloneDeep(sudokuArr)
-  newArr[1][2][0] = ''
-  newArr[3][1][0] = ''
-  newArr[4][0][1] = ''
-  newArr[6][1][2] = ''
-  newArr[8][2][1] = ''
-  newArr[8][1][2] = ''
+  blankedPostion.map(pos => convertNumberToSudoKuPos(newArr, pos, ''))
   return newArr
 }
 
@@ -52,18 +63,36 @@ const useClass = makeStyles({
     position: 'absolute',
     backgroundColor: '#fff',
     boxShadow: '0px 2px 10px #111',
+    cursor: 'pointer',
+    width: '81px',
+    // opacity: 0.6,
+    '& span': {
+      width: 27,
+      display: 'inline-block',
+      // padding: 4,
+      textAlign: 'center', 
+      userSelect: 'none',
+      '&:hover': {
+        backgroundColor: styleConfig.mainColor,
+        color: '#fff',
+      }
+    }
   }
 })
 
 
 
-const useSetBlockNumber = (handledSudokuArr) => {
+const useSetBlockNumber = (handledSudokuArr, blankedPostion) => {
   const [ sudokuArr, setSudokuNewArr ] = useState( handledSudokuArr )
   console.log(sudokuArr)
   const setBlockNumber = (number, blockPos) => {
-    console.log(number, blockPos)
+    console.log(number, blockPos, blankedPostion, convertPosToNum(blockPos))
+    if( !blankedPostion.includes(convertPosToNum(blockPos)) ) return 
     //deep clone
     let newArr = [...sudokuArr]
+    let thatBlock = newArr[ blockPos[0] ][ blockPos[1] ][ blockPos[2] ]
+    // check is the blank?
+    // if(thatBlock !== '')  return 
     newArr[ blockPos[0] ][ blockPos[1] ][ blockPos[2] ] = number
     setSudokuNewArr(newArr)
   }
@@ -71,7 +100,8 @@ const useSetBlockNumber = (handledSudokuArr) => {
 }
 
 const handledSudokuArr = getShiftedSudoku(sudokuArrDefault)
-
+const initBlankedSudoku = getBlankedSudoku(handledSudokuArr)
+//
 export default () => {
   const classes = useClass()
   const containerTop = useRef(0)
@@ -79,7 +109,7 @@ export default () => {
   const REF = useRef()
   //
   const [pos, getPos] = useClickPos()
-  const [ sudokuArr, setBlockNumber ] = useSetBlockNumber( getBlankedSudoku(handledSudokuArr) )
+  const [ sudokuArr, setBlockNumber ] = useSetBlockNumber(initBlankedSudoku, blankedPostion)
   console.log(sudokuArr)
 
   const getContainer = (el) => {
@@ -129,7 +159,6 @@ const SelectNumberPop = ({ left, top, className, setBlockNum, blockPos }) => {
       { [...Array(9).keys()].map(k => k + 1).map(key => (
         <span 
           key={ key } 
-          style={{ padding: 4, userSelect: 'none', }} 
           onClick={ setBlockNum.bind(this, key, blockPos) }>
           { key }
         </span>
@@ -138,35 +167,4 @@ const SelectNumberPop = ({ left, top, className, setBlockNum, blockPos }) => {
   )
 }
 
-
-
-
-
-//here
-const mockData = [
-  [
-    { id: 0, title: 'a', },
-    { id: 1, title: 'b', }
-  ],
-  [
-    { id: 2, title: 'c', },
-    { id: 3, title: 'd', }
-  ],
-]
-
-const RowData = ({ data }) => {
-  return (
-    <div className={ '' }>
-      { data.map(d => (
-        <div>
-          {d.map(insideD => (
-            <div>{ insideD.id + ': ' + insideD.title }</div>
-          ))}
-        <hr />
-        </div>
-      )) }
-    </div>
-  )
-}
-//here
 

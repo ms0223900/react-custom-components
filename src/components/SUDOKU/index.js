@@ -16,12 +16,15 @@ const shiftArr = (arr=[]) => {
   return [arr[arr.length - 1], ...arr.slice(0, -1)]
 }
 
-const templateSudokuArr = [...Array(9).keys()].map(a => a + 1) //1~9
+const from1To9 = [...Array(9).keys()].map(a => ({
+  number: a + 1,
+  type: 'normal',
+})) //1~9
 const sliceArr = (arr) => (
   [arr.slice(0, 3), arr.slice(3, 6), arr.slice(6, 9)]
 )
 
-const sudokuArrDefault = sliceArr(_.shuffle(templateSudokuArr)) 
+const sudokuArrDefault = sliceArr(_.shuffle(from1To9)) 
 const arrIsEqual = (arr1, arr2) => (
   arr1.toString() === arr2.toString()
 )
@@ -35,7 +38,7 @@ const getShiftedSudoku = (sudokuArr) => {
       shifed = shifed.map(s => shiftArr(s))
     }
     // const newShifted = _.cloneDeep(shifed)
-    const newShifted = JSON.parse(JSON.stringify(shifed))
+    const newShifted = _.cloneDeep(shifed)
     res[i] = newShifted
   }
   return res
@@ -46,7 +49,11 @@ const convertNumberToSudoKuPos = (sudokuArr=[], number=0, newValue=null, arrNum=
   const j = ~~( (number - 1) % arrNum[0] / arrNum[1] )
   const k = (number - 1) % arrNum[0] % arrNum[1] 
   // console.log([i, j, k])
-  sudokuArr[i][j][k] = newValue
+  // sudokuArr[i][j][k].name = newValue
+  sudokuArr[i][j][k] = {
+    number: newValue,
+    type: 'blank'
+  }
   return [i, j, k]
 }
 const convertPosToNum = (posArr=[]) => (
@@ -54,7 +61,7 @@ const convertPosToNum = (posArr=[]) => (
 )
 
 //generate random blanked position in sudoku
-const randomBlankedPostion = _.sampleSize([...Array(80).keys()].map(a => a + 1), 20)
+const randomBlankedPostion = _.sampleSize([...Array(80).keys()].map(a => a + 1), 1)
 console.log(randomBlankedPostion)
 // const blankedPostion = [ 16, 31, 38, 60, 78, 80 ]
 
@@ -90,13 +97,13 @@ const useSetBlockNumber = (handledSudokuArr, blankedPostion) => {
   console.log(sudokuArr)
   const setBlockNumber = (number, blockPos) => {
     console.log(number, blockPos, blankedPostion, convertPosToNum(blockPos))
+    // check is the blank?
     if( !blankedPostion.includes(convertPosToNum(blockPos)) ) return 
     //deep clone
     let newArr = [...sudokuArr]
     let thatBlock = newArr[ blockPos[0] ][ blockPos[1] ][ blockPos[2] ]
-    // check is the blank?
-    // if(thatBlock !== '')  return 
-    newArr[ blockPos[0] ][ blockPos[1] ][ blockPos[2] ] = number
+    
+    newArr[ blockPos[0] ][ blockPos[1] ][ blockPos[2] ].number = number
     setSudokuNewArr(newArr)
   }
   return [sudokuArr, setBlockNumber]
@@ -112,6 +119,21 @@ const getBlankedSudoku = (sudokuArr, blankedPostion) => {
 
 const handledSudokuArr = getShiftedSudoku(sudokuArrDefault)
 const initBlankedSudoku = getBlankedSudoku(handledSudokuArr, randomBlankedPostion)
+
+const checkSudokuIsSame = (answerArr, yourArr) => {
+  for (let i = 0; i < 9; i++) {
+    for (let j = 0; j < 3; j++) {
+      for (let k = 0; k < 3; k++) {
+        if(answerArr[i][j][k].number !== yourArr[i][j][k].number) {
+          return false
+        }
+      }
+    }
+  } return true
+}
+
+
+
 //
 export default () => {
   const classes = useClass()
@@ -129,12 +151,13 @@ export default () => {
   }
   useEffect(() => {
     console.log(initBlankedSudoku)
-    if(handledSudokuArr.toString() === sudokuArr.toString()) {
+    // console.log(JSON.stringify(handledSudokuArr),'////', JSON.stringify(sudokuArr))
+    if(checkSudokuIsSame(handledSudokuArr, sudokuArr)) {
       window.alert('win~')
     }
   }, [ sudokuArr ])
 
-
+  console.log(sudokuArr)
   return (
     <div ref={ getContainer } style={{ position: 'relative', padding: 6, }}>
       <h2>{ 'sudoku' }</h2>
@@ -146,9 +169,9 @@ export default () => {
                 key={ i * 9 + j * 3 + k }
                 isPosNow={ pos[2] && arrIsEqual([i, j, k], pos[2]) } 
                 getBlockPos={ getPos }
-                isBlanked={ blankedPosition.current.includes(convertPosToNum([i, j, k])) }
+                isBlanked={ ss.type === 'blank' }
                 blockPos={ [i, j, k] } 
-                sudokuTxt={ ss } />))) 
+                sudokuTxt={ ss.number } />))) 
           }
         </div>
       ))}
@@ -157,21 +180,28 @@ export default () => {
         top={ pos[1] }
         className={ classes.popContainer }
         blockPos={ pos[2] }
-        setBlockNum={ setBlockNumber }  />
+        setBlockNum={ setBlockNumber } />
     </div>
   )
 }
+
+export const SudokuPanel = () => {
+
+}
+
+
+
 
 const SelectNumberPop = ({ left, top, className, setBlockNum, blockPos }) => {
   return (
     <div 
       style={{ left, top, }} 
       className={ className }>
-      { [...Array(9).keys()].map(k => k + 1).map(key => (
+      { from1To9.map(key => (
         <span 
-          key={ key } 
-          onClick={ setBlockNum.bind(this, key, blockPos) }>
-          { key }
+          key={ key.number } 
+          onClick={ setBlockNum.bind(this, key.number, blockPos) }>
+          { key.number }
         </span>
       )) }
     </div>

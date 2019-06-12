@@ -6,7 +6,7 @@ import React, {
   useEffect,
   useRef
 } from 'react'
-import { cloneDeep } from 'lodash'
+import _ from 'lodash'
 import '../../styles/style.scss'
 import { styleConfig } from './config'
 import { makeStyles } from '@material-ui/styles'
@@ -16,7 +16,12 @@ const shiftArr = (arr=[]) => {
   return [arr[arr.length - 1], ...arr.slice(0, -1)]
 }
 
-const sudokuArrDefault = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+const templateSudokuArr = [...Array(9).keys()].map(a => a + 1) //1~9
+const sliceArr = (arr) => (
+  [arr.slice(0, 3), arr.slice(3, 6), arr.slice(6, 9)]
+)
+
+const sudokuArrDefault = sliceArr(_.shuffle(templateSudokuArr)) 
 const arrIsEqual = (arr1, arr2) => (
   arr1.toString() === arr2.toString()
 )
@@ -37,9 +42,10 @@ const getShiftedSudoku = (sudokuArr) => {
 }
 
 const convertNumberToSudoKuPos = (sudokuArr=[], number=0, newValue=null, arrNum=[9, 3, 3]) => {
-  const i = ~~(number / arrNum[0])
-  const j = ~~( (number % arrNum[0] - 1) / arrNum[1] )
-  const k = (number % arrNum[0] - 1) % arrNum[1] 
+  const i = ~~((number - 1) / arrNum[0])
+  const j = ~~( (number - 1) % arrNum[0] / arrNum[1] )
+  const k = (number - 1) % arrNum[0] % arrNum[1] 
+  // console.log([i, j, k])
   sudokuArr[i][j][k] = newValue
   return [i, j, k]
 }
@@ -47,15 +53,12 @@ const convertPosToNum = (posArr=[]) => (
   posArr[0] * 9 + posArr[1] * 3 + posArr[2] + 1
 )
 
-const blankedPostion = [ 16, 31, 38, 60, 78, 80 ]
+//generate random blanked position in sudoku
+const randomBlankedPostion = _.sampleSize([...Array(80).keys()].map(a => a + 1), 20)
+console.log(randomBlankedPostion)
+// const blankedPostion = [ 16, 31, 38, 60, 78, 80 ]
 
 
-//generate blanked sudoku from origin sudoku array
-const getBlankedSudoku = (sudokuArr) => {
-  const newArr = _.cloneDeep(sudokuArr)
-  blankedPostion.map(pos => convertNumberToSudoKuPos(newArr, pos, ''))
-  return newArr
-}
 
 
 const useClass = makeStyles({
@@ -99,17 +102,25 @@ const useSetBlockNumber = (handledSudokuArr, blankedPostion) => {
   return [sudokuArr, setBlockNumber]
 }
 
+//generate blanked sudoku from origin sudoku array
+const getBlankedSudoku = (sudokuArr, blankedPostion) => {
+  const newArr = _.cloneDeep(sudokuArr)
+  blankedPostion.map(pos => convertNumberToSudoKuPos(newArr, pos, ''))
+  return newArr
+}
+
+
 const handledSudokuArr = getShiftedSudoku(sudokuArrDefault)
-const initBlankedSudoku = getBlankedSudoku(handledSudokuArr)
+const initBlankedSudoku = getBlankedSudoku(handledSudokuArr, randomBlankedPostion)
 //
 export default () => {
   const classes = useClass()
   const containerTop = useRef(0)
   const popUpDisplay = useRef(false)
-  const REF = useRef()
+  const blankedPosition = useRef(randomBlankedPostion)
   //
   const [pos, getPos] = useClickPos()
-  const [ sudokuArr, setBlockNumber ] = useSetBlockNumber(initBlankedSudoku, blankedPostion)
+  const [ sudokuArr, setBlockNumber ] = useSetBlockNumber(initBlankedSudoku, randomBlankedPostion)
 
   const getContainer = (el) => {
     containerTop.current = el && el.getBoundingClientRect().top
@@ -135,7 +146,7 @@ export default () => {
                 key={ i * 9 + j * 3 + k }
                 isPosNow={ pos[2] && arrIsEqual([i, j, k], pos[2]) } 
                 getBlockPos={ getPos }
-                isBlanked={ blankedPostion.includes(convertPosToNum([i, j, k])) }
+                isBlanked={ blankedPosition.current.includes(convertPosToNum([i, j, k])) }
                 blockPos={ [i, j, k] } 
                 sudokuTxt={ ss } />))) 
           }

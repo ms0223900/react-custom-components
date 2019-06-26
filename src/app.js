@@ -4,6 +4,7 @@ import Calendar from './components/Calendar'
 import Calculator from './components/Calculator'
 import ComicViewer from './components/ComicViewer'
 import SUDOKU from './components/SUDOKU'
+import WeatherAPI from './components/WeatherAPI'
 
 export default () => {
 
@@ -11,8 +12,9 @@ export default () => {
     <div>
       {/* <Calendar /> */}
       {/* <Calculator /> */}
-      <ComicViewer />
-      <SUDOKU />
+      {/* <ComicViewer /> */}
+      {/* <SUDOKU /> */}
+      <WeatherAPI />
     </div>
   )
 }

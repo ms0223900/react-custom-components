@@ -1,7 +1,8 @@
 /* eslint-disable no-unused-vars */
-var HtmlWebpackPlugin = require('html-webpack-plugin')
 const path = require('path')
 const webpack = require('webpack')
+const { CleanWebpackPlugin } = require('clean-webpack-plugin')
+const HtmlWebpackPlugin = require('html-webpack-plugin')
 
 module.exports = {
 	// mode: 'development',
@@ -11,7 +12,8 @@ module.exports = {
 	},
 	output: {
 		filename: 'bundle.js',
-		path: path.resolve(__dirname, './dist/'),
+		path: path.resolve(__dirname, './build/'),
+		publicPath: '/',
 	},
 	target: 'web',
 	module: {
@@ -58,14 +60,20 @@ module.exports = {
 			}
 		},
 	},
-	devServer: {
-		contentBase: path.join(__dirname, 'public'),
-		port: 9222,
-		stats: 'errors-only',
-	},
 	resolve: {
 		extensions: ['.js', '.jsx']
 	},
+	plugins: [
+		new CleanWebpackPlugin(),
+		new HtmlWebpackPlugin({
+			title: 'custom-components',
+			template: './src/template.html'
+		}),
+		new webpack.DefinePlugin({
+			// NODE_ENV: JSON.stringify(process.env.NODE_ENV),
+			// GRAPHQL_API: JSON.stringify('http://10.40.201.178:4005/')
+		})
+	],
 	stats: 'errors-only',
 	node: {
 		fs: 'empty',

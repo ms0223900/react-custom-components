@@ -150,6 +150,7 @@ const fetchCityWeatherApi = (city, setFn, town=null) => {
     .then(res => res.json())
     .then(res => {
       // console.log(res)
+      //如果有提供town則取得鄉鎮市，否則取得原本縣市資料
       const data = town ? 
         res.records.locations[0].location.filter(loc => loc.locationName === town) : 
         res
@@ -158,12 +159,16 @@ const fetchCityWeatherApi = (city, setFn, town=null) => {
     .catch(e => console.log(e))
 }
 const getData = (weatherEl) => {
+  //取得最近時間的資料
   const latestData = getNearestTime(weatherEl.time).elementValue
   const time = getNearestTime(weatherEl.time).startTime || getNearestTime(weatherEl.time).dataTime
+  //取得value
   const value = latestData[0].value
+  //取得單位
   const measures = latestData[0].measures
   return { value, measures, time }
 }
+//轉換單位
 const convertMeasures = (measure) => {
   switch (measure) {
     case '攝氏度' || '百分比':
@@ -182,26 +187,31 @@ const convertMeasures = (measure) => {
 const WeatherInfo = ({ match, location }) => {
   // console.log(match)
   const classes = useStyles()
+  //city from match 的參數，像是: weather/tainan 的tainan
   const cityNow = match.params.city
   //
   const [weatherData, setData] = useState([])
   const [locNow, setLocNow] = useState(undefined)
-  //
+  //rdr
   useEffect(() => {
+    //從現在的city去fetch資料
     fetchCityWeatherApi(cityNow, setData)
     setLocNow(undefined)
   }, [match])
   const handleSelect = (e) => {
+    //透過select來拿到index, 以篩選某城鎮
     const { selectedIndex } = e.target
     setLocNow(selectedIndex)
   }
   //
   // console.log(weatherData)
   if(weatherData.length === 0) {
-    //loading
+    //預設顯示loading
     return ( <h3>{ 'loading...' }</h3> )
   } else {
+    //該縣市資料: data
     const data = weatherData.records.locations[0]
+    //鄉鎮市資料: locData; 如果沒有選城鎮，則全部顯示，
     const locData = typeof(locNow) !== 'undefined' ? 
       [ data.location[locNow] ] : data.location
     return (
@@ -210,6 +220,7 @@ const WeatherInfo = ({ match, location }) => {
         <h2>{ data.locationsName }
           <span>
             <select onChange={ handleSelect }>
+              {/* 所有鄉鎮市的資料: data.location; */}
               {data.location.map((loc, i) => (
                 <option key={ i } value={ i }>{ loc.locationName }</option>
               ))}
@@ -218,17 +229,14 @@ const WeatherInfo = ({ match, location }) => {
         </h2>
         
         { locData.map((loc, i) => {
+          //從locData取得相關天氣資料
           const { weatherElement, locationName, geocode } = loc
           const temp = weatherElement[3]
           const weatherDescp = weatherElement[6]
           const rain = weatherElement[7]
           const locationData = {
             pathname: `/weather/${ cityNow }/${ locationName }`,
-            state: {
-              temp,
-              weatherDescp,
-              rain,
-            }
+            state: { temp, weatherDescp, rain, }
           }
           return (
             <div key={ i } className={ classes.weatherBlock }>
@@ -273,7 +281,6 @@ const TownWeatherInfo = ({ match, location }) => {
   useEffect(() => {
     fetchCityWeatherApi(city, setTownData, town)
   }, [match])
-  
   //
   const onMatchRoutes = (matchRoutes) => ([
     ...matchRoutes,
@@ -318,6 +325,7 @@ const Weather = ({ match, location }) => {
       <h2>{ 'Weather' }</h2>
       <Route exact path={ `${ match.url }` } component={ WeatherMainPage } />
       <Route exact path={ `${ match.url }/:city` } component={ WeatherInfo } />
+      {/* 鄉鎮市的資料參數從city 和 town取得 */}
       <Route path={ `${ match.url }/:city/:town` } component={ TownWeatherInfo } />
     </div>
   )
@@ -330,7 +338,6 @@ const routes = [
     { path: '/weather/taichung', component: WeatherInfo, breadCrumbName: '台中' },
     { path: '/weather/tainan', component: WeatherInfo, breadCrumbName: '台南' },
   ] }, 
-  
 ]
 
 const BreadCrumb = ({ location, onMatchRoutes }) => {

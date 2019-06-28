@@ -5,6 +5,7 @@ import Calculator from '../src/components/Calculator'
 import ComicViewer from '../src/components/ComicViewer'
 import SUDOKU from '../src/components/SUDOKU'
 import WeatherAPI from '../src/components/WeatherAPI'
+import '../src/styles/style.scss'
 
 storiesOf('custom-components', module)
   .add('calendar', () => (

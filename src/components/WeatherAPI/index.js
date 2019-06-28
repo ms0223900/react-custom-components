@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react'
 import { renderRoutes, matchRoutes } from 'react-router-config'
 import { BrowserRouter as Router, Route, Link } from 'react-router-dom'
+import { ThemeProvider, useTheme } from '@material-ui/styles'
 import { 
   API,
   logo, 
@@ -10,7 +11,14 @@ import { makeStyles } from '@material-ui/styles'
 
 const useStyles = makeStyles({
   navBar: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     height: 'auto',
+    '& button': {
+      padding: 6,
+      marginRight: 10,
+    },
     '& a': { textDecoration: 'none', },
     '& li': {
       position: 'relative',
@@ -22,7 +30,7 @@ const useStyles = makeStyles({
         padding: 10,
         display: 'inline-block',
         width: '100%',
-        color: '#fff',
+        color: props => props.linkColor,
       },
       '& ul': {
         display: 'none',
@@ -39,10 +47,32 @@ const useStyles = makeStyles({
       },
     }
   },
+  breadCrumb: {
+    minWidth: 100,
+    maxWidth: 300,
+    margin: '10px 0px',
+    backgroundColor: '#add',
+    color: '#111',
+    padding: 6,
+    height: 30,
+    boxSizing: 'border-box',
+    '& li': {
+      display: 'inline-block',
+    },
+    '& a': {
+      textDecoration: 'none',
+      color: '#33ad',
+    }
+  },
   weatherBlock: {
-    maxWidth: 400,
+    display: 'inline-block',
+    verticalAlign: 'top',
+    maxWidth: 'calc(33% - 30px)',
     margin: 10,
     padding: 6,
+    '& a': {
+      color: props => props.color,
+    }
   },
   weatherPage: {
     '& a': {
@@ -54,27 +84,12 @@ const useStyles = makeStyles({
       boxShadow: '0px 0px 10px #ddd',
       textDecoration: 'none',
       color: '#345',
+      backgroundColor: '#fff',
     },
     '& img': {
       // width: '100%',
       maxHeight: 120,
       display: 'inline-block',
-
-    }
-  },
-  breadCrumb: {
-    minWidth: 100,
-    maxWidth: 300,
-    margin: '10px 0px',
-    backgroundColor: '#add',
-    padding: 6,
-    height: 30,
-    boxSizing: 'border-box',
-    '& li': {
-      display: 'inline-block',
-    },
-    '& a': {
-      textDecoration: 'none',
     }
   },
   townWeatherInfo: {
@@ -88,11 +103,35 @@ const useStyles = makeStyles({
     }
   }
 })
+const theme = {
+  light: {
+    mainColor: {
+      backgroundColor: '#fff',
+      color: '#111',
+    },
+    reverseColor: {
+      backgroundColor: '#333',
+      color: '#eeefff',
+    },
+  },
+  dark: {
+    mainColor: {
+      backgroundColor: '#222',
+      color: '#eee',
+    },
+    reverseColor: {
+      backgroundColor: '#fff',
+      color: '#222',
+    },
+  }
+}
+
+
 
 const Home = () => <h2>HOME</h2>
 const About = () => <h2>ABOUT</h2>
 
-const CustomLink = ({ label, to, exact=false, }) => { 
+const CustomLink = ({ label, to, exact=false, style, ...props }) => { 
   return (
     <Route 
       path={ to }
@@ -101,7 +140,8 @@ const CustomLink = ({ label, to, exact=false, }) => {
         console.log(match) //???
         return (
           <li className={ match ? 'sidebar-link active' : 'sidebar-link' }>
-            <Link to={ to }>{ label }</Link>
+            <Link style={ style } to={ to }>{ label }</Link>
+            { props.children }
           </li>
         )
       }}  />
@@ -109,22 +149,26 @@ const CustomLink = ({ label, to, exact=false, }) => {
 }
 
 //
-const Navbar = () => {
-  const classes = useStyles()
+const Navbar = ({ themeTone, setThemeFn }) => {
+  const theme = useTheme()
+  const classes = useStyles({ 
+    linkColor: theme[themeTone].reverseColor.color, 
+  })
+  const { backgroundColor: mainBg, color: mainColor } = theme[themeTone].mainColor
+  const { backgroundColor: revBg, color: revColor } = theme[themeTone].reverseColor
   return (
-    <nav className={ classes.navBar }>
+    <nav style={{ backgroundColor: revBg }} className={ classes.navBar }>
       <ul>
-        {/* <li><Link to={ '/' }>{ 'Home' }</Link></li> */}
         <CustomLink to={ '/' } label={ 'Home' } exact={ true } />
         <CustomLink to={ '/about' } label={ 'About' } />
-        <li>
-          <CustomLink to={ '/weather' } label={ 'Weather' } />
+        <CustomLink to={ '/weather' } label={ 'Weather' }>
           <ul>
             <li><Link to={ '/weather/taichung' }>{ 'Taichung' }</Link></li>
             <li><Link to={ '/weather/tainan' }>{ 'Tainan' }</Link></li>
           </ul>
-        </li>
+        </CustomLink>
       </ul>
+      <button style={{ backgroundColor: mainBg, color: mainColor  }} onClick={ setThemeFn }>{ themeTone }</button>
     </nav>
   )
 }
@@ -184,9 +228,14 @@ const convertMeasures = (measure) => {
 }
 //fn end
 
-const WeatherInfo = ({ match, location }) => {
+const WeatherInfo = ({ match, location, themeTone='light' }) => {
+  const theme = useTheme()
   // console.log(match)
-  const classes = useStyles()
+  const { backgroundColor, color } = theme[themeTone].mainColor
+  const classes = useStyles({
+    backgroundColor,
+    color,
+  })
   //city from match 的參數，像是: weather/tainan 的tainan
   const cityNow = match.params.city
   //
@@ -227,28 +276,29 @@ const WeatherInfo = ({ match, location }) => {
             </select>
           </span>
         </h2>
-        
-        { locData.map((loc, i) => {
-          //從locData取得相關天氣資料
-          const { weatherElement, locationName, geocode } = loc
-          const temp = weatherElement[3]
-          const weatherDescp = weatherElement[6]
-          const rain = weatherElement[7]
-          const locationData = {
-            pathname: `/weather/${ cityNow }/${ locationName }`,
-            state: { temp, weatherDescp, rain, }
-          }
-          return (
-            <div key={ i } className={ classes.weatherBlock }>
-              <h3><Link to={ locationData }>{ `鄉鎮市: ${ locationName } ` }</Link></h3>
-              <hr />
-              <h4>{ '最近天氣預測' }</h4>
-              <p>{ temp.description }: <span>{ getData(temp).value }度</span></p>
-              <p>{ weatherDescp.description }: <span>{ getData(weatherDescp).value  }</span></p>
-              <p>{ rain.description }: <span>{ getData(rain).value }</span></p>
-            </div>
-          )
-        }) }
+        <div>
+          { locData.map((loc, i) => {
+            //從locData取得相關天氣資料
+            const { weatherElement, locationName, geocode } = loc
+            const temp = weatherElement[3]
+            const weatherDescp = weatherElement[6]
+            const rain = weatherElement[7]
+            const locationData = {
+              pathname: `/weather/${ cityNow }/${ locationName }`,
+              state: { temp, weatherDescp, rain, }
+            }
+            return (
+              <div key={ i } className={ classes.weatherBlock }>
+                <h3><Link to={ locationData }>{ `鄉鎮市: ${ locationName } ` }</Link></h3>
+                <hr />
+                <h4>{ '最近天氣預測' }</h4>
+                <p>{ temp.description }: <span>{ getData(temp).value }度</span></p>
+                <p>{ weatherDescp.description }: <span>{ getData(weatherDescp).value  }</span></p>
+                <p>{ rain.description }: <span>{ getData(rain).value }</span></p>
+              </div>
+            )
+          }) }
+        </div>
       </div>
     )
   }
@@ -319,12 +369,13 @@ const TownWeatherInfo = ({ match, location }) => {
   )
 }
 
-const Weather = ({ match, location }) => {
+const Weather = ({ match, location, themeTone='light' }) => {
+  console.log(themeTone)
   return (
     <div style={{ padding: 10, }}>
       <h2>{ 'Weather' }</h2>
       <Route exact path={ `${ match.url }` } component={ WeatherMainPage } />
-      <Route exact path={ `${ match.url }/:city` } component={ WeatherInfo } />
+      <Route exact path={ `${ match.url }/:city` } render={ (routeProps) => <WeatherInfo themeTone={ themeTone } {...routeProps} /> } />
       {/* 鄉鎮市的資料參數從city 和 town取得 */}
       <Route path={ `${ match.url }/:city/:town` } component={ TownWeatherInfo } />
     </div>
@@ -365,22 +416,36 @@ const BreadCrumb = ({ location, onMatchRoutes }) => {
 }
 
 
-const Main = () => {
+const Main = ({ themeTone }) => {
+  const theme = useTheme()
+  const { backgroundColor: mainBg, color: mainColor } = theme[themeTone].mainColor
+  const { backgroundColor: revBg, color: revColor } = theme[themeTone].reverseColor
   return (
-    <div>
-      { renderRoutes(routes) }
-      {/* <Route exact path={ '/' } component={ Home } />
+    <div style={{ minHeight: '100vh', backgroundColor: mainBg, color: mainColor }}>
+      {/* { renderRoutes(routes) } */}
+      <Route exact path={ '/' } component={ Home } />
       <Route path={ '/about' } component={ About } />
-      <Route path={ '/weather' } component={ Weather } /> */}
+      <Route path={ '/weather' } render={ (routeProps) => <Weather themeTone={ themeTone } {...routeProps} /> } />
     </div>
   )
 }
 
 
-export default () => (
-  <Router>
-    <Navbar />
-    <Main />
-    {/* <Weather /> */}
-  </Router>
-)
+export default () => {
+  const [themeTone, setThemeTone] = useState('light')
+  const handleSetThemeTone = () => {
+    if(themeTone === 'light') {
+      setThemeTone('dark')
+    } else {
+      setThemeTone('light')
+    }
+  }
+  return (
+    <ThemeProvider theme={ theme }>
+      <Router>
+        <Navbar themeTone={ themeTone } setThemeFn={ handleSetThemeTone } />
+        <Main themeTone={ themeTone } />
+      </Router>
+    </ThemeProvider>
+  )
+}

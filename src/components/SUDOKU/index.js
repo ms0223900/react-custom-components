@@ -61,7 +61,8 @@ const convertPosToNum = (posArr=[]) => (
 )
 
 //generate random blanked position in sudoku
-const randomBlankedPostion = _.sampleSize([...Array(80).keys()].map(a => a + 1), 1)
+const randomAmount = 40
+const randomBlankedPostion = _.sampleSize([...Array(80).keys()].map(a => a + 1), randomAmount)
 console.log(randomBlankedPostion)
 // const blankedPostion = [ 16, 31, 38, 60, 78, 80 ]
 

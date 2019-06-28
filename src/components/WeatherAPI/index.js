@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { renderRoutes, matchRoutes } from 'react-router-config'
 import { BrowserRouter as Router, Route, Link } from 'react-router-dom'
 import { ThemeProvider, useTheme } from '@material-ui/styles'
+import Star from '@material-ui/icons/StarRounded'
 import { 
   API,
   logo, 
@@ -116,7 +117,7 @@ const theme = {
   },
   dark: {
     mainColor: {
-      backgroundColor: '#222',
+      backgroundColor: '#333',
       color: '#eee',
     },
     reverseColor: {
@@ -136,8 +137,7 @@ const CustomLink = ({ label, to, exact=false, style, ...props }) => {
     <Route 
       path={ to }
       exact={ exact }
-      children={({ match }) => {
-        console.log(match) //???
+      children={({ match }) => { //when path is match, it is the match property from route component 
         return (
           <li className={ match ? 'sidebar-link active' : 'sidebar-link' }>
             <Link style={ style } to={ to }>{ label }</Link>
@@ -150,7 +150,7 @@ const CustomLink = ({ label, to, exact=false, style, ...props }) => {
 
 //
 const Navbar = ({ themeTone, setThemeFn }) => {
-  const theme = useTheme()
+  // const theme = useTheme() || theme
   const classes = useStyles({ 
     linkColor: theme[themeTone].reverseColor.color, 
   })
@@ -229,7 +229,7 @@ const convertMeasures = (measure) => {
 //fn end
 
 const WeatherInfo = ({ match, location, themeTone='light' }) => {
-  const theme = useTheme()
+  // const theme = useTheme()
   // console.log(match)
   const { backgroundColor, color } = theme[themeTone].mainColor
   const classes = useStyles({
@@ -240,6 +240,7 @@ const WeatherInfo = ({ match, location, themeTone='light' }) => {
   const cityNow = match.params.city
   //
   const [weatherData, setData] = useState([])
+  const [LSstaredData, setLSstaredData] = useState([])
   const [locNow, setLocNow] = useState(undefined)
   //rdr
   useEffect(() => {
@@ -247,10 +248,31 @@ const WeatherInfo = ({ match, location, themeTone='light' }) => {
     fetchCityWeatherApi(cityNow, setData)
     setLocNow(undefined)
   }, [match])
+  useEffect(() => {
+    const originData = JSON.parse(localStorage.getItem('staredTown')) || []
+    setLSstaredData(originData)
+  }, [])
   const handleSelect = (e) => {
     //透過select來拿到index, 以篩選某城鎮
     const { selectedIndex } = e.target
     setLocNow(selectedIndex)
+  }
+  const handleStarTownLink = (id, cityChineseName, cityNow, town, link) => {
+    // console.log(cityChineseName, cityNow, town, link)
+    const originData = JSON.parse(localStorage.getItem('staredTown')) || []
+    const townId = cityNow + '-' + id
+    const hasStared = originData.find(data => data.id === townId)
+    let newData
+    if(hasStared) {
+      newData = originData.filter(data => data.id !== townId)
+    } else {
+      newData = [
+        ...originData,
+        { id: townId, cityChineseName, cityNow, town, link }
+      ]
+    }
+    localStorage.setItem('staredTown', JSON.stringify(newData))
+    setLSstaredData(newData)
   }
   //
   // console.log(weatherData)
@@ -263,6 +285,7 @@ const WeatherInfo = ({ match, location, themeTone='light' }) => {
     //鄉鎮市資料: locData; 如果沒有選城鎮，則全部顯示，
     const locData = typeof(locNow) !== 'undefined' ? 
       [ data.location[locNow] ] : data.location
+    const checkIsStared = (id) => LSstaredData.find(data => data.id === cityNow + '-' + id)
     return (
       <div>
         <BreadCrumb location={ location } />
@@ -289,7 +312,15 @@ const WeatherInfo = ({ match, location, themeTone='light' }) => {
             }
             return (
               <div key={ i } className={ classes.weatherBlock }>
-                <h3><Link to={ locationData }>{ `鄉鎮市: ${ locationName } ` }</Link></h3>
+                <h3>
+                  <Link to={ locationData }>{ `鄉鎮市: ${ locationName } ` }</Link>
+                  {/* //用themeProvide來抓theme, star自己theme的相關東西會抓不到 */}
+                  <Star 
+                    style={{ fill: checkIsStared(i) ? '#0000f1' : '#aaa' }}
+                    onClick={ handleStarTownLink.bind(this, i, data.locationsName, cityNow, locationName, `/weather/${ cityNow }/${ locationName }`, ) }>
+                    { checkIsStared(i) ? '以收藏' : '收藏' } 
+                  </Star>
+                </h3>
                 <hr />
                 <h4>{ '最近天氣預測' }</h4>
                 <p>{ temp.description }: <span>{ getData(temp).value }度</span></p>
@@ -307,23 +338,36 @@ const WeatherInfo = ({ match, location, themeTone='light' }) => {
 
 const WeatherMainPage = ({ location }) => {
   const classes = useStyles()
+  const staredData = JSON.parse(localStorage.getItem('staredTown')) || []
   return (
     <div className={ classes.weatherPage }>
       <BreadCrumb location={ location } />
-      <Link to={ '/weather/taichung' }>
-        <img src={ logo.taichung } />
-        <h3>TAICHUNG</h3>
-      </Link>
-      <Link to={ '/weather/tainan' }>
-        <img src={ logo.tainan } />
-        <h3>TAINAN</h3>
-      </Link>
+      <div>
+        <Link to={ '/weather/taichung' }>
+          <img src={ logo.taichung } />
+          <h3>TAICHUNG</h3>
+        </Link>
+        <Link to={ '/weather/tainan' }>
+          <img src={ logo.tainan } />
+          <h3>TAINAN</h3>
+        </Link>
+      </div>
+      <div>
+        <h3>{ '已收藏之城鎮' }</h3>
+        {staredData.map(data => (
+          <div key={ data.id }>
+            <Link to={ data.link }>
+              <h4>{ data.cityChineseName + ' ' + data.town }</h4>
+            </Link>
+          </div>
+        ))}
+      </div>
     </div>
   )
 }
 
 const TownWeatherInfo = ({ match, location }) => {
-  console.log(match, location)
+  // console.log(match, location)
   const classes = useStyles()
   const { city, town } = match.params
   const [townData, setTownData] = useState(undefined)
@@ -341,7 +385,7 @@ const TownWeatherInfo = ({ match, location }) => {
       }, 
     },
   ])
-  console.log(townData)
+  // console.log(townData)
   //
   return (
     <div>
@@ -370,7 +414,7 @@ const TownWeatherInfo = ({ match, location }) => {
 }
 
 const Weather = ({ match, location, themeTone='light' }) => {
-  console.log(themeTone)
+  // console.log(themeTone)
   return (
     <div style={{ padding: 10, }}>
       <h2>{ 'Weather' }</h2>
@@ -417,7 +461,7 @@ const BreadCrumb = ({ location, onMatchRoutes }) => {
 
 
 const Main = ({ themeTone }) => {
-  const theme = useTheme()
+  // const theme = useTheme()
   const { backgroundColor: mainBg, color: mainColor } = theme[themeTone].mainColor
   const { backgroundColor: revBg, color: revColor } = theme[themeTone].reverseColor
   return (
@@ -441,11 +485,11 @@ export default () => {
     }
   }
   return (
-    <ThemeProvider theme={ theme }>
+    // <ThemeProvider theme={ theme }>
       <Router>
         <Navbar themeTone={ themeTone } setThemeFn={ handleSetThemeTone } />
         <Main themeTone={ themeTone } />
       </Router>
-    </ThemeProvider>
+    // </ThemeProvider>
   )
 }

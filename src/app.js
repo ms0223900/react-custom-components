@@ -5,6 +5,7 @@ import Calculator from './components/Calculator'
 import ComicViewer from './components/ComicViewer'
 import SUDOKU from './components/SUDOKU'
 import WeatherAPI from './components/WeatherAPI'
+import TomatoTimer from './components/TomatoTimer'
 
 export default () => {
 
@@ -14,7 +15,8 @@ export default () => {
       {/* <Calculator /> */}
       {/* <ComicViewer /> */}
       {/* <SUDOKU /> */}
-      <WeatherAPI />
+      {/* <WeatherAPI /> */}
+      <TomatoTimer />
     </div>
   )
 }

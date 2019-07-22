@@ -9,6 +9,9 @@ const useStyle = makeStyles({
     margin: 'auto',
     padding: 10,
     textAlign: 'center',
+    '& h2': {
+      fontWeight: 600,
+    }
   }
 })
 
@@ -18,6 +21,7 @@ const Timer = ({ totalTime=10, isPause=false, setPausePlay, workOrBreak, setWork
   const [timePassed, setTime] = useState(totalTime)
   useEffect(() => {
     let timer
+    document.title = `(${ getMinSec(timePassed).min } : ${ getMinSec(timePassed).sec })`
     if(timePassed === 0) {
       setTimeout(() => {
         setWorkBreak()
@@ -35,13 +39,18 @@ const Timer = ({ totalTime=10, isPause=false, setPausePlay, workOrBreak, setWork
   //
   return (
     <Paper className={ classes.root }>
-      <Typography variant={ 'h3' }>{ workOrBreak + 'ing~' }</Typography>
-      <Typography variant={ 'h4' }>
+      <Typography variant={ 'h4' }>{ workOrBreak + 'ing~' }</Typography>
+      <Typography variant={ 'h2' }>
         { `${ getMinSec(timePassed).min } : ${ getMinSec(timePassed).sec }` }
       </Typography>
-      <Button variant={ 'outlined' } onClick={ setPausePlay }>
+      <Button 
+        color={ isPause ? 'primary' : 'default' }
+        variant={ 'contained' } 
+        onClick={ setPausePlay }
+      >
         { isPause ? 'start' : 'pause' }
       </Button>
+      <Button onClick={ () => setTime(totalTime) }>{ 'reset' }</Button>
     </Paper>
   )
 }

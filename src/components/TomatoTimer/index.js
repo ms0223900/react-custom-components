@@ -1,6 +1,7 @@
 import React from 'react'
 import Timer from './Timer'
 import TimeButton from './TimeButton'
+import { Tabs, Tab } from '@material-ui/core';
 
 // const defaultWorkTime = 25 * 60
 // const defaultBreakTime = 5 * 60
@@ -19,18 +20,27 @@ class TomatoTimer extends React.Component {
       isPause: !state.isPause,
     }))
   }
-  _handleSetWorkBreak = () => {
-    this.setState(state => ({
-      workOrBreak: state.workOrBreak === 'work' ? 'break' : 'work'
-    }))
+  _handleSetWorkBreak = (e, value) => {
+    //manually
+    // console.log(value)
+    if(typeof(value) === 'number') {
+      this.setState({
+        workOrBreak: value === 0 ? 'work' : 'break',
+      })
+    } else {
+      //toggle
+      this.setState(state => ({
+        workOrBreak: state.workOrBreak === 'work' ? 'break' : 'work'
+      }))
+    }
   }
   _handleSetTime = (setWorkOrBreak, addMinus) => {
-    const { time } = this.state
-    const originTime = setWorkOrBreak === 'work' ?time.workTime : time.breakTime
+    const { time, isPause } = this.state
+    const originTime = setWorkOrBreak === 'work' ? time.workTime : time.breakTime
     const newTime = 
       addMinus === 'add' ? originTime + 60 : 
-      (originTime - 60 < 0 ? 0 : originTime - 60)
-    this.setState({
+      (originTime - 60 <= 0 ? 60 : originTime - 60)
+    isPause && this.setState({
       time: setWorkOrBreak === 'work' ? {
         ...time,
         workTime: newTime,
@@ -47,6 +57,13 @@ class TomatoTimer extends React.Component {
     return (
       <div>
         <h2>{ 'Tomato Timer' }</h2>
+        <Tabs 
+          onChange={ this._handleSetWorkBreak } 
+          value={ workOrBreak === 'work' ? 0 : 1 }
+        >
+          <Tab label={ 'work' } />
+          <Tab label={ 'break' } />
+        </Tabs>
         <Timer
           workOrBreak={ workOrBreak }
           totalTime={ totalTime }

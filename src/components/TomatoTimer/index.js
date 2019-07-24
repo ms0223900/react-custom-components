@@ -2,6 +2,7 @@ import React from 'react'
 import Timer from './Timer'
 import TimeButton from './TimeButton'
 import { Tabs, Tab } from '@material-ui/core';
+import TodoListItem from './TodoListItem'
 
 // const defaultWorkTime = 25 * 60
 // const defaultBreakTime = 5 * 60
@@ -78,6 +79,7 @@ class TomatoTimer extends React.Component {
           workOrBreak={ 'break' }
           setTimeFn={ this._handleSetTime }
           time={ time.breakTime } />
+        <TodoListItem />
       </div>
     );
   }

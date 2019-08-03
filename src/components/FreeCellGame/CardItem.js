@@ -28,16 +28,17 @@ const useStyles = makeStyles({
   }
 })
 
-const mockFn = (pattern, number) => {
-  window.alert(pattern + ' ' + number)
+const mockFn = (id, pattern, number) => {
+  console.log(id, pattern, number)
 }
 
-const CardItem = ({ index=0, pattern='diamond', number='10', clickFn=mockFn }) => {
+const CardItem = ({ index=0, cardInfo, clickFn=mockFn, whichLine }) => {
   const classes = useStyles({ index })
+  const { pattern='diamond', number='10' } = cardInfo
   return (
     <Paper 
       className={ classes.root } 
-      onClick={ clickFn.bind(this, pattern, number) }
+      onClick={ clickFn.bind(this, whichLine, cardInfo) }
     >
       <Box className={ classes.box } display={ 'flex' }>
         <img className={ classes.img } src={ patternInfos[pattern].imgSrc } />

@@ -11,20 +11,24 @@ const mockCards = [
 
 const useStyles = makeStyles({
   root: {
-    position: 'relative'
+    position: 'relative',
+    width: 100,
+    height: 20,
+    margin: 10,
   }
 })
 
-const CardList = ({ cards=mockCards }) => {
+const CardList = ({ cards=mockCards, clickFn, whichLine }) => {
   const classes = useStyles()
   return (
     <Box className={ classes.root }>
       {cards.map((c, i) => (
         <CardItem 
-          key={ i }
+          key={ c.id }
           index={ i }
-          pattern={ c.pattern }
-          number={ c.number } />
+          whichLine={ whichLine }
+          cardInfo={ c }
+          clickFn={ clickFn } />
       ))}
     </Box>
   )

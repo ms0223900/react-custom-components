@@ -28,7 +28,7 @@ const getCards = (pattern='', color, index) => [...Array(13).keys()].map(a => (
   { id: a + 13 * index, pattern, color, number: a + 1 }
 ))
 
-const pokerCards = [
+export const pokerCards = [
   ...getCards('spade', 'black', 0),
   ...getCards('heart', 'red', 1),
   ...getCards('club', 'black', 2),

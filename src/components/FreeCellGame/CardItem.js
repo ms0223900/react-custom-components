@@ -38,7 +38,7 @@ const CardItem = ({ index=0, cardInfo, clickFn=mockFn, whichLine=undefined }) =>
   return (
     <Paper 
       className={ classes.root } 
-      onClick={ clickFn && clickFn.bind(this, whichLine, cardInfo) }
+      onClick={ clickFn ? clickFn.bind(this, whichLine, cardInfo) : undefined }
     >
       <Box className={ classes.box } display={ 'flex' }>
         <img className={ classes.img } src={ patternInfos[pattern].imgSrc } />

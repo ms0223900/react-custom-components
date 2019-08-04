@@ -1,9 +1,8 @@
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useEffect } from 'react'
 import { Box } from '@material-ui/core';
 import CardList from './CardList';
 import { useStyles } from './EmptyPart'
-// import CardItem from './CardItem';
-// import { getNewCardData } from './fn';
+// import { pokerCards } from './fn';
 
 const checkCanPutCard = (lastCardInfo, cardInfo) => {
   const { pattern, number } = cardInfo // chosen card info
@@ -52,6 +51,13 @@ const MainPart = ({ chosenCard, setChosenCard }) => {
       setChosenCard(undefined)
     }
   }, [mainCards, chosenCard])
+  useEffect(() => {
+    const cardsAmount = mainCards.map(c => c.cardsInLine.length)
+    const allCards = cardsAmount.reduce((a, b) => a + b, 0)
+    if(allCards === 52) {
+      window.alert('you win!!')
+    }
+  }, [mainCards])
   return (
     <Box display={ 'flex' }>
       {mainCards.map(cardLine => {

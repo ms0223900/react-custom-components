@@ -18,7 +18,7 @@ const useStyles = makeStyles({
   }
 })
 
-const CardList = ({ cards=mockCards, clickFn, whichLine }) => {
+const CardList = ({ cards=mockCards, clickFn, whichLine, cardAmount }) => {
   const classes = useStyles()
   return (
     <Box className={ classes.root }>
@@ -28,7 +28,8 @@ const CardList = ({ cards=mockCards, clickFn, whichLine }) => {
           index={ i }
           whichLine={ whichLine }
           cardInfo={ c }
-          clickFn={ clickFn } />
+          clickFn={ typeof(cardAmount) === 'number' ? 
+            cardAmount - 1 === i && clickFn : clickFn } />
       ))}
     </Box>
   )

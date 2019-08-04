@@ -41,7 +41,7 @@ export const getRandomPokerCards = () => _.shuffle(pokerCards)
 export const getRandomSplitCards = () => {
   const res = []
   const cards = getRandomPokerCards()
-  for (let i = 0; i < 7; i++) {
+  for (let i = 0; i < 8; i++) {
     if(i < 4) { //from ! ~ 4 line
       res[i] = cards.slice(i * 7, (i + 1) * 7)
     } else {

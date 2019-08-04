@@ -3,8 +3,20 @@ import { Box, Typography } from '@material-ui/core';
 import { getRandomSplitCards } from './fn'
 import CardList from './CardList'
 import CardItem from './CardItem'
+import EmptyPart from './EmptyPart'
+import MainPart from './MainPart';
+import { makeStyles } from '@material-ui/styles';
 
 //
+const useStyles = makeStyles({
+  root: {
+    margin: 'auto',
+    maxWidth: 1000,
+  },
+  cardLists: {
+    justifyContent: 'space-between',
+  }
+})
 
 const cardLines_action_remove = (whichLine) => ({
   type: 'remove',
@@ -37,14 +49,17 @@ const cardLins_reducer = (state, action) => {
 }
 
 const App = () => {
+  const classes = useStyles()
   const randomsCards = getRandomSplitCards()
   const [cardLines, dispatch] = useReducer(cardLins_reducer, randomsCards)
   const [chosenCard, setChosenCard] = useState(undefined)
   //
   const redoCard = useCallback(() => {
     const { whichLine, cardInfo } = chosenCard
-    dispatch( cardLines_action_add(whichLine, cardInfo) )
-    setChosenCard(undefined)
+    if(whichLine) {
+      dispatch( cardLines_action_add(whichLine, cardInfo) )
+      setChosenCard(undefined)
+    }
   }, [chosenCard])
   //
   const handleCardSetFn = useCallback((whichLine, cardInfo) => {
@@ -88,22 +103,34 @@ const App = () => {
   }, [chosenCard])
   console.log(chosenCard)
   return (
-    <Box display={ 'flex' }>
-      {cardLines.map((cards, i) =>(
-        <CardList 
-          clickFn={ handleCardSetFn } 
-          cards={ cards } 
-          whichLine={ i } />
-      ))}
+    <>
+      <Box className={ classes.root }>
+        <Box display={ 'flex' }>
+          <EmptyPart 
+            chosenCard={ chosenCard }
+            setChosenCard={ setChosenCard } />
+          <Box style={{ width: 50, }} />
+          <MainPart 
+            chosenCard={ chosenCard } 
+            setChosenCard={ setChosenCard } />
+        </Box>
+        <Box display={ 'flex' } className={ classes.cardLists }>
+          {cardLines.map((cards, i) =>(
+            <CardList 
+              clickFn={ handleCardSetFn }
+              cards={ cards } 
+              cardAmount={ cards.length }
+              whichLine={ i } />
+          ))}
+        </Box>
+      </Box>
       {chosenCard && (
         <Box>
-          <Typography variant={ 'h3' }>{ 'Chosen Card' }</Typography>
+          <Typography variant={ 'subtitle1' }>{ 'Chosen Card' }</Typography>
           <CardItem clickFn={ redoCard } cardInfo={ chosenCard.cardInfo } />
         </Box>
       )}
-      
-      {/* <CardList /> */}
-    </Box>
+    </>
   )
 }
 export default App

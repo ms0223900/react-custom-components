@@ -29,11 +29,11 @@ const useStyles = makeStyles({
   },
 })
 
-const SinglePiece = ({ setPiece, blackOrWhite }) => {
+const SinglePiece = ({ id, setPiece, blackOrWhite }) => {
   const classes = useStyles({ blackOrWhite })
   return (
     <div
-      onClick={ setPiece } 
+      onClick={ setPiece.bind(this, id) } 
       className={ classes.root } />
   )
 }

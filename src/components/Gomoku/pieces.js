@@ -16,13 +16,15 @@ const useStyles = makeStyles({
   },
 })
 
-const Pieces = ({ pieceData }) => {
+const Pieces = ({ pieceData, setPiece }) => {
   const classes = useStyles()
   return (
     <div className={ classes.root }>
       {pieceData.map(piece => (
         <SinglePiece 
-          key={ piece.id }
+          key={ piece.pieceId }
+          id={ piece.pieceId }
+          setPiece={ setPiece }
           blackOrWhite={ piece.pieceColor } />
       ))}
     </div>

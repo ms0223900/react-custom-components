@@ -6,6 +6,7 @@ import ComicViewer from '../src/components/ComicViewer'
 import SUDOKU from '../src/components/SUDOKU'
 import WeatherAPI from '../src/components/WeatherAPI'
 import FreeCellGame from '../src/components/FreeCellGame'
+import Gomoku from '../src/components/Gomoku'
 import '../src/styles/style.scss'
 
 storiesOf('custom-components', module)
@@ -26,4 +27,7 @@ storiesOf('custom-components', module)
   ))
   .add('FreeCellGame', () => (
     <FreeCellGame />
+  ))
+  .add('Gomoku', () => (
+    <Gomoku />
   ))

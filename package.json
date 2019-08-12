@@ -10,6 +10,7 @@
     "lint": "eslint src/*.js",
     "lintFix": "eslint --fix src/*.js",
     "storybook": "start-storybook -s ./public -p 6006",
+    "storybook-API": "STORYBOOK_API=https://intense-brushlands-46000.herokuapp.com start-storybook -p 6006",
     "build-storybook": "build-storybook"
   },
   "keywords": [],

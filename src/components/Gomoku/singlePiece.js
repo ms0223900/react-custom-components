@@ -33,7 +33,7 @@ const SinglePiece = ({ id, setPiece, blackOrWhite }) => {
   const classes = useStyles({ blackOrWhite })
   return (
     <div
-      onClick={ setPiece.bind(this, id) } 
+      onClick={ setPiece ? setPiece.bind(this, id) : null } 
       className={ classes.root } />
   )
 }

@@ -1,6 +1,9 @@
 import React, { useState, useCallback, useEffect } from 'react'
+import { Button } from '@material-ui/core'
 import Board from './board'
 import Pieces from './pieces'
+import { checkWhoWin } from './fn'
+import { socket } from './API';
 
 const piecesData_mockData = [...Array(14 * 14).keys()].map(k => ({
   user: null, pieceId: k, pieceColor: null
@@ -10,69 +13,26 @@ const piecesData_mockData = [...Array(14 * 14).keys()].map(k => ({
 // piecesData_mockData[20] = { user: '', pieceId: 20, pieceColor: 'black', }
 
 const userData_mockData = [
-  { username: 'aaa', color: 'black', isPlay: true, },
-  { username: 'bbb', color: 'white', isPlay: false, },
+  { username: 'Player01', color: 'black' },
+  { username: 'Player02', color: 'white' },
 ]
-
-const checkIds_ArrInArr = (arr1=[], arr2=[]) => {
-  // console.log(arr1, arr2)
-  const amount = arr1.length
-  let count = 0
-  arr2.forEach(arr => {
-    if(arr1.indexOf(arr) !== -1) {
-      count += 1
-    } 
-  })
-  return count === amount
-}
-
-const checkWhoWin = (pieceData, user) => {
-  const array5 = [...Array(5).keys()]
-  const filteredPieces = pieceData.filter(data => data.user === user)
-  const filteredPiecesIds = filteredPieces.map(piece => piece.pieceId)
-  // console.log(filteredPiecesIds)
-  const checkDirections = (pieceId) => {
-    const topLeftIds = array5.map(i => pieceId - i * 15)
-    const topIds = array5.map(i => pieceId - i * 14)
-    const topRightIds = array5.map(i => pieceId - i * 13)
-    const leftIds = array5.map(i => pieceId - i * 1)
-    const rightIds = array5.map(i => pieceId + i * 1)
-    const bottomLeftIds = array5.map(i => pieceId + i * 13)
-    const bottomIds = array5.map(i => pieceId + i * 14)
-    const bottomRightIds = array5.map(i => pieceId + i * 15)
-    const directionIds = [topLeftIds, topIds, topRightIds, leftIds, rightIds, bottomLeftIds, bottomIds, bottomRightIds]
-    for (let i = 0; i < directionIds.length; i++) {
-      const ids = directionIds[i]
-      if(checkIds_ArrInArr(ids, filteredPiecesIds)) {
-        return true
-      }
-    }
-  }
-  //
-  const checkIsFulfill = () => {
-    if(filteredPieces.length < 5) {
-      return false
-    } else {
-      for (let i = 0; i < filteredPiecesIds.length; i++) {
-        const id = filteredPiecesIds[i]
-        const res = checkDirections(id)
-        if(res) {
-          return true
-        }
-      }
-    }
-  }
-  if(checkIsFulfill()) return user
-}
-
 
 const App = () => {
   const [pieceData, setData] = useState(piecesData_mockData)
   const [userData, setUserData] = useState(userData_mockData)
+  const [userNow, setUserNow] = useState(null)
+  const [playerNow, setPlayerNow] = useState('Player01')
+  //
+  const winAndClearGame = (winner) => {
+    console.log('win!!!')
+    window.alert(`winner is ${ winner}`)
+    setData(piecesData_mockData)
+    setUserData(userData_mockData)
+  }
+
   const handleSetData = useCallback((id) => {
-    const userDataNow = userData.find(data => data.isPlay)
+    const userDataNow = userData.find(data => data.username === userNow)
     const pieceColor = userDataNow.color
-    const userNow = userDataNow.username
     const newPieceData = [...pieceData]
     if(!newPieceData[id].pieceColor) {
       newPieceData[id] = {
@@ -81,36 +41,62 @@ const App = () => {
         pieceColor,
       }
       setData(newPieceData)
-    }
-  }, [pieceData, userData])
-  useEffect(() => {
-    const { username } = userData.find(data => data.isPlay)
-    const gameWinner = checkWhoWin(pieceData, username)
-    if(gameWinner) {
-      setTimeout(() => {
-        window.alert(gameWinner)
-        setData(piecesData_mockData)
-        setUserData(userData_mockData)
-      }, 1000)
-    } else {
-      if(pieceData.find(data => data.user)) {
-        const newUserData = [
-          { ...userData[0], isPlay: !userData[0].isPlay, },
-          { ...userData[1], isPlay: !userData[1].isPlay, },
-        ]
-        setUserData(newUserData)
+      //
+      const whoIsWin = checkWhoWin(newPieceData, userNow)
+      const nextPlayer = !whoIsWin && userNow === userData[0].username ? userData[1].username : userData[0].username
+      const socketData = {
+        winner: whoIsWin,
+        nextPlayer,
+        data: newPieceData
       }
+      setPlayerNow(nextPlayer)
+      whoIsWin && winAndClearGame(whoIsWin)
+      //
+      socket.emit('set_piece', socketData)
     }
-    //
-  }, [pieceData])
+  }, [pieceData, userData, userNow])
   //
-  const userIsPlayNow = userData.find(data => data.isPlay).username
+  const setUser = (user) => {
+    const anotherPlayer = user === userData[0].username ? userData[1].username : userData[0].username
+    setUserNow(user)
+    socket.emit('set_player', anotherPlayer)
+  }
+  useEffect(() => {
+    socket.on('get_player', res => {
+      !userNow && setUserNow(res)
+    })
+  }, [userNow])
+  //
+  useEffect(() => {
+    //socket listen
+    socket.on('get_piece', res => {
+      setPlayerNow(res.nextPlayer)
+      setData(res.data)
+      res.winner && winAndClearGame(res.winner)
+    })
+    
+  }, [])
+  //
   return (
     <div>
-      <h3>{ 'user: ' + userIsPlayNow }</h3>
-      <Board>
-        <Pieces setPiece={ handleSetData }  pieceData={ pieceData } />
-      </Board>
+      <h3>
+        { 'This turn is user: ' + playerNow }
+        <span>{ userNow === playerNow && ' / your turn!' }</span>
+      </h3>
+      <hr />
+      <h4>{ userNow && `You are ${ userNow }` }</h4>
+      {userNow && (
+        <Board>
+          <Pieces setPiece={ playerNow === userNow && handleSetData }  pieceData={ pieceData } />
+        </Board>
+      )}
+      {!userNow && (
+        <div>
+          <h3>{ 'choose your player, or wait for another player.' }</h3>
+          <Button variant={ 'contained' } onClick={() => setUser('Player01')}>{ 'Player01' }</Button>
+          <Button variant={ 'contained' } onClick={() => setUser('Player02')}>{ 'Player02' }</Button>
+        </div>
+      )}
     </div>
   )
 }

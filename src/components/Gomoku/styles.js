@@ -6,5 +6,9 @@ export const useStyles = makeStyles({
     padding: 20,
     margin: 'auto',
     textAlign: 'center',
+  },
+  userHighlight: {
+    color: '#0032FF',
+    fontWeight: 600,
   }
 })

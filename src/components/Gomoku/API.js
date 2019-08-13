@@ -10,13 +10,17 @@ const apiUrl =
 export const socket = openSocket(apiUrl)
 export const strapi = new Strapi(apiUrl)
 
+
 export const createGomokuRoom = () => {
   const users = getRandomUser()
-  strapi.createEntry('gomokus', {
+  return strapi.createEntry('gomokus', {
     user1: users[0],
     user2: users[1],
   })
-  .then(res => console.log(res))
+  .then(res => {
+    console.log(res)
+    return res
+  })
   .catch(err => console.log(err))
 }
 export const getGomokuRooms = () => (
@@ -28,7 +32,7 @@ export const getGomokuRooms = () => (
     })
 )
 export const updateGomokuRoomState = (id, user1_isReady=false, user2_isReady=false, roomIsFull=false) => (
-  strapi.updateEntry('gomokus', id, {
+  id && strapi.updateEntry('gomokus', id, {
     user1_isReady,
     user2_isReady,
     roomIsFull,
@@ -40,9 +44,10 @@ export const handleAddInRoomAndSetReady = async (setUserNowFn, setUserDataFn, se
   const emptyRoom = rooms.find(room => !room.roomIsFull)
   if(emptyRoom) {
     const { id, user1, user2 } = emptyRoom
+    socket.emit('join', id)
     setUserDataFn([
-      { username: user1, color: 'black' },
-      { username: user2, color: 'white' },
+      { username: user1, color: 'black', roomId: id },
+      { username: user2, color: 'white', roomId: id },
     ])
     //set your user
     if(!emptyRoom.user1_isReady) { //set user to user1
@@ -62,5 +67,19 @@ export const handleAddInRoomAndSetReady = async (setUserNowFn, setUserDataFn, se
     }
   } else {
     //create a room 
+    createGomokuRoom()
+      .then(res => {
+        const { id, user1, user2 } = res
+        socket.emit('join', id)
+        setUserDataFn([
+          { username: user1, color: 'black', roomId: id },
+          { username: user2, color: 'white', roomId: id },
+        ])
+        updateGomokuRoomState(id, true, false, false)
+          .then(res => {
+            console.log(user1, res)
+            setUserNowFn(user1)
+          })
+      })
   }
 }

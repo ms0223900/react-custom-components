@@ -7,22 +7,24 @@ import { checkWhoWin } from './fn'
 import { socket } from './API';
 import { useStyles } from './styles'
 import { updateGomokuRoomState, handleAddInRoomAndSetReady } from './API'
+import { piecesData_mockData, userData_mockData } from './config'
+import UserInfo from './userInfo'
 
-const piecesData_mockData = [...Array(14 * 14).keys()].map(k => ({
-  user: null, pieceId: k, pieceColor: null
-}))
-// piecesData_mockData[0] = { user: '', pieceId: 0, pieceColor: 'black', }
-// piecesData_mockData[10] = { user: '', pieceId: 10, pieceColor: 'white', }
-// piecesData_mockData[20] = { user: '', pieceId: 20, pieceColor: 'black', }
-
-const userData_mockData = [
-  { username: 'Player01', color: 'black' },
-  { username: 'Player02', color: 'white' },
-]
-
-
-
-
+const FastMatch = ({ className, setDataFns }) => {
+  const [setUserNow, setUserData, handleSetGameStart] = setDataFns
+  return (
+    <Paper className={ className }>
+      <Typography variant={'h3'}>{'GOMOKU BATTLE'}</Typography>
+      <Button 
+        variant={ 'contained' } 
+        color={ 'primary' } 
+        onClick={ () => handleAddInRoomAndSetReady(setUserNow, setUserData, handleSetGameStart) }
+      >
+        { 'fast match' }
+      </Button>
+    </Paper>
+  )
+}
 
 const App = () => {
   const classes = useStyles()
@@ -32,25 +34,43 @@ const App = () => {
   const [playerNow, setPlayerNow] = useState('Player01')
   const [gameStart, setGameStart] = useState(false)
   //
-  const winAndClearGame = (winner) => {
-    console.log('win!!!')
-    window.alert(`winner is ${ winner}`)
+  const leaveGame = useCallback((userNow) => {
+    const { roomId } = userData[0]
+    const confirmMes = 'Are your sure leaving the game?'
+    if(window.confirm(confirmMes)) {
+      socket.emit('leave', {
+        userNow,
+        roomId,
+      })
+      resetGame(false)
+    }
+  }, [userData])
+
+  const resetGame = useCallback(winner => {
+    if(winner) {
+      console.log(winner, userData)
+      winner && window.alert(`winner is ${ winner}`)
+    }
+    //clear room data 
+    if(userData) {
+      const { roomId } = userData[0]
+      updateGomokuRoomState(roomId)
+    }
     setData(piecesData_mockData)
-    setUserData(userData_mockData)
+    setUserData(null)
     setUserNow(null)
     setGameStart(false)
-    //clear mock room
-    updateGomokuRoomState(2)
-  }
+  }, [userNow, userData])
+  //
   const handleSetGameStart = () => {
-    socket.emit('set_game_start', true)
+    socket.emit('set_game', true)
     setGameStart(true)
   }
   const handleSetData = useCallback((id) => {
     const userDataNow = userData.find(data => data.username === userNow)
     const pieceColor = userDataNow.color
     const newPieceData = [...pieceData]
-    if(!newPieceData[id].pieceColor) {
+    if(!newPieceData[id].pieceColor) { //if not be set piece
       newPieceData[id] = {
         user: userNow,
         pieceId: id,
@@ -67,73 +87,74 @@ const App = () => {
         data: newPieceData
       }
       setPlayerNow(nextPlayer)
-      winner && winAndClearGame(winner)
+      winner && resetGame(winner)
       //
       socket.emit('set_piece', socketData)
     }
   }, [pieceData, userData, userNow])
   //
-  const setUser = (user) => {
-    const anotherPlayer = user === userData[0].username ? userData[1].username : userData[0].username
-    setUserNow(user)
-    socket.emit('set_player', anotherPlayer)
-  }
-  useEffect(() => {
-    userData && setPlayerNow(userData[0].username)
-  }, [userData])
-  //
   useEffect(() => {
     console.log('register socket')
     //socket listen
-    socket.on('get_piece', res => {
-      setPlayerNow(res.nextPlayer)
-      setData(res.data)
-      res.winner && winAndClearGame(res.winner)
+    socket.on('get_game', res => {
+      console.log('get_game', res)
+      setGameStart(res)
+      //reset game 
+      !res && resetGame(false)
     })
-    socket.on('get_game_start', () => {
-      console.log('get_game_start')
-      setGameStart(true)
+    socket.on('get_message', res => {
+      window.alert(res)
     })
   }, [])
   //
+  useEffect(() => {
+    window.onbeforeunload = function(e) {
+      //exit at game started, reset and emit leave room
+      if(gameStart) {
+        return 
+      }
+    }
+    return () => {
+      window.onbeforeunload = null
+    }
+  }, [gameStart, userData, userNow])
+  useEffect(() => {
+    if(userData) {
+      setPlayerNow(userData[0].username)
+      socket.on('get_piece', res => {
+        setPlayerNow(res.nextPlayer)
+        setData(res.data)
+        res.winner && resetGame(res.winner)
+      })
+    }
+  }, [userData])
+  //
+  
+  //
+  const isWaiting = userNow && !gameStart
   return (
     <div>
       {gameStart && (
         <>
-          <h3>
-            { 'This turn is user: ' + playerNow }
-            <span>{ userNow === playerNow && ' / your turn!' }</span>
-          </h3>
-          <hr />
-          <h4>{ userNow && `You are ${ userNow }` }</h4>
+          <UserInfo 
+            userNow={ userNow }
+            playerNow={ playerNow }
+            userData={ userData } />
           <Board>
             <Pieces setPiece={ playerNow === userNow && handleSetData }  pieceData={ pieceData } />
           </Board>
+          <Button onClick={ leaveGame.bind(this, userNow) }>{ 'exit game' }</Button>
         </>
       )}
-      {userNow && !gameStart && (
+      {isWaiting && (
         <Typography variant={ 'h5' }>
           { 'waiting for another player...' }
         </Typography>
       )}
-      {/* {!userNow && (
-        <div>
-          <h3>{ 'choose your player, or wait for another player.' }</h3>
-          <Button variant={ 'contained' } onClick={() => setUser('Player01')}>{ 'Player01' }</Button>
-          <Button variant={ 'contained' } onClick={() => setUser('Player02')}>{ 'Player02' }</Button>
-        </div>
-      )} */}
       {!gameStart && (
-        <Paper className={ classes.matchPart }>
-          <Typography variant={'h3'}>{'GOMOKU BATTLE'}</Typography>
-          <Button 
-            variant={ 'contained' } 
-            color={ 'primary' } 
-            onClick={ () => handleAddInRoomAndSetReady(setUserNow, setUserData, handleSetGameStart) }
-          >
-            { 'fast match' }
-          </Button>
-        </Paper>
+        <FastMatch 
+          className={ classes.matchPart }
+          setDataFns={ [setUserNow, setUserData, handleSetGameStart] }  />
       )}
     </div>
   )

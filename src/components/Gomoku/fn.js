@@ -51,3 +51,16 @@ export const checkWhoWin = (pieceData, user='') => {
   } 
   return null
 }
+
+const userPrefix = ['tiger', 'penguin', 'cat', 'sloth']
+export const getRandomUser = () => {
+  const _userPrefix = [...userPrefix]
+  const user1Id = ~~(Math.random() * 10000)
+  const user2Id = ~~(Math.random() * 10000)
+  const user1PrefixIndex = ~~(Math.random() * 4)
+  const user2PrefixIndex = ~~(Math.random() * 3)
+  const user1 = _userPrefix[user1PrefixIndex] + '_' + user1Id
+  _userPrefix.splice(user1PrefixIndex, 1)
+  const user2 = _userPrefix[user2PrefixIndex] + '_' + user2Id
+  return [user1, user2]
+}

@@ -31,6 +31,14 @@ export const getGomokuRooms = () => (
       return res
     })
 )
+export const getSpecificGomokuRoom = (id) => (
+  strapi
+    .getEntry('gomokus', id)
+    .then(res => {
+      console.log(res)
+      return res
+    })
+)
 export const updateGomokuRoomState = (id, user1_isReady=false, user2_isReady=false, roomIsFull=false) => (
   id && strapi.updateEntry('gomokus', id, {
     user1_isReady,
@@ -38,6 +46,21 @@ export const updateGomokuRoomState = (id, user1_isReady=false, user2_isReady=fal
     roomIsFull,
   })
 )
+export const updateChat = async (id, username, chatContent) => {  
+  return strapi
+    .createEntry('chats', {
+      roomId: id,
+      username,
+      chatContent
+    })
+    .then(res => {
+      socket.emit('send_chat', [id, res])
+    })
+}
+export const getChatByRoomId = async (roomId) => {
+  const originData = await strapi.getEntries('chats', res => res)
+  return originData.filter(data => data.roomId === roomId)
+}
 
 export const handleAddInRoomAndSetReady = async (setUserNowFn, setUserDataFn, setGameStartFn) => {
   const rooms = await getGomokuRooms()

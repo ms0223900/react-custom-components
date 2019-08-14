@@ -1,6 +1,10 @@
 import { makeStyles } from '@material-ui/styles'
 
 export const useStyles = makeStyles({
+  gameMainPart: {
+    maxWidth: 960,
+    justifyContent: 'space-between',
+  },
   matchPart: {
     width: 300,
     padding: 20,

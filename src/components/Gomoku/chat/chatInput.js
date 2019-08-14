@@ -3,7 +3,7 @@ import { TextField, Button, Box } from '@material-ui/core';
 import { updateChat } from '../API';
 
 
-const ChatInput = ({ username, handleSend=updateChat, roomId }) => {
+const ChatInput = ({ username, setLatestChat, roomId }) => {
   const [value, setValue] = React.useState('')
   const handleChange = e => {
     const { value } = e.target
@@ -13,8 +13,9 @@ const ChatInput = ({ username, handleSend=updateChat, roomId }) => {
     e.keyCode === 13 && handleSendMes()
   }
   const handleSendMes = useCallback(() => {
-    if(handleSend) {
-      value.length > 0 && handleSend(roomId, username, value)
+    if(value.length > 0) {
+      updateChat(roomId, username, value)
+      setLatestChat(value)
       setValue('')
     }
   }, [username, value, roomId])

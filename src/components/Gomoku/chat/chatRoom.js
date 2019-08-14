@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useCallback } from 'react'
 import { Box } from '@material-ui/core'
 import ChatBubble from './chatBubble'
 import ChatInput from './chatInput'
@@ -40,6 +40,17 @@ const ChatRoom = ({ userData, userNow, chatData_mock=[], ...props }) => {
     }
     chatData.length === 0 && getData()
   }, [userData])
+  const handleSetLocalLatestChat = useCallback(val => {
+    const latestChat = {
+      id: chatData.length,
+      username: userNow,
+      chatContent: val
+    }
+    setChatData([
+      ...chatData,
+      latestChat
+    ])
+  }, [userNow, chatData])
   //
   useEffect(() => {
     //register socket
@@ -81,6 +92,7 @@ const ChatRoom = ({ userData, userNow, chatData_mock=[], ...props }) => {
       </Box>
       <ChatInput 
         username={ userNow }
+        setLatestChat={ handleSetLocalLatestChat }
         roomId={ userData && userData[0].roomId } />
       {props.children}
     </Box>

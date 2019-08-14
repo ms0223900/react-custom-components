@@ -46,7 +46,7 @@ const App = () => {
       resetGame(false)
     }
   }, [userData])
-  const resetGame = useResetGame(userData, setData, setUserData, setUserNow, setGameStart)
+  const resetGame = useResetGame(userData, setGameStart)
   const handleSetData = useHandleSetData(userData, userNow, pieceData, setData, setPlayerNow, resetGame)
   //
   const handleSetGameStart = () => {
@@ -61,14 +61,25 @@ const App = () => {
       console.log('get_game', res)
       setGameStart(res)
       //reset game 
-      !res && resetGame(false)
+      if(!res) {
+        resetGame(false)
+        socket.emit('leave', false)
+      }
     })
     socket.on('get_message', res => {
       window.alert(res)
     })
+    return () => {
+      socket.removeAllListeners()
+    }
   }, [])
   //
   useEffect(() => {
+    if(!gameStart) {
+      setData(piecesData_mockData);
+      setUserData(null);
+      setUserNow(null);
+    }
     window.onbeforeunload = function() {
       // return ''
     }
@@ -77,18 +88,19 @@ const App = () => {
     }
   }, [gameStart])
   useEffect(() => {
-    if(userData) {
+    if(userData && userNow) {
       setPlayerNow(userData[0].username)
       socket.on('get_piece', res => {
         setPlayerNow(res.nextPlayer)
         setData(res.data)
-        res.winner && resetGame(res.winner)
+        res.winner && resetGame(userNow, res.winner)
       })
     }
-  }, [userData])
+  }, [userData, userNow])
   //
   const isWaiting = userNow && !gameStart
   console.log(userNow, gameStart)
+  console.log(pieceData)
   return (
     <div>
       {gameStart && (
@@ -102,10 +114,16 @@ const App = () => {
               <Board>
                 <Pieces setPiece={ playerNow === userNow && handleSetData }  pieceData={ pieceData } />
               </Board>
-              <Button onClick={ leaveGame.bind(this, userNow) }>{ 'exit game' }</Button>
               <ChatRoom 
                 userData={ userData }
-                userNow={ userNow }  />
+                userNow={ userNow }
+              >
+                <Button 
+                  onClick={ leaveGame.bind(this, userNow) }
+                >
+                  { 'exit game' }
+                </Button>
+              </ChatRoom>
             </Box>
         </Container>
       )}

@@ -1,24 +1,23 @@
 import { useCallback } from 'react'
 import { updateGomokuRoomState, socket } from './API';
-import { piecesData_mockData } from './config';
 import { checkWhoWin } from './fn';
 
 
-export function useResetGame(userData, setData, setUserData, setUserNow, setGameStart) {
-  return useCallback(winner => {
+export function useResetGame(userData, setGameStart) {
+  return useCallback((userNow, winner) => {
     if (winner) {
+      const resultMes = userNow === winner ? 'You Win!!!' : 'You Lose :(...'
       console.log(winner, userData);
-      winner && window.alert(`winner is ${winner}`);
+      setTimeout(() => {
+        window.alert(resultMes);
+        setGameStart(false)
+      }, 1000)
     }
     //clear room data 
     if (userData) {
       const { roomId } = userData[0];
       updateGomokuRoomState(roomId);
     }
-    setData(piecesData_mockData);
-    setUserData(null);
-    setUserNow(null);
-    setGameStart(false);
   }, [userData]);
 }
 
@@ -44,7 +43,8 @@ export function useHandleSetData(userData, userNow, pieceData, setData, setPlaye
         data: newPieceData
       };
       setPlayerNow(nextPlayer);
-      winner && resetGame(winner);
+      //local call
+      winner && resetGame(userNow, winner);
       //
       socket.emit('set_piece', socketData);
     }

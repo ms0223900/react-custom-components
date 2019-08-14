@@ -29,7 +29,7 @@ const getChatData = async (userData) => {
   return []
 }
 
-const ChatRoom = ({ userData, userNow, chatData_mock=[] }) => {
+const ChatRoom = ({ userData, userNow, chatData_mock=[], ...props }) => {
   const classes = useStyles()
   const [chatData, setChatData] = useState(chatData_mock)
   const [latestChat, setLatestChat] = useState(null)
@@ -82,6 +82,7 @@ const ChatRoom = ({ userData, userNow, chatData_mock=[] }) => {
       <ChatInput 
         username={ userNow }
         roomId={ userData && userData[0].roomId } />
+      {props.children}
     </Box>
   )
 }

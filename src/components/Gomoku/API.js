@@ -63,6 +63,14 @@ export const getChatByRoomId = async (roomId) => {
 }
 
 export const handleAddInRoomAndSetReady = async (setUserNowFn, setUserDataFn, setGameStartFn) => {
+  const setFirstPlayerAndTimeoutExit = (id, user1) => {
+    updateGomokuRoomState(id, true, false, false)
+      .then(res => {
+        console.log(user1, res)
+        setUserNowFn(user1)
+      })
+  }
+  //
   const rooms = await getGomokuRooms()
   const emptyRoom = rooms.find(room => !room.roomIsFull)
   if(emptyRoom) {
@@ -74,11 +82,7 @@ export const handleAddInRoomAndSetReady = async (setUserNowFn, setUserDataFn, se
     ])
     //set your user
     if(!emptyRoom.user1_isReady) { //set user to user1
-      updateGomokuRoomState(id, true, false, false)
-        .then(res => {
-          console.log(user1, res)
-          setUserNowFn(user1)
-        })
+      setFirstPlayerAndTimeoutExit(id, user1)
     } else {
       //set user to user2 and start game
       updateGomokuRoomState(id, true, true, true) 
@@ -98,11 +102,7 @@ export const handleAddInRoomAndSetReady = async (setUserNowFn, setUserDataFn, se
           { username: user1, color: 'black', roomId: id },
           { username: user2, color: 'white', roomId: id },
         ])
-        updateGomokuRoomState(id, true, false, false)
-          .then(res => {
-            console.log(user1, res)
-            setUserNowFn(user1)
-          })
+        setFirstPlayerAndTimeoutExit(id, user1)
       })
   }
 }

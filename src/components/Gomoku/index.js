@@ -60,6 +60,8 @@ const App = () => {
     socket.on('get_game', res => {
       console.log('get_game', res)
       setGameStart(res)
+      console.log('clearTimeout')
+      socket.emit('clear_timeout')
       //reset game 
       if(!res) {
         resetGame(false)
@@ -80,12 +82,6 @@ const App = () => {
       setUserData(null);
       setUserNow(null);
     }
-    window.onbeforeunload = function() {
-      // return ''
-    }
-    return () => {
-      window.onbeforeunload = null
-    }
   }, [gameStart])
   useEffect(() => {
     if(userData && userNow) {
@@ -100,7 +96,6 @@ const App = () => {
   //
   const isWaiting = userNow && !gameStart
   console.log(userNow, gameStart)
-  console.log(pieceData)
   return (
     <div>
       {gameStart && (

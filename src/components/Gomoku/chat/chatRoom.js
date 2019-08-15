@@ -1,9 +1,10 @@
-import React, { useEffect, useState, useCallback } from 'react'
+import React, { useEffect, useState, useCallback, useRef } from 'react'
 import { Box } from '@material-ui/core'
 import ChatBubble from './chatBubble'
 import ChatInput from './chatInput'
 import { getChatByRoomId, socket } from '../API'
 import { makeStyles } from '@material-ui/styles';
+import { scrollToBottom } from '../fn';
 
 const useStyles = makeStyles({
   root: {
@@ -30,6 +31,7 @@ const getChatData = async (userData) => {
 }
 
 const ChatRoom = ({ userData, userNow, chatData_mock=[], ...props }) => {
+  const roomRef = useRef(null)
   const classes = useStyles()
   const [chatData, setChatData] = useState(chatData_mock)
   const [latestChat, setLatestChat] = useState(null)
@@ -40,6 +42,11 @@ const ChatRoom = ({ userData, userNow, chatData_mock=[], ...props }) => {
     }
     chatData.length === 0 && getData()
   }, [userData])
+  const setRef = el => {
+    roomRef.current = el
+    console.log(roomRef.current)
+  }
+  
   const handleSetLocalLatestChat = useCallback(val => {
     const latestChat = {
       id: chatData.length,
@@ -53,12 +60,16 @@ const ChatRoom = ({ userData, userNow, chatData_mock=[], ...props }) => {
   }, [userNow, chatData])
   //
   useEffect(() => {
+    scrollToBottom(roomRef.current)
     //register socket
     socket.on('get_chat', res => {
       console.log(res, 'socket get chat')
       setLatestChat(res)
     })
   }, [])
+  useEffect(() => {
+    scrollToBottom(roomRef.current)
+  }, [chatData])
   useEffect(() => {
     if(latestChat) {
       const newChat = [
@@ -74,21 +85,23 @@ const ChatRoom = ({ userData, userNow, chatData_mock=[], ...props }) => {
   return (
     <Box className={ classes.root }>
       <Box className={ classes.chatArea }>
-        {chatData ? (
-          chatData.map(data => {
-            const { id, username, chatContent } = data
-            return (
-              <ChatBubble 
-                key={ id }
-                username={ username }
-                chatContent={ chatContent }
-                isMe={ userNow === username } 
-              />
-            )
-          })
-        ) : (
-          'loading...'
-        )}
+        <div ref={ setRef } >
+          {chatData ? (
+            chatData.map(data => {
+              const { id, username, chatContent } = data
+              return (
+                <ChatBubble 
+                  key={ id }
+                  username={ username }
+                  chatContent={ chatContent }
+                  isMe={ userNow === username } 
+                />
+              )
+            })
+          ) : (
+            'loading...'
+          )}
+        </div>
       </Box>
       <ChatInput 
         username={ userNow }

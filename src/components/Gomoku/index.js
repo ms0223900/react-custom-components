@@ -10,6 +10,8 @@ import { piecesData_mockData } from './config'
 import UserInfo from './userInfo'
 import { useResetGame, useHandleSetData } from './hookFn';
 import ChatRoom from './chat/chatRoom';
+import { randomPiece } from './fn'
+import Timer from '../Timer';
 
 const FastMatch = ({ className, setDataFns }) => {
   const [setUserNow, setUserData, handleSetGameStart] = setDataFns
@@ -48,6 +50,11 @@ const App = () => {
   }, [userData])
   const resetGame = useResetGame(userData, setGameStart)
   const handleSetData = useHandleSetData(userData, userNow, pieceData, setData, setPlayerNow, resetGame)
+  const handleSetRandomPiece = () => {
+    window.alert('time out!')
+    const randomPieceId = randomPiece(pieceData)
+    handleSetData(randomPieceId)
+  }
   //
   const handleSetGameStart = () => {
     socket.emit('set_game', true)
@@ -105,6 +112,11 @@ const App = () => {
             playerNow={ playerNow }
             userData={ userData } 
           />
+          <Timer 
+            time={ 2 } 
+            timeoutFn={ handleSetRandomPiece } 
+            isPause={ playerNow !== userNow }
+          />
             <Box display={ 'flex' } className={ classes.gameMainPart }>
               <Board>
                 <Pieces setPiece={ playerNow === userNow && handleSetData }  pieceData={ pieceData } />
@@ -117,6 +129,9 @@ const App = () => {
                   onClick={ leaveGame.bind(this, userNow) }
                 >
                   { 'exit game' }
+                </Button>
+                <Button onClick={ handleSetRandomPiece }>
+                  { 'set random piece' }
                 </Button>
               </ChatRoom>
             </Box>

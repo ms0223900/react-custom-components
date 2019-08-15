@@ -23,5 +23,25 @@ export const chatData_mockData = [
     "id": 1,
     "username": "sloth_3511",
     "chatContent": "good morning!"
-  }
+  },
+  {
+    "id": 2,
+    "username": "penguin_541",
+    "chatContent": "hi!"
+  },
+  {
+    "id": 3,
+    "username": "sloth_3511",
+    "chatContent": "good morning!"
+  },
+  {
+    "id": 4,
+    "username": "penguin_541",
+    "chatContent": "hi!"
+  },
+  {
+    "id": 5,
+    "username": "sloth_3511",
+    "chatContent": "good morning!"
+  },
 ]

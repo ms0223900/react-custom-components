@@ -64,3 +64,14 @@ export const getRandomUser = () => {
   const user2 = _userPrefix[user2PrefixIndex] + '_' + user2Id
   return [user1, user2]
 }
+
+export const scrollToBottom = el => {
+  el && el.scrollIntoView({behavior: 'instant', block: 'end', inline: 'nearest'})
+}
+
+export const randomPiece = (pieceData) => {
+  const emptyPieces = pieceData.filter(data => !data.pieceColor)
+  const randomIndex = ~~(Math.random() * emptyPieces.length)
+  const randomPiece = emptyPieces[randomIndex]
+  return randomPiece.pieceId
+}

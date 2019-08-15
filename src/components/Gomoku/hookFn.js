@@ -27,6 +27,7 @@ export function useHandleSetData(userData, userNow, pieceData, setData, setPlaye
     const userDataNow = userData.find(data => data.username === userNow);
     const pieceColor = userDataNow.color;
     const newPieceData = [...pieceData];
+    console.log(userData, userNow, pieceData, setData, setPlayerNow, resetGame, id)
     if (!newPieceData[id].pieceColor) { //if not be set piece
       newPieceData[id] = {
         user: userNow,

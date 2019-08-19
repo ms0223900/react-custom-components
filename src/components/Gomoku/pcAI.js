@@ -8,20 +8,20 @@ export const aiRival = (pieceData, user='', userPieceColor) => {
   const pcPieceIds = pieceData.filter(data => data.user === 'PC').map(piece => piece.pieceId)
   // console.log(pcPieceIds)
 
-  const newPieceData = (id, originData=pieceData) => {
+  const newPieceData = (id, originData=pieceData, _user=user, color=userPieceColor) => {
     let data = [...originData]
     data[id] = { 
-      ...data[id], user, pieceColor: userPieceColor, 
+      ...data[id], user: _user, pieceColor: color, 
     }
     return data
   }
 
-  const checkNewPieceDataWhoWin = (moveId, moveId2) => {
-    let data = newPieceData(moveId)
+  const checkNewPieceDataWhoWin = (moveId, moveId2, _user=user, color=userPieceColor) => {
+    let data = newPieceData(moveId, pieceData, _user, color)
     if(moveId2) {
       data = newPieceData(moveId2, data)
     }
-    if(checkWhoWin(data, user)) {
+    if(checkWhoWin(data, _user)) {
       return moveId 
     }
   }
@@ -57,20 +57,25 @@ export const aiRival = (pieceData, user='', userPieceColor) => {
   const PCpossibleMoves = getPieceDirectionMoves(pcPieceIds, userPieceIds)
   for (let i = 0; i < PCpossibleMoves.length; i++) {
     const moveId = PCpossibleMoves[i];
-    const checkRes = checkNewPieceDataWhoWin(moveId)
+    const checkRes = checkNewPieceDataWhoWin(moveId, null, 'PC', 'white')
     if(checkRes) {
       loseOrWinRes = [...loseOrWinRes, checkRes]
     }
   }
-
+  
   //check lose or win results
   if(loseOrWinRes.length > 0) {
-    console.log(loseOrWinRes)
+    console.log('loseOrWinRes: ', loseOrWinRes)
     return getMaxAmountElementFromArr(loseOrWinRes)
   } else {
     //random get piece id with userPossibleMoves
-    const moveIndex = ~~(Math.random() * userPossibleMoves.length)
-    return userPossibleMoves[moveIndex]
+    if(PCpossibleMoves.length > 0) {
+      const moveIndex = ~~(Math.random() * PCpossibleMoves.length)
+      return PCpossibleMoves[moveIndex]
+    } else {
+      const moveIndex = ~~(Math.random() * userPossibleMoves.length)
+      return userPossibleMoves[moveIndex]
+    }
   }
 
 }

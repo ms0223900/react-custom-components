@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react'
 import { Typography, Paper } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 
@@ -28,7 +28,7 @@ const mockFn = () => {
   window.alert('time out!')
 }
 
-const Timer = ({ timeoutFn=mockFn, time=333, isPause }) => {
+const Timer = forwardRef(({ timeoutFn=mockFn, time=333, isPause }, ref) => {
   const classes = useStyles()
   const [timeNow, setTimeNow] = useState(time)
   useEffect(() => {
@@ -45,6 +45,12 @@ const Timer = ({ timeoutFn=mockFn, time=333, isPause }) => {
     }
   }, [timeNow, isPause])
   //
+  useImperativeHandle(ref, () => ({
+    resetTimer() {
+      setTimeNow(time)
+    }
+  }))
+  //
   const { min, sec } = getTime(timeNow)
   return (
     <Paper className={ classes.root }>
@@ -53,5 +59,5 @@ const Timer = ({ timeoutFn=mockFn, time=333, isPause }) => {
       </Typography>
     </Paper>
   )
-}
+})
 export default Timer

@@ -6,7 +6,7 @@ import { checkWhoWin } from './fn';
 export function useResetGame(userData, setGameStart) {
   return useCallback((userNow, winner) => {
     if (winner) {
-      const resultMes = userNow === winner ? 'You Win!!!' : 'You Lose :(...'
+      const resultMes = userNow === winner && winner !== 'PC' ? 'You Win!!!' : 'You Lose :(...'
       console.log(winner, userData);
       setTimeout(() => {
         window.alert(resultMes);
@@ -27,7 +27,7 @@ export function useHandleSetData(userData, userNow, pieceData, setData, setPlaye
     const userDataNow = userData.find(data => data.username === userNow);
     const pieceColor = userDataNow.color;
     const newPieceData = [...pieceData];
-    console.log(userData, userNow, pieceData, setData, setPlayerNow, resetGame, id)
+    // console.log(userData, userNow, pieceData, setData, setPlayerNow, resetGame, id)
     if (!newPieceData[id].pieceColor) { //if not be set piece
       newPieceData[id] = {
         user: userNow,

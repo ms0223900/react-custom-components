@@ -1,19 +1,20 @@
 /* eslint-disable no-unused-vars */
-import React, { useState, useCallback, useEffect } from 'react'
+import React, { useState, useCallback, useEffect, useRef } from 'react'
 import { Button, Box, Paper, Typography, Container } from '@material-ui/core'
 import Board from './board'
 import Pieces from './pieces'
 import { socket } from './API';
 import { useStyles } from './styles'
 import { handleAddInRoomAndSetReady } from './API'
-import { piecesData_mockData } from './config'
+import { piecesData_mockData, singlePlayerUsername } from './config'
 import UserInfo from './userInfo'
 import { useResetGame, useHandleSetData } from './hookFn';
 import ChatRoom from './chat/chatRoom';
 import { randomPiece } from './fn'
 import Timer from '../Timer';
+import { aiRival } from './pcAI';
 
-const FastMatch = ({ className, setDataFns }) => {
+const FastMatch = ({ className, setDataFns, setSinglePlayFn }) => {
   const [setUserNow, setUserData, handleSetGameStart] = setDataFns
   return (
     <Paper className={ className }>
@@ -25,17 +26,23 @@ const FastMatch = ({ className, setDataFns }) => {
       >
         { 'fast match' }
       </Button>
+      <Button onClick={ setSinglePlayFn }>
+        { 'Single Play' }
+      </Button>
     </Paper>
   )
 }
 
 const App = () => {
   const classes = useStyles()
+  const timerRef = useRef()
+  // const [pieceInfo, setPieceInfo] = useState(null)
   const [pieceData, setData] = useState(piecesData_mockData)
   const [userData, setUserData] = useState(null)
   const [userNow, setUserNow] = useState(null)
   const [playerNow, setPlayerNow] = useState('Player01')
   const [gameStart, setGameStart] = useState(false)
+  const [isSinglePlay, setSinglePlay] = useState(false)
   //
   const leaveGame = useCallback((userNow) => {
     const { roomId } = userData[0]
@@ -50,6 +57,7 @@ const App = () => {
   }, [userData])
   const resetGame = useResetGame(userData, setGameStart)
   const handleSetData = useHandleSetData(userData, userNow, pieceData, setData, setPlayerNow, resetGame)
+  const handleSetData_pc = useHandleSetData(userData, 'PC', pieceData, setData, setPlayerNow, resetGame)
   const handleSetRandomPiece = () => {
     window.alert('time out!')
     const randomPieceId = randomPiece(pieceData)
@@ -59,6 +67,17 @@ const App = () => {
   const handleSetGameStart = () => {
     socket.emit('set_game', true)
     // setGameStart(true)
+  }
+  const handleSetSinglePlay = () => {
+    const username = singlePlayerUsername
+    setGameStart(true)
+    setUserData([
+      { username, color: 'black', roomId: 'single play' },
+      { username: 'PC', color: 'white', roomId: 'single play' },
+    ])
+    setPlayerNow(username)
+    setUserNow(username)
+    setSinglePlay(true)
   }
   //
   useEffect(() => {
@@ -100,6 +119,16 @@ const App = () => {
       })
     }
   }, [userData, userNow])
+  useEffect(() => {
+    if(isSinglePlay) {
+      if(playerNow !== singlePlayerUsername) {
+        const pcId = aiRival(pieceData, userNow, 'black')
+        console.log(pcId)
+        handleSetData_pc(pcId)
+      }
+    }
+    timerRef.current && timerRef.current.resetTimer()
+  }, [pieceData])
   //
   const isWaiting = userNow && !gameStart
   console.log(userNow, gameStart)
@@ -113,13 +142,17 @@ const App = () => {
             userData={ userData } 
           />
           <Timer 
-            time={ 2 } 
+            ref={ timerRef }
+            time={ 2000 } 
             timeoutFn={ handleSetRandomPiece } 
             isPause={ playerNow !== userNow }
           />
             <Box display={ 'flex' } className={ classes.gameMainPart }>
               <Board>
-                <Pieces setPiece={ playerNow === userNow && handleSetData }  pieceData={ pieceData } />
+                <Pieces 
+                  // setPieceInfo={ setPieceInfo }
+                  setPiece={ playerNow === userNow && handleSetData }
+                  pieceData={ pieceData } />
               </Board>
               <ChatRoom 
                 userData={ userData }
@@ -145,7 +178,8 @@ const App = () => {
       {!gameStart && (
         <FastMatch 
           className={ classes.matchPart }
-          setDataFns={ [setUserNow, setUserData, handleSetGameStart] }  />
+          setDataFns={ [setUserNow, setUserData, handleSetGameStart] }setSinglePlayFn={ handleSetSinglePlay }  
+        />
       )}
     </div>
   )

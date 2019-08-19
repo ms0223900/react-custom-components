@@ -1,5 +1,7 @@
 /* eslint-disable quotes */
 export const cellSize = 35
+export const singlePlayerUsername = 'Player'
+
 
 export const piecesData_mockData = [...Array(14 * 14).keys()].map(k => ({
   user: null, pieceId: k, pieceColor: null

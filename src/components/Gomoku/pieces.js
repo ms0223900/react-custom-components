@@ -16,7 +16,7 @@ const useStyles = makeStyles({
   },
 })
 
-const Pieces = ({ pieceData, setPiece }) => {
+const Pieces = ({ pieceData, setPiece, setPieceInfo }) => {
   const classes = useStyles()
   return (
     <div className={ classes.root }>
@@ -25,6 +25,7 @@ const Pieces = ({ pieceData, setPiece }) => {
           key={ piece.pieceId }
           id={ piece.pieceId }
           setPiece={ setPiece }
+          setPieceInfo={ setPieceInfo }
           blackOrWhite={ piece.pieceColor } />
       ))}
     </div>

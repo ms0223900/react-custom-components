@@ -9,6 +9,8 @@ const checkIds_ArrInArr = (arr1=[], arr2=[]) => {
   })
   return count === amount
 }
+//14pieces per row
+export const piece8Directions = [-15, -14, -13, -1, 1, 13, 14, 15]
 
 export const checkWhoWin = (pieceData, user='') => {
   const array5 = [...Array(5).keys()]

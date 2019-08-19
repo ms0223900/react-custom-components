@@ -29,10 +29,11 @@ const useStyles = makeStyles({
   },
 })
 
-const SinglePiece = ({ id, setPiece, blackOrWhite }) => {
+const SinglePiece = ({ id, setPiece, blackOrWhite, setPieceInfo }) => {
   const classes = useStyles({ blackOrWhite })
   return (
     <div
+      // onMouseEnter={ () => setPieceInfo(id) }
       onClick={ setPiece ? setPiece.bind(this, id) : null } 
       className={ classes.root } />
   )

@@ -77,3 +77,7 @@ export const randomPiece = (pieceData) => {
   const randomPiece = emptyPieces[randomIndex]
   return randomPiece.pieceId
 }
+
+export const getIndexBetweenNums = (num=0, arr=[]) => {
+  return arr.findIndex(a => a > num) - 1
+}

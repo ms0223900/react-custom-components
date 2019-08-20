@@ -1,37 +1,15 @@
 /* eslint-disable no-unused-vars */
 import React, { useState, useCallback, useEffect, useRef } from 'react'
-import { Button, Box, Paper, Typography, Container } from '@material-ui/core'
-import Board from './board'
-import Pieces from './pieces'
-import { socket } from './API';
+import { Typography } from '@material-ui/core'
+import { socket, getSpecificGomokuRoom } from './API';
 import { useStyles } from './styles'
-import { handleAddInRoomAndSetReady } from './API'
 import { piecesData_mockData, singlePlayerUsername } from './config'
-import UserInfo from './userInfo'
 import { useResetGame, useHandleSetData } from './hookFn';
-import ChatRoom from './chat/chatRoom';
 import { randomPiece } from './fn'
-import Timer from '../Timer';
 import { aiRival } from './pcAI';
-
-const FastMatch = ({ className, setDataFns, setSinglePlayFn }) => {
-  const [setUserNow, setUserData, handleSetGameStart] = setDataFns
-  return (
-    <Paper className={ className }>
-      <Typography variant={'h3'}>{'GOMOKU BATTLE'}</Typography>
-      <Button 
-        variant={ 'contained' } 
-        color={ 'primary' } 
-        onClick={ () => handleAddInRoomAndSetReady(setUserNow, setUserData, handleSetGameStart) }
-      >
-        { 'fast match' }
-      </Button>
-      <Button onClick={ setSinglePlayFn }>
-        { 'Single Play' }
-      </Button>
-    </Paper>
-  )
-}
+import NavBar from './loginSignIn/navBar';
+import GameMainPart from './components/gameMainPart'
+import FastMatch from './components/fastMatch'
 
 const App = () => {
   const classes = useStyles()
@@ -66,7 +44,6 @@ const App = () => {
   //
   const handleSetGameStart = () => {
     socket.emit('set_game', true)
-    // setGameStart(true)
   }
   const handleSetSinglePlay = () => {
     const username = singlePlayerUsername
@@ -86,9 +63,6 @@ const App = () => {
     socket.on('get_game', res => {
       console.log('get_game', res)
       setGameStart(res)
-      console.log('clearTimeout')
-      socket.emit('clear_timeout')
-      //reset game 
       if(!res) {
         resetGame(false)
         socket.emit('leave', false)
@@ -108,6 +82,19 @@ const App = () => {
       setUserData(null);
       setUserNow(null);
     }
+    if(userData) {
+      const { roomId } = userData[0]
+      roomId !== 'single play' && 
+      getSpecificGomokuRoom(roomId)
+        .then(res => {
+          const { user1, user2 } = res
+          setUserData([
+            { username: user1, color: 'black', roomId, },
+            { username: user2, color: 'white', roomId, },
+          ])
+        })
+    }
+    
   }, [gameStart])
   useEffect(() => {
     if(userData && userNow) {
@@ -133,42 +120,19 @@ const App = () => {
   const isWaiting = userNow && !gameStart
   console.log(userNow, gameStart)
   return (
-    <div>
+    <div style={{ marginTop: 60, }}>
       {gameStart && (
-        <Container>
-          <UserInfo 
-            userNow={ userNow }
-            playerNow={ playerNow }
-            userData={ userData } 
-          />
-          <Timer 
-            ref={ timerRef }
-            time={ 2000 } 
-            timeoutFn={ handleSetRandomPiece } 
-            isPause={ playerNow !== userNow }
-          />
-            <Box display={ 'flex' } className={ classes.gameMainPart }>
-              <Board>
-                <Pieces 
-                  // setPieceInfo={ setPieceInfo }
-                  setPiece={ playerNow === userNow && handleSetData }
-                  pieceData={ pieceData } />
-              </Board>
-              <ChatRoom 
-                userData={ userData }
-                userNow={ userNow }
-              >
-                <Button 
-                  onClick={ leaveGame.bind(this, userNow) }
-                >
-                  { 'exit game' }
-                </Button>
-                <Button onClick={ handleSetRandomPiece }>
-                  { 'set random piece' }
-                </Button>
-              </ChatRoom>
-            </Box>
-        </Container>
+        <GameMainPart 
+          classes={ classes }
+          userNow={ userNow }
+          playerNow={ playerNow }
+          userData={ userData }
+          timerRef={ timerRef }
+          handleSetRandomPiece={ handleSetRandomPiece }
+          handleSetData={ handleSetData }
+          pieceData={ pieceData }
+          leaveGame={ leaveGame }
+        />
       )}
       {isWaiting && (
         <Typography variant={ 'h5' }>
@@ -178,9 +142,11 @@ const App = () => {
       {!gameStart && (
         <FastMatch 
           className={ classes.matchPart }
-          setDataFns={ [setUserNow, setUserData, handleSetGameStart] }setSinglePlayFn={ handleSetSinglePlay }  
+          setDataFns={ [setUserNow, setUserData, handleSetGameStart] }
+          setSinglePlayFn={ handleSetSinglePlay }  
         />
       )}
+      <NavBar />
     </div>
   )
 }

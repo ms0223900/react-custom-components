@@ -1,17 +1,30 @@
 import { useCallback } from 'react'
-import { updateGomokuRoomState, socket } from './API';
-import { checkWhoWin } from './fn';
+import { updateGomokuRoomState, socket, updateUser } from './API';
+import { checkWhoWin, getIndexBetweenNums } from './fn';
+import { pointPerRound_PC, pointPerRound_realRival, ranksPoints } from './config';
 
+const updatePointAndRank = (isRealRival) => {
+  const id = localStorage.getItem('userDBid')
+  if(id) {
+    const point = localStorage.getItem('point')
+    const newPoint = isRealRival ? point + pointPerRound_realRival : point + pointPerRound_PC
+    const newRank = getIndexBetweenNums(newPoint, ranksPoints)
+    updateUser(id, newPoint, newRank)
+  }
+}
 
 export function useResetGame(userData, setGameStart) {
   return useCallback((userNow, winner) => {
     if (winner) {
-      const resultMes = userNow === winner && winner !== 'PC' ? 'You Win!!!' : 'You Lose :(...'
+      const winRes = userNow === winner && winner !== 'PC'
+      const resultMes = winRes ? 'You Win!!!' : 'You Lose :(...'
+      winRes && updatePointAndRank()
+      //
       console.log(winner, userData);
       setTimeout(() => {
         window.alert(resultMes);
         setGameStart(false)
-      }, 1000)
+      }, 500)
     }
     //clear room data 
     if (userData) {

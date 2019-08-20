@@ -13,8 +13,9 @@ export const strapi = new Strapi(apiUrl)
 
 export const createGomokuRoom = () => {
   const users = getRandomUser()
+  const username = localStorage.getItem('username')
   return strapi.createEntry('gomokus', {
-    user1: users[0],
+    user1: username ? username : users[0],
     user2: users[1],
   })
   .then(res => {
@@ -35,12 +36,14 @@ export const getSpecificGomokuRoom = (id) => (
   strapi
     .getEntry('gomokus', id)
     .then(res => {
-      console.log(res)
+      console.log(id, res)
       return res
     })
 )
-export const updateGomokuRoomState = (id, user1_isReady=false, user2_isReady=false, roomIsFull=false) => (
+export const updateGomokuRoomState = (id, user1_isReady=false, user2_isReady=false, roomIsFull=false, user1, user2) => (
   id && strapi.updateEntry('gomokus', id, {
+    user1,
+    user2,
     user1_isReady,
     user2_isReady,
     roomIsFull,
@@ -63,8 +66,9 @@ export const getChatByRoomId = async (roomId) => {
 }
 
 export const handleAddInRoomAndSetReady = async (setUserNowFn, setUserDataFn, setGameStartFn) => {
-  const setFirstPlayerAndTimeoutExit = (id, user1) => {
-    updateGomokuRoomState(id, true, false, false)
+  const username = localStorage.getItem('username')
+  const setFirstPlayerAndTimeoutExit = (id, user1, user2) => {
+    updateGomokuRoomState(id, true, false, false, user1, user2)
       .then(res => {
         console.log(user1, res)
         setUserNowFn(user1)
@@ -76,26 +80,39 @@ export const handleAddInRoomAndSetReady = async (setUserNowFn, setUserDataFn, se
   if(emptyRoom) {
     const { id, user1, user2 } = emptyRoom
     socket.emit('join', id)
-    setUserDataFn([
-      { username: user1, color: 'black', roomId: id },
-      { username: user2, color: 'white', roomId: id },
-    ])
     //set your user
+    setUserDataFn([
+      { username: null, color: 'black', roomId: id },
+      { username: null, color: 'white', roomId: id },
+    ])
     if(!emptyRoom.user1_isReady) { //set user to user1
-      setFirstPlayerAndTimeoutExit(id, user1)
+      const user = username ? username : user1
+      setFirstPlayerAndTimeoutExit(id, user, user2)
+      // setUserDataFn([
+      //   { username: user, color: 'black', roomId: id },
+      //   { username: user2, color: 'white', roomId: id },
+      // ])
     } else {
       //set user to user2 and start game
-      updateGomokuRoomState(id, true, true, true) 
+      const user = username ? username : user2
+      updateGomokuRoomState(id, true, true, true, user1, user) 
         .then(res => {
-          console.log(user2, res)
-          setUserNowFn(user2)
+          console.log(user, res)
+          setUserNowFn(user)
           setGameStartFn()
         })
+      // setUserDataFn([
+      //   { username: user1, color: 'black', roomId: id },
+      //   { username: user, color: 'white', roomId: id },
+      // ])
+      // //user1 need update user2 username if user2 is logged in
+      // socket.emit('update_user2Data', { username: user, color: 'white', roomId: id })
     }
   } else {
     //create a room 
     createGomokuRoom()
       .then(res => {
+        //user1 is created or form localstorage
         const { id, user1, user2 } = res
         socket.emit('join', id)
         setUserDataFn([
@@ -106,3 +123,46 @@ export const handleAddInRoomAndSetReady = async (setUserNowFn, setUserDataFn, se
       })
   }
 }
+
+const setToLS = (id, username, point, rank) => {
+  localStorage.setItem('userDBid', id)
+  localStorage.setItem('username', username)
+  localStorage.setItem('point', point)
+  localStorage.setItem('rank', rank)
+}
+
+export const singUp = (username, email, pwd, setErr) => (
+  strapi
+    .register(username, email, pwd)
+    .then(res => {
+      console.log(res)
+      // localStorage.setItem('username', username)
+      const { id, username, point, rank } = res.user
+      setToLS(id, username, point, rank)
+      // window.history.back()
+      location.reload()
+    })
+    .catch(e => {
+      setErr(e.message)
+    })
+)
+export const logIn = (username, pwd, setErr) => (
+  strapi
+    .login(username, pwd)
+    .then(res => {
+      console.log(res)
+      const { id, username, point, rank } = res.user
+      setToLS(id, username, point, rank)
+      location.reload()
+    })
+    .catch(e => {
+      setErr(e.message)
+    }) 
+)
+export const updateUser = (id, point, rank) => (
+  strapi
+    .updateEntry('users', id, {
+      point,
+      rank,
+    })
+)

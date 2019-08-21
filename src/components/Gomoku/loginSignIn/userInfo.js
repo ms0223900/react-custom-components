@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react'
+import React, { useContext } from 'react'
 import { Paper, Typography, makeStyles } from '@material-ui/core';
+import ContextStore from '../lib/context'
 
 const useStyles = makeStyles({
   root: {
@@ -7,23 +8,9 @@ const useStyles = makeStyles({
   }
 })
 
-const UserInfo = () => {
+const UserInfo = ({ userInfo }) => {
   const classes = useStyles()
-  const [pointAndRank, setPtAndRk] = useState({
-    point: null,
-    rank: null
-  })
-  useEffect(() => {
-    //init
-    const point = localStorage.getItem('point')
-    const rank = localStorage.getItem('rank')
-    setPtAndRk({
-      point,
-      rank
-    })
-  }, [])
-  //
-  const { point, rank } = pointAndRank
+  const { point, rank } = userInfo
   return (
     <Paper className={ classes.root }>
       <Typography variant={ 'subtitle1' }>
@@ -37,4 +24,9 @@ const UserInfo = () => {
     </Paper>
   )
 }
-export default UserInfo
+export default () => {
+  const { userInfo } = useContext(ContextStore)
+  return (
+    <UserInfo userInfo={ userInfo } />
+  )
+}

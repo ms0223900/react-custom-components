@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
-import React, { useState, useCallback, useEffect, useRef } from 'react'
+import React, { useState, useCallback, useEffect, useRef, useContext } from 'react'
 import { Typography } from '@material-ui/core'
-import { socket, getSpecificGomokuRoom } from './API';
+import { socket, getSpecificGomokuRoom, updateUser } from './API';
 import { useStyles } from './styles'
 import { piecesData_mockData, singlePlayerUsername } from './config'
 import { useResetGame, useHandleSetData } from './hookFn';
@@ -10,8 +10,10 @@ import { aiRival } from './pcAI';
 import NavBar from './loginSignIn/navBar';
 import GameMainPart from './components/gameMainPart'
 import FastMatch from './components/fastMatch'
+import ContextStore, { ContextValue } from './lib/context'
 
 const App = () => {
+  const { setUserInfo } = useContext(ContextStore)
   const classes = useStyles()
   const timerRef = useRef()
   // const [pieceInfo, setPieceInfo] = useState(null)
@@ -33,7 +35,7 @@ const App = () => {
       resetGame(false)
     }
   }, [userData])
-  const resetGame = useResetGame(userData, setGameStart)
+  const resetGame = useResetGame(userData, setGameStart, setUserInfo)
   const handleSetData = useHandleSetData(userData, userNow, pieceData, setData, setPlayerNow, resetGame)
   const handleSetData_pc = useHandleSetData(userData, 'PC', pieceData, setData, setPlayerNow, resetGame)
   const handleSetRandomPiece = () => {
@@ -151,5 +153,12 @@ const App = () => {
   )
 }
 
-export default App
+export default () => {
+  const value = ContextValue()
+  return (
+    <ContextStore.Provider value={ value }>
+      <App />
+    </ContextStore.Provider>
+  )
+}
 

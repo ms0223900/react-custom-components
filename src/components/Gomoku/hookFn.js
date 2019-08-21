@@ -3,22 +3,30 @@ import { updateGomokuRoomState, socket, updateUser } from './API';
 import { checkWhoWin, getIndexBetweenNums } from './fn';
 import { pointPerRound_PC, pointPerRound_realRival, ranksPoints } from './config';
 
-const updatePointAndRank = (isRealRival) => {
-  const id = localStorage.getItem('userDBid')
+const updatePointAndRank = (isRealRival, setUserInfoFn) => {
+  const id = JSON.parse(localStorage.getItem('userDBid'))
   if(id) {
-    const point = localStorage.getItem('point')
+    const point = JSON.parse(localStorage.getItem('point')) || 0
     const newPoint = isRealRival ? point + pointPerRound_realRival : point + pointPerRound_PC
     const newRank = getIndexBetweenNums(newPoint, ranksPoints)
     updateUser(id, newPoint, newRank)
+      .then(() => {
+        localStorage.setItem('point', newPoint)
+        localStorage.setItem('rank', newRank)
+        setUserInfoFn({
+          point: newPoint,
+          rank: newRank,
+        })
+      })
   }
 }
 
-export function useResetGame(userData, setGameStart) {
+export function useResetGame(userData, setGameStart, setUserInfo) {
   return useCallback((userNow, winner) => {
     if (winner) {
       const winRes = userNow === winner && winner !== 'PC'
       const resultMes = winRes ? 'You Win!!!' : 'You Lose :(...'
-      winRes && updatePointAndRank()
+      winRes && updatePointAndRank(false, setUserInfo)
       //
       console.log(winner, userData);
       setTimeout(() => {

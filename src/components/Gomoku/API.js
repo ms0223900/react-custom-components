@@ -165,4 +165,9 @@ export const updateUser = (id, point, rank) => (
       point,
       rank,
     })
+    .then(res => {
+      console.log('latest point and rank: ', res)
+      // window.alert('update point successful')
+      return res
+    })
 )

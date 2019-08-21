@@ -3,8 +3,8 @@ export const cellSize = 35
 export const singlePlayerUsername = 'Player'
 export const pointPerRound_PC = 100
 export const pointPerRound_realRival = pointPerRound_PC * 1.5
-//from 10 ~ 1
-export const ranksPoints = [0, 1000, 3000, 5000, 8000, 12000]
+//from 0 ~ 6
+export const ranksPoints = [0, 1000, 3000, 5000, 8000, 12000, 15000]
 
 
 export const piecesData_mockData = [...Array(14 * 14).keys()].map(k => ({

@@ -131,21 +131,40 @@ const setToLS = (id, username, point, rank) => {
   localStorage.setItem('rank', rank)
 }
 
-export const singUp = (username, email, pwd, setErr) => (
+export const getUser = (username) => (
   strapi
-    .register(username, email, pwd)
+    .getEntries('users', {
+      username,
+    })
     .then(res => {
       console.log(res)
-      // localStorage.setItem('username', username)
-      const { id, username, point, rank } = res.user
-      setToLS(id, username, point, rank)
-      // window.history.back()
-      location.reload()
-    })
-    .catch(e => {
-      setErr(e.message)
+      return res
     })
 )
+
+export const singUp = async (username, email, pwd, setErr) => {
+  try {
+    const sameUsername = await getUser(username)
+    if(sameUsername.length > 0) {
+      throw {
+        message: 'Username have been used!'
+      }
+    }
+    return strapi
+      .register(username, email, pwd)
+      .then(res => {
+        console.log(res)
+        // localStorage.setItem('username', username)
+        const { id, username, point, rank } = res.user
+        setToLS(id, username, point, rank)
+        // window.history.back()
+        location.reload()
+      })
+      .catch(e => setErr(e.message)) 
+  } catch (e) {
+    setErr(e.message)
+  }
+}
 export const logIn = (username, pwd, setErr) => (
   strapi
     .login(username, pwd)

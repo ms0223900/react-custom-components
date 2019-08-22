@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import React, { useState, useCallback, useEffect, useRef, useContext } from 'react'
 import { Typography } from '@material-ui/core'
-import { socket, getSpecificGomokuRoom, updateUser } from './API';
+import { socket, getSpecificGomokuRoom, updateUser, getUser } from './API';
 import { useStyles } from './styles'
 import { piecesData_mockData, singlePlayerUsername } from './config'
 import { useResetGame, useHandleSetData } from './hookFn';

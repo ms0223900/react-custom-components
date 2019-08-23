@@ -49,10 +49,11 @@ export const updateGomokuRoomState = (id, user1_isReady=false, user2_isReady=fal
     roomIsFull,
   })
 )
-export const updateChat = async (id, username, chatContent) => {  
+export const updateChat = async (id, username, chatContent, type='text') => {  
   return strapi
     .createEntry('chats', {
       roomId: id,
+      type,
       username,
       chatContent
     })
@@ -188,5 +189,17 @@ export const updateUser = (id, point, rank) => (
       console.log('latest point and rank: ', res)
       // window.alert('update point successful')
       return res
+    })
+)
+export const getEmotes = () => (
+  strapi
+    .getEntries('emotes')
+    .then(res => {
+      console.log('emotes: ', res)
+      return res.map(r => ({
+        id: r.id,
+        emoteName: r.emoteName,
+        imgSrc: apiUrl + r.emoteImg.url
+      }))
     })
 )

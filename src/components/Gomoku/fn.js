@@ -68,7 +68,7 @@ export const getRandomUser = () => {
 }
 
 export const scrollToBottom = el => {
-  el && el.scrollIntoView({behavior: 'instant', block: 'end', inline: 'nearest'})
+  el && el.scrollIntoView({ behavior: 'instant', block: 'end', inline: 'end' })
 }
 
 export const randomPiece = (pieceData) => {

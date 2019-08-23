@@ -1,9 +1,21 @@
 import React, { useCallback } from 'react'
-import { TextField, Button, Box } from '@material-ui/core';
+import TagFaces from '@material-ui/icons/TagFaces'
+import { TextField, Button, Box, makeStyles } from '@material-ui/core';
 import { updateChat } from '../API';
 
+const useStyles = makeStyles({
+  root: {
+    position: 'relative',
+    paddingTop: 6,
+  },
+  buttonArea: {
+    padding: 6,
+    textAlign: 'right',
+  }
+})
 
-const ChatInput = ({ username, setLatestChat, roomId }) => {
+const ChatInput = ({ username, setLatestChat, roomId, openEmoteFn, ...props }) => {
+  const classes = useStyles()
   const [value, setValue] = React.useState('')
   const handleChange = e => {
     const { value } = e.target
@@ -14,24 +26,32 @@ const ChatInput = ({ username, setLatestChat, roomId }) => {
   }
   const handleSendMes = useCallback(() => {
     if(value.length > 0) {
-      updateChat(roomId, username, value)
+      roomId && updateChat(roomId, username, value, 'text')
       setLatestChat(value)
       setValue('')
     }
   }, [username, value, roomId])
   return (
-    <Box style={{ padding: 10 }}>
+    <Box className={ classes.root }>
       <TextField 
         value={ value } 
+        style={{ backgroundColor: '#fff', width: '100%', }}
         placeholder={ 'say something' } 
+        variant={ 'outlined' }
         onKeyUp={ handleSendByKey }
         onChange={ handleChange } />
-      <Button 
-        disabled={ value.length === 0 }
-        variant={ 'contained' } 
-        onClick={ handleSendMes }>
-        { 'send' }
-      </Button>
+      <Box className={ classes.buttonArea }>
+        <Button onClick={ openEmoteFn }>
+          <TagFaces />
+        </Button>
+        <Button 
+          disabled={ value.length === 0 }
+          variant={ 'contained' } 
+          onClick={ handleSendMes }>
+          { 'send' }
+        </Button>
+      </Box>
+      { props.children }
     </Box>
   )
 }

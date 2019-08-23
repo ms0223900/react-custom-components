@@ -1,3 +1,13 @@
+import littleKumaImg from '../../images/sticker-littleKuma.png'
+import emoteThankYou from '../../images/emote-thank-you.png'
+import emoteHiThere from '../../images/emote-hi-there.png'
+import emoteRu87 from '../../images/emote-ru-87.png'
+import emoteRuRdrrC from '../../images/emote-ru-rdrrC.png'
+
+
+
+
+
 /* eslint-disable quotes */
 export const cellSize = 35
 export const singlePlayerUsername = 'Player'
@@ -20,32 +30,61 @@ export const userData_mockData = [
 export const chatData_mockData = [
   {
     "id": 0,
+    "type": "text",
     "username": "penguin_541",
     "chatContent": "hi!"
   },
   {
     "id": 1,
+    "type": "text",
     "username": "sloth_3511",
     "chatContent": "good morning!"
   },
   {
     "id": 2,
+    "type": "text",
     "username": "penguin_541",
     "chatContent": "hi!"
   },
   {
     "id": 3,
+    "type": "text",
     "username": "sloth_3511",
     "chatContent": "good morning!"
   },
   {
     "id": 4,
+    "type": "text",
     "username": "penguin_541",
     "chatContent": "hi!"
   },
   {
     "id": 5,
+    "type": "emote",
     "username": "sloth_3511",
-    "chatContent": "good morning!"
+    "chatContent": littleKumaImg
+  },
+]
+
+export const emoteData_mockData = [
+  {
+    "id": 0,
+    "emoteName": 'thank-you',
+    "imgSrc": emoteThankYou
+  },
+  {
+    "id": 1,
+    "emoteName": 'hi-there',
+    "imgSrc": emoteHiThere
+  },
+  {
+    "id": 2,
+    "emoteName": 'ru-87',
+    "imgSrc": emoteRu87
+  },
+  {
+    "id": 3,
+    "emoteName": 'ru-rdrrC',
+    "imgSrc": emoteRuRdrrC
   },
 ]

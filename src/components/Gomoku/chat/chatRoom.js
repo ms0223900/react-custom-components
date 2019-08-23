@@ -5,16 +5,26 @@ import ChatInput from './chatInput'
 import { getChatByRoomId, socket } from '../API'
 import { makeStyles } from '@material-ui/styles';
 import { scrollToBottom } from '../fn';
+import EmotePopup from './emotePopup';
 
 const useStyles = makeStyles({
   root: {
+    position: 'fixed',
+    top: 60,
+    right: 0,
+    bottom: 0,
     width: 260,
     padding: 6,
+    margin: 'auto',
     borderRadius: 6,
     backgroundColor: '#eee',
   }, 
+  chatContainer: {
+    flexDirection: 'column',
+    height: '100%'
+  },
   chatArea: {
-    height: 400,
+    height: 1000,
     borderRadius: 6,
     backgroundColor: '#fff',
     overflowY: 'auto',
@@ -35,6 +45,7 @@ const ChatRoom = ({ userData, userNow, chatData_mock=[], ...props }) => {
   const classes = useStyles()
   const [chatData, setChatData] = useState(chatData_mock)
   const [latestChat, setLatestChat] = useState(null)
+  const [emoteDisplay, setEmoteDisplay] = useState(false)
   useEffect(() => {
     async function getData(){
       const data = await getChatData(userData)
@@ -47,20 +58,22 @@ const ChatRoom = ({ userData, userNow, chatData_mock=[], ...props }) => {
     console.log(roomRef.current)
   }
   
-  const handleSetLocalLatestChat = useCallback(val => {
+  const handleSetLocalLatestChat = useCallback((val, type='text') => {
     const latestChat = {
       id: chatData.length,
       username: userNow,
+      type,
       chatContent: val
     }
     setChatData([
       ...chatData,
       latestChat
     ])
-  }, [userNow, chatData])
+    setEmoteDisplay(false)
+  }, [userNow, chatData, userData])
   //
   useEffect(() => {
-    scrollToBottom(roomRef.current)
+    // scrollToBottom(roomRef.current)
     //register socket
     socket.on('get_chat', res => {
       console.log(res, 'socket get chat')
@@ -84,29 +97,41 @@ const ChatRoom = ({ userData, userNow, chatData_mock=[], ...props }) => {
   console.log(chatData)
   return (
     <Box className={ classes.root }>
-      <Box className={ classes.chatArea }>
-        <div ref={ setRef } >
-          {chatData ? (
-            chatData.map(data => {
-              const { id, username, chatContent } = data
-              return (
-                <ChatBubble 
-                  key={ id }
-                  username={ username }
-                  chatContent={ chatContent }
-                  isMe={ userNow === username } 
-                />
-              )
-            })
-          ) : (
-            'loading...'
-          )}
-        </div>
+      
+      <Box display={ 'flex' } className={ classes.chatContainer }>
+        <Box className={ classes.chatArea }>
+          <div ref={ setRef } >
+            {chatData ? (
+              chatData.map(data => {
+                const { id, username } = data
+                return (
+                  <ChatBubble 
+                    key={ id }
+                    isMe={ userNow === username } 
+                    { ...data }
+                  />
+                )
+              })
+            ) : (
+              'loading...'
+            )}
+          </div>
+        </Box>
+        <ChatInput 
+          username={ userNow }
+          roomId={ userData && userData[0].roomId }
+          setLatestChat={ handleSetLocalLatestChat }
+          roomId={ userData && userData[0].roomId }
+          openEmoteFn={() => setEmoteDisplay(!emoteDisplay)}
+        >
+          <EmotePopup 
+            username={ userNow }
+            roomId={ userData && userData[0].roomId }
+            emoteDisplay={ emoteDisplay }
+            setLatestEmoteChat={ handleSetLocalLatestChat }
+            closeFn={() => setEmoteDisplay(false)} />
+        </ChatInput>
       </Box>
-      <ChatInput 
-        username={ userNow }
-        setLatestChat={ handleSetLocalLatestChat }
-        roomId={ userData && userData[0].roomId } />
       {props.children}
     </Box>
   )

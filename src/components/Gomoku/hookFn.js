@@ -23,21 +23,19 @@ const updatePointAndRank = (isRealRival, setUserInfoFn) => {
 
 export function useResetGame(userData, setGameStart, setUserInfo) {
   return useCallback((userNow, winner) => {
-    if (winner) {
-      const winRes = userNow === winner && winner !== 'PC'
-      const resultMes = winRes ? 'You Win!!!' : 'You Lose :(...'
-      winRes && updatePointAndRank(false, setUserInfo)
-      //
-      console.log(winner, userData);
-      setTimeout(() => {
-        window.alert(resultMes);
-        setGameStart(false)
-      }, 500)
-    }
+    const winRes = userNow === winner && winner !== 'PC'
+    const resultMes = winRes ? 'You Win!!!' : 'You Lose :(...'
+    winRes && updatePointAndRank(false, setUserInfo)
+    //
+    console.log(winner, userData);
+    setTimeout(() => {
+      window.alert(resultMes);
+      setGameStart(false)
+    }, 500)
     //clear room data 
     if (userData) {
       const { roomId } = userData[0];
-      updateGomokuRoomState(roomId);
+      roomId !== 'single play' && updateGomokuRoomState(roomId);
     }
   }, [userData]);
 }

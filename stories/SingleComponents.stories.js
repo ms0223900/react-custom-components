@@ -4,6 +4,7 @@ import '../src/styles/style.scss'
 import ChatRoom from '../src/components/Gomoku/chat/chatRoom'
 import { chatData_mockData, userData_mockData } from '../src/components/Gomoku/config'
 import Timer from '../src/components/Timer';
+import GARAM from '../src/components/GARAM';
 
 storiesOf('single custom components', module)
   .add('chatRoom', () => (
@@ -14,4 +15,7 @@ storiesOf('single custom components', module)
   ))
   .add('timer', () => (
     <Timer />
+  ))
+  .add('GARAM', () => (
+    <GARAM />
   ))

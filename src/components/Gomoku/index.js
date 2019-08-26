@@ -28,10 +28,12 @@ const App = () => {
     const { roomId } = userData[0]
     const confirmMes = 'Are your sure leaving the game?'
     if(window.confirm(confirmMes)) {
-      socket.emit('leave', {
-        userNow,
-        roomId,
-      })
+      if(roomId !== 'single play') {
+        socket.emit('leave', {
+          userNow,
+          roomId,
+        })
+      }
       resetGame(false)
     }
   }, [userData])

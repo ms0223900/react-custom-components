@@ -124,6 +124,7 @@ const ChatRoom = ({ userData, userNow, chatData_mock=[], ...props }) => {
           roomId={ userData && userData[0].roomId }
           openEmoteFn={() => setEmoteDisplay(!emoteDisplay)}
         >
+          {props.children}
           <EmotePopup 
             username={ userNow }
             roomId={ userData && userData[0].roomId }
@@ -132,7 +133,7 @@ const ChatRoom = ({ userData, userNow, chatData_mock=[], ...props }) => {
             closeFn={() => setEmoteDisplay(false)} />
         </ChatInput>
       </Box>
-      {props.children}
+      
     </Box>
   )
 }

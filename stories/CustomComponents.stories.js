@@ -8,6 +8,7 @@ import WeatherAPI from '../src/components/WeatherAPI'
 import FreeCellGame from '../src/components/FreeCellGame'
 import Gomoku from '../src/components/Gomoku'
 import '../src/styles/style.scss'
+import GARAMGameRouter from '../src/components/GARAM/route';
 
 storiesOf('custom-components', module)
   .add('calendar', () => (
@@ -30,4 +31,7 @@ storiesOf('custom-components', module)
   ))
   .add('Gomoku', () => (
     <Gomoku />
+  ))
+  .add('GARAM', () => (
+    <GARAMGameRouter />
   ))

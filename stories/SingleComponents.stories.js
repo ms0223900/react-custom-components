@@ -5,6 +5,8 @@ import ChatRoom from '../src/components/Gomoku/chat/chatRoom'
 import { chatData_mockData, userData_mockData } from '../src/components/Gomoku/config'
 import Timer from '../src/components/Timer';
 import GARAM from '../src/components/GARAM';
+import GameFrame from '../src/components/GameFrame';
+import ResultContent from '../src/components/GARAM/resultContent';
 
 storiesOf('single custom components', module)
   .add('chatRoom', () => (
@@ -18,4 +20,10 @@ storiesOf('single custom components', module)
   ))
   .add('GARAM', () => (
     <GARAM />
+  ))
+  .add('Game Frame', () => (
+    <GameFrame />
+  ))
+  .add('GARAM with Game Frame', () => (
+    <GameFrame GameComponent={ GARAM } PopupComponent={ ResultContent } />
   ))

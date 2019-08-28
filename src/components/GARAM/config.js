@@ -6,7 +6,7 @@ export const primaryColor = '#0051ff'
 export const getDifficultyEmptyBlocks = (difficulty) => {
   switch (difficulty) {
     case 'easy':
-      return 8
+      return 4
     case 'medium':
       return 12
     case 'hard':
@@ -15,7 +15,7 @@ export const getDifficultyEmptyBlocks = (difficulty) => {
       return 8;
   }
 }
-
+export const gameModes = ['limitTime', 'speedMode']
 
 
 const getArrs = (arrCount, res=undefined) => (

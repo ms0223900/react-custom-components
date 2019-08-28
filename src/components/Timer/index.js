@@ -4,6 +4,7 @@ import { makeStyles } from '@material-ui/styles';
 
 const useStyles = makeStyles({
   root: {
+    display: 'inline-block',
     width: 90,
     margin: 10,
     padding: 10,
@@ -28,16 +29,16 @@ const mockFn = () => {
   window.alert('time out!')
 }
 
-const Timer = forwardRef(({ timeoutFn=mockFn, time=333, isPause }, ref) => {
+const Timer = ({ timeoutFn=mockFn, time=333, isPause, countDown=true }, ref) => {
   const classes = useStyles()
   const [timeNow, setTimeNow] = useState(time)
   useEffect(() => {
-    if(timeNow === 0) {
+    if(countDown && timeNow === 0) {
       timeoutFn()
       setTimeNow(time)
     }
     if(!isPause) {
-      const newTime = timeNow - 1
+      const newTime = countDown ? timeNow - 1 : timeNow + 1
       const timer = setTimeout(() => {
         setTimeNow(newTime)
       }, 1000)
@@ -48,6 +49,9 @@ const Timer = forwardRef(({ timeoutFn=mockFn, time=333, isPause }, ref) => {
   useImperativeHandle(ref, () => ({
     resetTimer() {
       setTimeNow(time)
+    },
+    getTimerTime() {
+      return timeNow
     }
   }))
   //
@@ -59,5 +63,5 @@ const Timer = forwardRef(({ timeoutFn=mockFn, time=333, isPause }, ref) => {
       </Typography>
     </Paper>
   )
-})
-export default Timer
+}
+export default forwardRef(Timer)

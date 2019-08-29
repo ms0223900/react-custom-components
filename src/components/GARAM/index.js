@@ -1,39 +1,21 @@
 /* eslint-disable no-unused-vars */
-import React, { useState, useCallback, useEffect, forwardRef, useRef } from 'react'
+import React, { useState, useCallback, forwardRef, useRef, useEffect } from 'react'
 import {
+  limitTimeModeTime,
   cellSize,
   getDifficultyEmptyBlocks,
+  getDifficultyByLevel,
+  getResultScoreStars,
 } from './config'
-import { Box, makeStyles, Paper, Button, Typography, Divider } from '@material-ui/core';
-import { getNumbersData, checkAnswer } from './fn'
-import SingleBlockItem from './singleBlockItem';
-import SingleOperationItem from './singleOperationItem';
+import { Box, makeStyles, Paper, Button, Typography, Divider, Select, MenuItem, FormControl, InputLabel } from '@material-ui/core';
 import Timer from '../Timer'
 import GaramMainGame from './garamMainGame';
-// console.log(getRandomNumberAndGetRandomFac(nums))
 
-const GaramHead = ({ classes, difficulty, setDiff }) => (
-  <Box display={ 'flex' } className={ classes.gameHead }>
-    <Box>
-      <Typography variant={ 'h4' }>{ 'GARAM' }</Typography>
-      <Typography variant={ 'subtitle1' }>{ 'difficulty: ' + difficulty }</Typography>
-    </Box>
-    <Box>
-      <Button 
-        variant={ 'contained' }
-        color={ difficulty === 'easy' ? 'primary' : 'default' }
-        onClick={ () => setDiff('easy') }>{ 'easy' }</Button>
-      <Button 
-        variant={ 'contained' }
-        color={ difficulty === 'medium' ? 'primary' : 'default' }
-        onClick={ () => setDiff('medium') }>{ 'medium' }</Button>
-      <Button 
-        variant={ 'contained' }
-        color={ difficulty === 'hard' ? 'primary' : 'default' }
-        onClick={ () => setDiff('hard') }>{ 'hard' }</Button>
-    </Box>
-  </Box>
-)
+const {
+  getSpeedModeResultContent,
+  getResultContent,
+  getMultiLevelResultStarContent
+} = getResultScoreStars
 
 
 const useStyles = makeStyles({
@@ -52,30 +34,43 @@ const useStyles = makeStyles({
     margin: '10px 0px',
     height: 1.5,
   },
+  chooseDiff: {
+    minWidth: 120,
+  }
 })
 
-const getSpeedModeResultContent = (difficulty, time) => {
-  const difficultyWeight = getDifficultyEmptyBlocks(difficulty)
-  const score = difficultyWeight * (difficultyWeight * 3 - time) * 100
-  return ({
-    level: 'no',
-    score,
-  })
+const DifficultySelects = ({ difficulty, changeFn }) => {
+  const classes = useStyles()
+  return (
+    <FormControl className={ classes.chooseDiff }>
+      <InputLabel htmlFor={'difficulty'}>{'difficulty'}</InputLabel>
+      <Select 
+      value={ difficulty }
+      onChange={ changeFn }
+      >
+        <MenuItem value={'easy'}>{'easy'}</MenuItem>
+        <MenuItem value={'medium'}>{'medium'}</MenuItem>
+        <MenuItem value={'hard'}>{'hard'}</MenuItem>
+      </Select>
+    </FormControl>
+    
+  )
 }
 
-const getResultContent = (level=0) => ({
+
+const GARAM = ({ 
+  mainGameRef, 
+  gameMode='speedMode', 
   level,
-  score: level * 1000,
-})
-
-
-const GARAM = ({ overFn, isOver, mainGameRef, gameMode='speedMode' }, ref) => {
+  overFn,
+  setLevelDataFn, 
+}, ref) => {
   const classes = useStyles()
   const timerRef = useRef()
-  // const [gameMode] = useState('limitTime')
   const [timerPause, setTimerPause] = useState(true)
   const [clearedLevel, setLevel] = useState(0)
-  const [difficulty, setDiff] = useState('easy')
+  const [difficulty, setDiff] = useState('')
+  
   const handleTimerOver = useCallback(() => {
     setTimerPause(true) //pause timer
     setLevel(0)
@@ -83,53 +78,93 @@ const GARAM = ({ overFn, isOver, mainGameRef, gameMode='speedMode' }, ref) => {
     timerRef && timerRef.current.resetTimer()
   }, [gameMode, clearedLevel])
 
-  const handleSpeedModeGameOver = useCallback(() => {
-    const time = timerRef.current.getTimerTime()
-    console.log(time)
-    overFn( getSpeedModeResultContent(difficulty, time) )
-    handleTimerOver()
-  }, [timerRef, difficulty])
+  const handleChange = e => {
+    const { value } = e.target
+    // console.log(value)
+    setDiff(value)
+  }
+
+  const handleStart = useCallback(() => {
+    if(!difficulty) {
+      window.alert('choose difficulty first~')
+    } else {
+      setTimerPause(!timerPause)
+    }
+  }, [difficulty, timerPause])
+
+  const handleGameOver = useCallback(() => {
+    if(gameMode === 'speedMode' || gameMode === 'multiLevel') {
+      const time = timerRef.current.getTimerTime()
+      console.log(time)
+      handleTimerOver()
+      if(gameMode === 'multiLevel') {
+        //set star result data 
+        const result = getMultiLevelResultStarContent(difficulty, level, time)
+        overFn(result)
+        setLevelDataFn(result)
+      } else {
+        overFn( getSpeedModeResultContent(difficulty, time) )
+      }
+    } 
+  }, [level, timerRef, gameMode])
+
+  //multi level set difficulty by level
+  useEffect(() => {
+    if(typeof(level) === 'number') {
+      const diff = getDifficultyByLevel(level)
+      setDiff(diff)
+    }
+    timerRef && timerRef.current.resetTimer()
+  }, [])
 
   //
   return (
     <Paper className={ classes.root }>
-      {gameMode === 'limitTime' ? (
-        <Timer 
-          ref={ timerRef }
-          time={ 3 } 
-          timeoutFn={ handleTimerOver } 
-          isPause={ timerPause } />
-      ) : (
-        <Timer 
-          ref={ timerRef }
-          time={ 0 } 
-          countDown={ false }
-          // timeoutFn={ handleTimerOver } 
-          isPause={ timerPause } />
+      {gameMode !== 'multiLevel' && (
+        <DifficultySelects 
+          difficulty={ difficulty }
+          changeFn={ handleChange } />
       )}
-      <Button onClick={() => setTimerPause(!timerPause)}>
-        {timerPause ? 'Start' : 'Pause'}
-      </Button>
-      {/* <Button onClick={() => {
-        console.log(timerRef.current)
-        const time = timerRef.current.getTimerTime()
-        window.alert(time)
-      }}>{'getTime'}</Button> */}
-      <Button onClick={ () => {
-        timerRef.current.resetTimer()
-      } }>{'reset'}</Button>
-      {/* <GaramHead 
-        classes={ classes } 
-        difficulty={ difficulty } 
-        setDiff={ setDiff } /> */}
-      <Typography>{ 'level cleared: ' + clearedLevel }</Typography>
+      <Box>
+        {gameMode === 'limitTime' ? (
+          <Timer 
+            ref={ timerRef }
+            time={ limitTimeModeTime } 
+            timeoutFn={ handleTimerOver } 
+            isPause={ timerPause } />
+        ) : (
+          <Timer 
+            ref={ timerRef }
+            time={ 0 } 
+            countDown={ false }
+            // timeoutFn={ handleTimerOver } 
+            isPause={ timerPause } />
+        )}
+        <Button onClick={ handleStart }>
+          {timerPause ? 'Start' : 'Pause'}
+        </Button>
+        <Button onClick={ () => {
+          timerRef.current.resetTimer()
+        } }>{'reset'}</Button>
+      </Box>
+
+      {gameMode === 'limitTime' && (
+        <Typography>{ 'level cleared: ' + clearedLevel }</Typography>
+      )}
+      {gameMode === 'multiLevel' && (
+        <Typography>
+          { 'level: ' + level }
+        </Typography>
+      )}
       <Divider className={ classes.divider } />
+
       <GaramMainGame 
         ref={ mainGameRef }
         gameMode={ gameMode }
+        difficulty={ difficulty }
         timerPause={ timerPause }
         setClearedLevelFn={ setLevel }
-        gameOverFn={ handleSpeedModeGameOver } />
+        gameOverFn={ handleGameOver } />
     </Paper>
   )
 }

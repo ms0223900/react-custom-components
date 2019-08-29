@@ -1,8 +1,10 @@
 /* eslint-disable no-unused-vars */
 import _ from 'lodash'
 
+export const limitTimeModeTime = 120
 export const cellSize = 50
 export const primaryColor = '#0051ff'
+export const gameModes = ['limitTime', 'speedMode', 'multiLevel']
 export const getDifficultyEmptyBlocks = (difficulty) => {
   switch (difficulty) {
     case 'easy':
@@ -15,7 +17,50 @@ export const getDifficultyEmptyBlocks = (difficulty) => {
       return 8;
   }
 }
-export const gameModes = ['limitTime', 'speedMode']
+export const getDifficultyByLevel = (level) => {
+  if(level <= 20) {
+    return 'easy'
+  } else if(level <= 40) {
+    return 'medium'
+  } else {
+    return 'hard'
+  }
+}
+//level score stars...
+export class getResultScoreStars {
+  static getSpeedModeResultContent = (difficulty, time) => {
+    const difficultyWeight = getDifficultyEmptyBlocks(difficulty)
+    const score = difficultyWeight * (difficultyWeight * 3 - time) * 100
+    return ({
+      level: 'no',
+      score,
+    })
+  }
+  static getResultContent = (level=0) => ({
+    level,
+    score: level * 1000,
+  })
+  static getStarByLevelAndTime = (level, time) => {
+    if(level <= 20) {
+      if(time <= 10) {
+        return 3
+      } else if(time <= 20) {
+        return 2
+      } else {
+        return 1
+      }
+    }
+    //...
+  }
+  static getMultiLevelResultStarContent = (difficulty, level, time) => {
+    return ({
+      level,
+      score: this.getSpeedModeResultContent(difficulty, time).score,
+      star: this.getStarByLevelAndTime(level, time)
+    })
+  }
+}
+
 
 
 const getArrs = (arrCount, res=undefined) => (
@@ -182,7 +227,7 @@ export const formatNumbers = (nums) => (
   })
 )
 
-export const randomBlankNumbers = (originNums, amountOfEmptyBlocks=8) => {
+export const randomBlankNumbers = (originNums, amountOfEmptyBlocks) => {
   let newNums = formatNumbers(originNums)
   let numbersIndexes = []
   let blankedNumbersForCheck = []

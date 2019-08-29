@@ -23,12 +23,17 @@ const GameResultPopup = ({ maxWidth=300, closeFn, nextFn, ...props }) => {
   )
 }
 
-const usePopup = (init=false) => {
+const usePopup = (init=false, setGameCoinFn) => {
   const [popup, setPopup] = useState(init)
   const [popupCnt, setCnt] = useState({})
   const open = useCallback((cnt) => {
     setCnt(cnt)
     setPopup(true)
+    const { score } = cnt
+    const coin = ~~(score / 100)
+    if(coin >= 0) {
+      setGameCoinFn(originCoin => parseInt(originCoin) + coin)
+    }
   }, [popup])
   const close = useCallback(() => {
     setPopup(false)
@@ -40,26 +45,37 @@ const usePopup = (init=false) => {
 }
 
 
-const GameFrame = ({ GameComponent, PopupComponent }) => {
+const GameFrame = ({ GameComponent, PopupComponent, resultNextFns=[], ...props }) => {
   const gameRef = useRef()
   const classes = useStyles_gameFrame()
-  const [popup, open, close, toggle, popupCnt] = usePopup()
+  const [gameCoin, setGameCoin] = useState(parseInt(localStorage.getItem('gameCoin')) || 0)
+  const [popup, open, close, toggle, popupCnt] = usePopup(false, setGameCoin)
   const handleOver = (resultContent) => {
     open(resultContent)
   }
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     close()
-    gameRef && gameRef.current.handleNext()
-  }
+    if(resultNextFns.length > 0) {
+      resultNextFns.forEach(fn => fn())
+      gameRef && gameRef.current.handleResetGame()
+    } else {
+      gameRef && gameRef.current.handleNext()
+    }
+  }, [resultNextFns])
+  useEffect(() => {
+    localStorage.setItem('gameCoin', gameCoin)
+  }, [gameCoin])
   // console.log(popupCnt)
   //
   return (
     <Box className={ classes.root }>
+      <Typography variant={'h5'}>{'game coin: ' + gameCoin }</Typography>
       {GameComponent && (
         <GameComponent 
           mainGameRef={ gameRef } 
           isOver={ popup } 
-          overFn={ handleOver } />
+          overFn={ handleOver }
+          {...props} />
       )}
       {popup && (
         <GameResultPopup closeFn={ close } nextFn={ handleNext }>

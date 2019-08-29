@@ -53,12 +53,22 @@ const getResultContent = (level=0) => ({
   score: level * 1000,
 })
 
+const getDataByDifficulty = (difficulty) => (
+  getNumbersData(getDifficultyEmptyBlocks(difficulty))
+)
 
-const GaramMainGame = ({ timerPause, gameMode='limitTime', gameOverFn, setClearedLevelFn }, ref) => {
+const GaramMainGame = ({ 
+  gameMode='limitTime', 
+  difficulty,
+  timerPause, 
+  gameOverFn, 
+  setClearedLevelFn 
+}, ref) => {
+  console.log(difficulty)
   const classes = useStyles()
   const [clearedLevel, setLevel] = useState(0)
-  const [difficulty] = useState('easy')
-  const [ allNumbersData, setData ] = useState(getNumbersData(getDifficultyEmptyBlocks(difficulty)))
+  // const [difficulty] = useState('easy')
+  const [ allNumbersData, setData ] = useState( getDataByDifficulty(difficulty) )
   const { operations, numbers, blankedNumbersForCheck } = allNumbersData
   const { opeRes_rowCenter, opeRes_columnCenter } = operations
   console.log(blankedNumbersForCheck)
@@ -87,11 +97,18 @@ const GaramMainGame = ({ timerPause, gameMode='limitTime', gameOverFn, setCleare
     }
   }, [allNumbersData])
 
+  const handleSetData = useCallback(() => {
+    setData(getDataByDifficulty(difficulty))
+  }, [difficulty])
+
   const handleNextGaram = useCallback(() => {
-    const emptyBlocksAmount = getDifficultyEmptyBlocks(difficulty)
     setClearedLevelFn(lvl => lvl + 1)
-    setData(getNumbersData(emptyBlocksAmount))
+    handleSetData()
   }, [clearedLevel, difficulty])
+
+  useEffect(() => {
+    handleSetData()
+  }, [difficulty])
 
   //check answer
   useEffect(() => {
@@ -100,9 +117,9 @@ const GaramMainGame = ({ timerPause, gameMode='limitTime', gameOverFn, setCleare
     if(checkResult) {
       // overFn(resultContent_mockData)
       //game mode 
-      if(gameMode === 'speedMode') {
+      if(gameMode === 'speedMode' || gameMode === 'multiLevel') {
         gameOverFn( getResultContent(clearedLevel) )
-      } else {
+      } else if(gameMode === 'limitTime') {
         handleNextGaram()
       }
       
@@ -112,8 +129,8 @@ const GaramMainGame = ({ timerPause, gameMode='limitTime', gameOverFn, setCleare
     handleNext: () => {
       handleNextGaram()
       setLevel(0)
-      window.alert('next!')
-    }
+    },
+    handleResetGame: handleSetData,
   }))
   //
   return (
@@ -131,7 +148,9 @@ const GaramMainGame = ({ timerPause, gameMode='limitTime', gameOverFn, setCleare
       {!timerPause && (
         <Box className={ classes.numberBlocks }>
           {numbers.map((data, i) => {
-            const { type, number } = data
+            // console.log(data)
+            const { type, number, answer } = data
+            const isCorrect = parseInt(answer) === parseInt(number)
             return (
               <SingleBlockItem 
                 key={ i }
@@ -139,6 +158,7 @@ const GaramMainGame = ({ timerPause, gameMode='limitTime', gameOverFn, setCleare
                 type={ type }
                 number={ number }
                 isBlock={ false }
+                isCorrect={ isCorrect }
                 setBlankInput={ handleBlankInput } />
             )
           })}

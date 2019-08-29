@@ -20,7 +20,13 @@ const useStyles = makeStyles({
   tableCell: {
     ...basicBlockStyle,
     border: props => props.isBlock ? '1px solid #aaa' : 'none',
-    backgroundColor: props => props.isBlock ? '#fff' : 'transparent',
+    backgroundColor: props => {
+      if(props.isCorrect) {
+        return '#83cff2'
+      } else {
+        return props.isBlock ? '#fff' : 'transparent'
+      }
+    },
     fontSize: 32,
     fontWeight: 200,
     // userSelect: 'initial',
@@ -44,8 +50,15 @@ const useStyles = makeStyles({
   }
 })
 
-const SingleBlockItem = ({ index, type, number, isBlock, setBlankInput }) => {
-  const classes = useStyles({ isBlock })
+const SingleBlockItem = ({ 
+  index, 
+  type, 
+  number, 
+  isBlock, 
+  isCorrect,
+  setBlankInput 
+}) => {
+  const classes = useStyles({ isBlock, isCorrect })
   return (
     <Box className={ classes.tableCell }>
       { type === 'blanked' ? (

@@ -6,6 +6,7 @@ import ComicViewer from './components/ComicViewer'
 import SUDOKU from './components/SUDOKU'
 import WeatherAPI from './components/WeatherAPI'
 import TomatoTimer from './components/TomatoTimer'
+import GARAMGameRouter from './components/GARAM/route';
 
 export default () => {
 
@@ -16,7 +17,8 @@ export default () => {
       {/* <ComicViewer /> */}
       {/* <SUDOKU /> */}
       {/* <WeatherAPI /> */}
-      <TomatoTimer />
+      {/* <TomatoTimer /> */}
+      <GARAMGameRouter />
     </div>
   )
 }

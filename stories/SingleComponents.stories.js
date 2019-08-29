@@ -6,7 +6,8 @@ import { chatData_mockData, userData_mockData } from '../src/components/Gomoku/c
 import Timer from '../src/components/Timer';
 import GARAM from '../src/components/GARAM';
 import GameFrame from '../src/components/GameFrame';
-import ResultContent from '../src/components/GARAM/resultContent';
+import ResultContent from '../src/components/GameFrame/resultContent';
+import MultiLevels from '../src/components/GameFrame/multiLevels';
 
 storiesOf('single custom components', module)
   .add('chatRoom', () => (
@@ -26,4 +27,7 @@ storiesOf('single custom components', module)
   ))
   .add('GARAM with Game Frame', () => (
     <GameFrame GameComponent={ GARAM } PopupComponent={ ResultContent } />
+  ))
+  .add('Game Frame (multi levels)', () => (
+    <MultiLevels />
   ))

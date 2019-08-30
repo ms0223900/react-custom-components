@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import React, { useState, useCallback, useEffect } from 'react'
 import { useQuery, useMutation } from '@apollo/react-hooks'
-import { getShopList, apiUrl, UPDATE_USER_BUY_LIST, CREATE_USER_BUY_LIST } from './API'
+import { QUERY_SHOP_LIST, apiUrl, UPDATE_USER_BUY_LIST, CREATE_USER_BUY_LIST } from './API'
 import { Paper, Box, Typography, Button } from '@material-ui/core';
 import { 
   shopData_mockData,
@@ -92,7 +92,11 @@ const ShopHeader = ({ gameCoin=10000, closeFn }) => {
 }
 
 const ConfirmPopup = ({ itemInfo, confirmBuyFn, cancelBuyFn }) => {
-  const [updateUserBuyList] = useMutation(UPDATE_USER_BUY_LIST)
+  const [updateUserBuyList] = useMutation(UPDATE_USER_BUY_LIST, {
+    update(cache, { data }) {
+      console.log(data)
+    }
+  })
   const [createUserBuyList] = useMutation(CREATE_USER_BUY_LIST)
   const classes = useStyles_confirmBuyPopup()
   const {
@@ -124,12 +128,10 @@ const ConfirmPopup = ({ itemInfo, confirmBuyFn, cancelBuyFn }) => {
       updateUserBuyList({
         variables: {
           id: userbuylistId,
-          itemCount: itemCount + count,
+          itemCount: itemCount + parseInt(count),
         }
       })
-      .then(res => {
-        console.log(res)
-      })
+      .then(() => cancelBuyFn())
     } else {
       //create
       createUserBuyList({
@@ -141,9 +143,7 @@ const ConfirmPopup = ({ itemInfo, confirmBuyFn, cancelBuyFn }) => {
           }
         }
       })
-      .then(res => {
-        console.log(res)
-      })
+      .then(() => cancelBuyFn())
     }
   }, [count, totalPrice, itemInfo])
   return (
@@ -211,7 +211,7 @@ const ShopList = ({ shopData=shopData_mockData }) => {
 }
 
 export default () => {
-  const { loading, error, data } = useQuery(getShopList, {
+  const { loading, error, data } = useQuery(QUERY_SHOP_LIST, {
     variables: {
       username: username_mockData
     }

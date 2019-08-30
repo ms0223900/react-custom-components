@@ -5,7 +5,7 @@ export const apiUrl =
   'https://intense-brushlands-46000.herokuapp.com' : 
   process.env.STORYBOOK_API || 'http://localhost:1337/' 
 
-export const getShopList = gql`
+export const QUERY_SHOP_LIST = gql`
   query shopLists($username: String!) {
   shoplists {
     id
@@ -36,6 +36,7 @@ export const UPDATE_USER_BUY_LIST = gql`
       }
     }) {
       userbuylist {
+        id
         itemId
         itemCount
       }
@@ -50,6 +51,7 @@ export const CREATE_USER_BUY_LIST = gql`
       userbuylist {
         id
         itemId
+        itemCount
       }
     }
   }`

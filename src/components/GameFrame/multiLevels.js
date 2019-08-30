@@ -77,7 +77,7 @@ const SingleLevelItem = ({ level, star, isComponentView=true }) => {
   )
 }
 
-const MultiLevels = ({ levelData, isComponentView }) => {
+const MultiLevels = ({ levelData=levelData_mockData, isComponentView }) => {
   return (
     <Container>
       {levelData.map(data => (

@@ -50,9 +50,11 @@ const GameFrame = ({ GameComponent, PopupComponent, resultNextFns=[], ...props }
   const classes = useStyles_gameFrame()
   const [gameCoin, setGameCoin] = useState(parseInt(localStorage.getItem('gameCoin')) || 0)
   const [popup, open, close, toggle, popupCnt] = usePopup(false, setGameCoin)
+  
   const handleOver = (resultContent) => {
     open(resultContent)
   }
+
   const handleNext = useCallback(() => {
     close()
     if(resultNextFns.length > 0) {
@@ -62,6 +64,7 @@ const GameFrame = ({ GameComponent, PopupComponent, resultNextFns=[], ...props }
       gameRef && gameRef.current.handleNext()
     }
   }, [resultNextFns])
+
   useEffect(() => {
     localStorage.setItem('gameCoin', gameCoin)
   }, [gameCoin])

@@ -58,6 +58,7 @@ const MultiLevelGame = ({ match, history, setLevelData }) => {
         GameComponent={ GARAM } 
         PopupComponent={ ResultContent } 
         resultNextFns={ [handleNextLevel] }
+        //props for game
         gameMode={ 'multiLevel' }
         level={ parseInt(level) }
         setLevelDataFn={ setLevelData } />

@@ -8,6 +8,8 @@ import GARAM from '../src/components/GARAM';
 import GameFrame from '../src/components/GameFrame';
 import ResultContent from '../src/components/GameFrame/resultContent';
 import MultiLevels from '../src/components/GameFrame/multiLevels';
+import ShopList from '../src/components/GameFrame/shopList';
+import { ApolloProviderWrapper } from './API'
 
 storiesOf('single custom components', module)
   .add('chatRoom', () => (
@@ -30,4 +32,9 @@ storiesOf('single custom components', module)
   ))
   .add('Game Frame (multi levels)', () => (
     <MultiLevels />
+  ))
+  .add('shop list', () => (
+    <ApolloProviderWrapper>
+      <ShopList />
+    </ApolloProviderWrapper>
   ))

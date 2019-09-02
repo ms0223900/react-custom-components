@@ -11,7 +11,7 @@ const apiUrl =
 
 const link = createHttpLink({ uri: apiUrl, })
 const cache = new InMemoryCache()
-const client = new ApolloClient({
+export const client = new ApolloClient({
   cache,
   link,
 })

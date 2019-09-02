@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import React, { useState, useCallback, useEffect } from 'react'
 import { useQuery, useMutation } from '@apollo/react-hooks'
-import { QUERY_SHOP_LIST, apiUrl, UPDATE_USER_BUY_LIST, CREATE_USER_BUY_LIST } from './API'
+import { QUERY_SHOP_LIST, apiUrl, UPDATE_USER_BUY_LIST, CREATE_USER_BUY_LIST, UPDATE_USER } from './API'
 import { Paper, Box, Typography, Button } from '@material-ui/core';
 import { 
   shopData_mockData,
@@ -14,9 +14,9 @@ import {
   useStyles_confirmBuyPopup,
 } from './styles'
 
-const username_mockData = 'aaa'
+export const username_mockData = 'aaa'
 
-const mergeItemCountShopLists = (shoplists, userbuylists) => {
+export const mergeItemCountShopLists = (shoplists, userbuylists) => {
   const newShopLists = [...shoplists]
   for (let i = 0; i < userbuylists.length; i++) {
     const { id, itemId, itemCount } = userbuylists[i]
@@ -30,7 +30,7 @@ const mergeItemCountShopLists = (shoplists, userbuylists) => {
 }
 
 
-const SingleShopItem = ({ itemInfo, buyFn, }) => {
+const SingleShopItem = ({ isShop=true, itemInfo, buyFn, }) => {
   const {
     id,
     itemName, 
@@ -42,7 +42,7 @@ const SingleShopItem = ({ itemInfo, buyFn, }) => {
   const classes = useStyles_singleShopItem()
   const isBought = itemCount > 0 && isOnlyOne
   const handleBuy = () => {
-    if(!isBought) {
+    if(!isBought && isShop) {
       buyFn({
         ...itemInfo,
         itemId: id,
@@ -50,6 +50,15 @@ const SingleShopItem = ({ itemInfo, buyFn, }) => {
       })
     }
   }
+  const BuyButton = () => isBought ? (
+      <Button disabled>
+        { 'bought' }
+      </Button>
+    ) : (
+      <Button variant='contained'>
+      { 'C ' + itemPrice }
+    </Button>
+    )
   return (
     <Paper
       className={ classes.root } 
@@ -69,35 +78,63 @@ const SingleShopItem = ({ itemInfo, buyFn, }) => {
           { `x ${ itemCount || 0 }` }
         </Typography>
       )}
-      {isBought ? (
-        <Button disabled>
-          { 'bought' }
-        </Button>
-      ) : (
-        <Button variant='contained'>
-        { 'C ' + itemPrice }
-      </Button>
-      )}
+      {isShop && <BuyButton />}
     </Paper>
   )
 }
 
-const ShopHeader = ({ gameCoin=10000, closeFn }) => {
+const ShopHeader = ({ gameCoin=0, closeFn }) => {
   return (
     <Box display='flex'>
       <Typography>{ `Coin x ${ gameCoin }` }</Typography>
-      <Button onClick={ closeFn }>{ 'X' }</Button>
+      <Button variant={'contained'} onClick={ closeFn }>{ 'X' }</Button>
     </Box>
   )
 }
 
-const ConfirmPopup = ({ itemInfo, confirmBuyFn, cancelBuyFn }) => {
-  const [updateUserBuyList] = useMutation(UPDATE_USER_BUY_LIST, {
-    update(cache, { data }) {
-      console.log(data)
-    }
+const ConfirmPopup = ({ 
+  itemInfo, 
+  userInfo, 
+  setUserInfo, 
+  cancelBuyFn }) => {
+  const username = userInfo ? userInfo.username : username_mockData
+  const [updateUserBuyList] = useMutation(UPDATE_USER_BUY_LIST)
+  const [createUserBuyList] = useMutation(CREATE_USER_BUY_LIST, {
+    update(cache, { data: { createUserbuylist } }) {
+      console.log(createUserbuylist)
+      const originData = cache.readQuery({ 
+        query: QUERY_SHOP_LIST, 
+        variables: {
+          userWhere: {
+            username
+          }
+        } 
+      })
+      // console.log(caaa)
+      cache.writeQuery({
+        query: QUERY_SHOP_LIST,
+        variables: {
+          userWhere: {
+            username
+          }
+        },
+        data: {
+          ...originData, 
+          userbuylists: [
+            ...originData.userbuylists,
+            createUserbuylist.userbuylist,
+          ]
+        }
+      })
+    },
+    refetchQueries: [{
+      query: QUERY_SHOP_LIST,
+      variables: {
+        username
+      }
+    }]
   })
-  const [createUserBuyList] = useMutation(CREATE_USER_BUY_LIST)
+  const [updateUser] = useMutation(UPDATE_USER)
   const classes = useStyles_confirmBuyPopup()
   const {
     itemName='aaa', 
@@ -117,34 +154,55 @@ const ConfirmPopup = ({ itemInfo, confirmBuyFn, cancelBuyFn }) => {
   }, [count])
 
   const handleConfirmBuy = useCallback(() => {
+    const numCount = parseInt(count)
     const { itemId, userbuylistId, itemCount } = itemInfo
-    //set user coin
-
-    //set user bought list
-    //id, count
-    console.log(itemInfo)
-    if(userbuylistId) {
-      //update
-      updateUserBuyList({
-        variables: {
-          id: userbuylistId,
-          itemCount: itemCount + parseInt(count),
-        }
-      })
-      .then(() => cancelBuyFn())
-    } else {
-      //create
-      createUserBuyList({
-        variables: {
-          data: {
-            username: username_mockData,
-            itemId,
-            itemCount: count,
+    const updateList = () => {
+      if(userbuylistId) {
+        //update
+        updateUserBuyList({
+          variables: {
+            id: userbuylistId,
+            itemCount: itemCount + numCount,
           }
+        })
+        .then(() => cancelBuyFn())
+      } else {
+        //create
+        createUserBuyList({
+          variables: {
+            data: {
+              username,
+              itemId,
+              itemCount: numCount,
+            }
+          }
+        })
+        .then(() => cancelBuyFn())
+      }
+    }
+    // updateList()
+    const remainPoints = parseInt(userInfo.point) - parseInt(totalPrice)
+    if(remainPoints >= 0) {
+      //set user coin
+      updateUser({
+        variables: {
+          id: userInfo.id,
+          point: parseInt(userInfo.point) - parseInt(totalPrice)
         }
       })
-      .then(() => cancelBuyFn())
+      .then(res => {
+        // console.log(res)
+        setUserInfo({
+          ...userInfo,
+          point: res.data.updateUser.user.point
+        })
+      })
+      //set user bought list
+      //id, count
+      console.log(itemInfo)
+      updateList()
     }
+    
   }, [count, totalPrice, itemInfo])
   return (
     <Box>
@@ -169,7 +227,13 @@ const ConfirmPopup = ({ itemInfo, confirmBuyFn, cancelBuyFn }) => {
   )
 }
 
-const ShopList = ({ shopData=shopData_mockData }) => {
+export const ShopList = ({ 
+  isShop,
+  shopData=shopData_mockData, 
+  userInfo, 
+  setUserInfo, 
+  closeFn 
+}) => {
   const [popupConfirm, setPopupConfirm] = useState(false)
   const [popupItemInfo, setInfo] = useState(null)
   const classes = useStyles_shopList()
@@ -184,7 +248,9 @@ const ShopList = ({ shopData=shopData_mockData }) => {
     <Box className={ classes.root }>
       <Box className={ classes.back } />
       <Paper className={ classes.shopList }>
-        <ShopHeader />
+        <ShopHeader 
+          gameCoin={ userInfo && userInfo.point }
+          closeFn={ closeFn } />
         <Box
           // display={ 'flex' } 
           className={ classes.container }
@@ -192,6 +258,7 @@ const ShopList = ({ shopData=shopData_mockData }) => {
           {shopData.map(data => (
             <SingleShopItem 
               key={ data.id }
+              isShop={ isShop }
               itemInfo={ {
                 ...data,
                 itemImgSrc: apiUrl + data.itemImgSrc.url,
@@ -204,28 +271,40 @@ const ShopList = ({ shopData=shopData_mockData }) => {
       {popupConfirm && (
         <ConfirmPopup 
           itemInfo={ popupItemInfo }
-          cancelBuyFn={ () => setPopupConfirm(false) }  />
+          userInfo={ userInfo }
+          setUserInfo={ setUserInfo }
+          cancelBuyFn={ () => setPopupConfirm(false) } />
       )}
     </Box>
   )
 }
 
-export default () => {
+export default ({ userInfo, setUserInfo }) => {
+  const username = userInfo ? userInfo.username : username_mockData
   const { loading, error, data } = useQuery(QUERY_SHOP_LIST, {
     variables: {
-      username: username_mockData
+      userWhere: {
+        username
+      }
     }
   })
   if(loading) {
     return 'loading...'
   } else {
-    const { shoplists, userbuylists } = data
-    console.log(data)
-    const mergedShopListsData = mergeItemCountShopLists(shoplists, userbuylists)
-    console.log(mergedShopListsData)
-    return (
-      <ShopList shopData={ mergedShopListsData } />
-    ) 
+    if(userInfo && !userInfo.isLoggedIn) {
+      return 'please log in first~'
+    } else {
+      const { shoplists, userbuylists } = data
+      console.log(data)
+      const mergedShopListsData = mergeItemCountShopLists(shoplists, userbuylists)
+      console.log(mergedShopListsData)
+      return (
+        <ShopList 
+          userInfo={ userInfo }
+          setUserInfo={ setUserInfo }
+          shopData={ mergedShopListsData } />
+      ) 
+    }
   }
-  
 }
+

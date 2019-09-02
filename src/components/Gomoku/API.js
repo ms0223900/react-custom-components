@@ -173,10 +173,11 @@ export const logIn = (username, pwd, setErr) => (
       console.log(res)
       const { id, username, point, rank } = res.user
       setToLS(id, username, point, rank)
-      location.reload()
+      return res
+      // location.reload()
     })
     .catch(e => {
-      setErr(e.message)
+      setErr && setErr(e.message)
     }) 
 )
 export const updateUser = (id, point, rank) => (

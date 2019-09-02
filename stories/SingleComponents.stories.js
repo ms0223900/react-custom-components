@@ -10,6 +10,10 @@ import ResultContent from '../src/components/GameFrame/resultContent';
 import MultiLevels from '../src/components/GameFrame/multiLevels';
 import ShopList from '../src/components/GameFrame/shopList';
 import { ApolloProviderWrapper } from './API'
+import { 
+  ShopListWithCxt, 
+  NavBarWithCxt 
+} from '../src/components/GameFrame/componentsWithLogIn';
 
 storiesOf('single custom components', module)
   .add('chatRoom', () => (
@@ -36,5 +40,15 @@ storiesOf('single custom components', module)
   .add('shop list', () => (
     <ApolloProviderWrapper>
       <ShopList />
+    </ApolloProviderWrapper>
+  ))
+  .add('ShopListWithCxt', () => (
+    <ApolloProviderWrapper>
+      <ShopListWithCxt /> 
+    </ApolloProviderWrapper>
+  ))
+  .add('Nav bar', () => (
+    <ApolloProviderWrapper>
+      <NavBarWithCxt /> 
     </ApolloProviderWrapper>
   ))

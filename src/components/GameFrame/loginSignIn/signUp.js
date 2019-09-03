@@ -59,7 +59,7 @@ const SignUp = ({ setUserInfo, closeFn }) => {
       const sameUsernames = data.users
       signUp(sameUsernames, form, setErr, setUserInfo)
         .then(res => {
-          console.log(res)
+          // console.log(res)
           res && closeFn()
         })
     }

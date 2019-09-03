@@ -1,6 +1,5 @@
 import gql from 'graphql-tag'
 import Strapi from 'strapi-sdk-javascript/build/main'
-import { client } from '../../../stories/API'
 
 export const apiUrl = 
   process.env.NODE_ENV === 'production' ? 
@@ -76,11 +75,18 @@ export const QUERY_SHOP_LIST = gql`
   query shopLists($userWhere: JSON) {
     shoplists {
       id
+      type
       itemName
       itemPrice
       isOnlyOne
       itemImgSrc {
         url
+      }
+      emote {
+        id
+        emoteImg {
+          url
+        }
       }
     }
     userbuylists(where: $userWhere, sort: "itemId") {
@@ -88,9 +94,9 @@ export const QUERY_SHOP_LIST = gql`
       itemId
       itemCount
     }
-    # users(where: $userWhere) {
-    #   point
-    # }
+    useremotelists(where: $userWhere, sort: "emoteId") {
+      emoteId
+    }
   }`
 
 export const UPDATE_USER_BUY_LIST = gql`
@@ -159,6 +165,31 @@ export const UPDATE_USER = gql`
         username
         point
         rank
+      }
+    }
+  }`
+
+export const QUERY_USER_EMOTES = gql`
+  query QUERY_USER_EMOTES($userWhere: JSON) {
+    useremotelists(where: $userWhere, sort: "emoteId") {
+      emoteId
+    }
+    emotes {
+      id
+      emoteName
+      emoteImg {
+        url
+      }
+    }
+  }`
+
+export const CREATE_USER_EMOTE_LIST = gql`
+  mutation CREATE_USER_EMOTE_LIST($data: UseremotelistInput) {
+    createUseremotelist(input: {
+      data: $data
+    }) {
+      useremotelist {
+        emoteId
       }
     }
   }`

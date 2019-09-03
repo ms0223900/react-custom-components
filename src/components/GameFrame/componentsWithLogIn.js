@@ -5,8 +5,9 @@ import { Button } from '@material-ui/core';
 import { logInAndSetInfo } from './API'
 import ItemList from './itemList';
 import NavBar from './loginSignIn/navBar';
+import ChatRoom from './chat/chatRoom'
 
-const ShopListWithLogin = () => {
+const ComponentWithLoginSwitch = ({ Component, ...props }) => {
   const { userInfo, setUserInfo } = useContext(ContextStore)
   const handleAAALogin = () => {
     logInAndSetInfo('aaa', 'aaaaaaaa', null, setUserInfo)
@@ -14,6 +15,10 @@ const ShopListWithLogin = () => {
   const handleAA124Login = () => {
     logInAndSetInfo('aa124', 'aaa', null, setUserInfo)
   }
+  // const children = React.Children.map(props.children, child => React.cloneElement(child, {
+  //   userInfo, setUserInfo, ...props
+  // }))
+  // console.log(children)
   return (
     <>
       <Button 
@@ -26,16 +31,29 @@ const ShopListWithLogin = () => {
         onClick={ handleAA124Login }>
         {'user: ' + 'aa124' }
       </Button>
-      <ShopList 
-        userInfo={ userInfo } 
-        setUserInfo={ setUserInfo } />
-      <ItemList 
-        userInfo={ userInfo } 
-        setUserInfo={ setUserInfo }  />
+      {/* { children } */}
+      <Component {...{
+        ...props,
+        userInfo,
+        setUserInfo
+      }} />
     </>
     
   )
 }
+
+
+const ShopListWithLogin = (props) => {
+  return (
+    <ComponentWithLoginSwitch {...props} Component={ props => (
+      <>
+        <ShopList {...props}/>
+        <ItemList {...props}/>
+      </>
+    ) } />
+  )
+}
+
 
 export const ShopListWithCxt = () => {
   const value = ContextValue()
@@ -51,6 +69,15 @@ export const NavBarWithCxt = () => {
   return (
     <ContextStore.Provider value={ value }>
       <NavBar />
+    </ContextStore.Provider>
+  )
+}
+
+export const ChatRoomWithCxt = (props) => {
+  const value = ContextValue()
+  return (
+    <ContextStore.Provider value={ value }>
+      <ComponentWithLoginSwitch {...props} Component={ ChatRoom } />
     </ContextStore.Provider>
   )
 }

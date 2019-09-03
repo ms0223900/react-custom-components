@@ -93,7 +93,7 @@ const NavBar = ({ userInfo, setUserInfo }) => {
   //query latest information from username
   useEffect(() => {
     console.log(data)
-    if(data.users && data.users.length > 0) {
+    if(data && data.users && data.users.length > 0) {
       setUserInfo({
         ...data.users[0],
         isLoggedIn: true,

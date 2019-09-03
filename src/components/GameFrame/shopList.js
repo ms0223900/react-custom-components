@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import React, { useState, useCallback, useEffect } from 'react'
 import { useQuery, useMutation } from '@apollo/react-hooks'
-import { QUERY_SHOP_LIST, apiUrl, UPDATE_USER_BUY_LIST, CREATE_USER_BUY_LIST, UPDATE_USER } from './API'
+import { QUERY_SHOP_LIST, apiUrl, UPDATE_USER_BUY_LIST, CREATE_USER_BUY_LIST, UPDATE_USER, CREATE_USER_EMOTE_LIST, QUERY_USER_EMOTES } from './API'
 import { Paper, Box, Typography, Button } from '@material-ui/core';
 import { 
   shopData_mockData,
@@ -13,21 +13,9 @@ import {
   useStyles_singleShopItem,
   useStyles_confirmBuyPopup,
 } from './styles'
+import { mergeItemCountShopLists } from './fn'
 
 export const username_mockData = 'aaa'
-
-export const mergeItemCountShopLists = (shoplists, userbuylists) => {
-  const newShopLists = [...shoplists]
-  for (let i = 0; i < userbuylists.length; i++) {
-    const { id, itemId, itemCount } = userbuylists[i]
-    newShopLists[itemId - 1] = {
-      ...newShopLists[itemId - 1],
-      itemCount,
-      userbuylistId: id,
-    }
-  }
-  return newShopLists
-}
 
 
 const SingleShopItem = ({ isShop=true, itemInfo, buyFn, }) => {
@@ -96,7 +84,8 @@ const ConfirmPopup = ({
   itemInfo, 
   userInfo, 
   setUserInfo, 
-  cancelBuyFn }) => {
+  cancelBuyFn 
+}) => {
   const username = userInfo ? userInfo.username : username_mockData
   const [updateUserBuyList] = useMutation(UPDATE_USER_BUY_LIST)
   const [createUserBuyList] = useMutation(CREATE_USER_BUY_LIST, {
@@ -134,6 +123,16 @@ const ConfirmPopup = ({
       }
     }]
   })
+  const [createUserEmoteList] = useMutation(CREATE_USER_EMOTE_LIST, {
+    refetchQueries: [{
+      query: QUERY_USER_EMOTES,
+      variables: {
+        userWhere: {
+          username
+        }
+      }
+    }]
+  })
   const [updateUser] = useMutation(UPDATE_USER)
   const classes = useStyles_confirmBuyPopup()
   const {
@@ -141,6 +140,7 @@ const ConfirmPopup = ({
     itemPrice=99, 
     itemImgSrc=diceImgSrc, 
     itemMaxCount=5,
+    type,
   } = itemInfo
   const [count, setCount] = useState(1)
   const totalPrice = itemPrice * count
@@ -155,7 +155,7 @@ const ConfirmPopup = ({
 
   const handleConfirmBuy = useCallback(() => {
     const numCount = parseInt(count)
-    const { itemId, userbuylistId, itemCount } = itemInfo
+    const { itemId, userbuylistId, itemCount, emoteId } = itemInfo
     const updateList = () => {
       if(userbuylistId) {
         //update
@@ -177,7 +177,24 @@ const ConfirmPopup = ({
             }
           }
         })
+        .then(res => {
+          if(emoteId) {
+            createUserEmoteList({
+              variables: {
+                data: {
+                  username,
+                  emoteId,
+                }
+              }
+            })
+            return res
+          } else {
+            return res
+          }
+        })
         .then(() => cancelBuyFn())
+        //if emotes
+        
       }
     }
     // updateList()
@@ -235,6 +252,7 @@ export const ShopList = ({
   closeFn 
 }) => {
   const [popupConfirm, setPopupConfirm] = useState(false)
+  const [selectedShopType, setType] = useState('consumables')
   const [popupItemInfo, setInfo] = useState(null)
   const classes = useStyles_shopList()
   const handleOpenConfirmBuy = itemInfo => {
@@ -244,6 +262,38 @@ export const ShopList = ({
   useEffect(() => {
     popupItemInfo && setPopupConfirm(true)
   }, [popupItemInfo])
+  console.log(shopData)
+
+  const ShopListFromData = ({ type='consumables', shopData }) => (
+    <>
+      {shopData
+        .filter(data => data.type === type)
+        .map(data => {
+          const itemImgSrc = () => {
+            let url
+            if(type === 'emote') {
+              url = data.emote.emoteImg.url
+            } else {
+              url = data.itemImgSrc.url
+            }
+            return url.includes('http') ? url : apiUrl + url
+          }
+          return (
+            <SingleShopItem 
+              key={ data.id }
+              isShop={ isShop }
+              itemInfo={ {
+                ...data,
+                itemImgSrc: itemImgSrc(),
+              } }
+              buyFn={ handleOpenConfirmBuy }  
+            />
+          )
+        })
+      }
+    </>
+  )
+
   return (
     <Box className={ classes.root }>
       <Box className={ classes.back } />
@@ -255,17 +305,19 @@ export const ShopList = ({
           // display={ 'flex' } 
           className={ classes.container }
         >
-          {shopData.map(data => (
-            <SingleShopItem 
-              key={ data.id }
-              isShop={ isShop }
-              itemInfo={ {
-                ...data,
-                itemImgSrc: apiUrl + data.itemImgSrc.url,
-              } }
-              buyFn={ handleOpenConfirmBuy }  
-            />
-          ))}
+          <Button onClick={ () => setType('consumables') }>{'consumables'}</Button>
+          <Button onClick={ () => setType('emote') }>{'emote'}</Button>
+          <hr />
+          {selectedShopType === 'consumables' && (
+            <ShopListFromData 
+              type={ 'consumables' }
+              shopData={ shopData } />
+          )}
+          {selectedShopType === 'emote' && (
+            <ShopListFromData 
+              type={ 'emote' }
+              shopData={ shopData } />
+          )}
         </Box>
       </Paper>
       {popupConfirm && (
@@ -279,7 +331,7 @@ export const ShopList = ({
   )
 }
 
-export default ({ userInfo, setUserInfo }) => {
+export const shopOrItemList = (isShop) => ({ userInfo, setUserInfo }) => {
   const username = userInfo ? userInfo.username : username_mockData
   const { loading, error, data } = useQuery(QUERY_SHOP_LIST, {
     variables: {
@@ -294,17 +346,30 @@ export default ({ userInfo, setUserInfo }) => {
     if(userInfo && !userInfo.isLoggedIn) {
       return 'please log in first~'
     } else {
-      const { shoplists, userbuylists } = data
-      console.log(data)
-      const mergedShopListsData = mergeItemCountShopLists(shoplists, userbuylists)
-      console.log(mergedShopListsData)
+      let mergedShopListsData
+      if(data) {
+        // console.log(data)
+        mergedShopListsData = mergeItemCountShopLists(data)
+        if(!isShop) {
+          mergedShopListsData = mergedShopListsData.filter(data => data.itemCount > 0)
+        }
+        console.log(mergedShopListsData)
+      }
+      const shopListProps = {
+        isShop,
+        userInfo,
+        setUserInfo
+      }
       return (
-        <ShopList 
-          userInfo={ userInfo }
-          setUserInfo={ setUserInfo }
-          shopData={ mergedShopListsData } />
+        <>
+          <ShopList 
+            {...shopListProps}
+            shopData={ mergedShopListsData } />
+        </>
       ) 
     }
   }
 }
+
+export default shopOrItemList(true)
 

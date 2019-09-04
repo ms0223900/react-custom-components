@@ -17,6 +17,7 @@ import {
   ChatRoomWithCxt 
 } from '../src/components/GameFrame/componentsWithLogIn';
 import ItemList from '../src/components/GameFrame/itemList';
+import { HexSnake } from '../src/components/HexaNumberSnake/hexaSnake';
 
 storiesOf('single custom components', module)
   .add('chatRoom from gomoku', () => (
@@ -67,5 +68,8 @@ storiesOf('single custom components', module)
     <ApolloProviderWrapper>
       <NavBarWithCxt /> 
     </ApolloProviderWrapper>
+  ))
+  .add('hexagon', () => (
+    <HexSnake />
   ))
   

@@ -1,0 +1,32 @@
+$hexagonWidth: 60px;
+$hexColor: #64C7CC;
+
+.hexagon {
+  position: relative;
+  width: $hexagonWidth; 
+  height: $hexagonWidth*0.577;
+  background-color: $hexColor;
+  margin: $hexagonWidth*0.2886 0;
+  text-align: center;
+}
+
+.hexagon:before,
+.hexagon:after {
+  content: "";
+  position: absolute;
+  left: 0;
+  width: 0;
+  border-left: $hexagonWidth/2 solid transparent;
+  border-right: $hexagonWidth/2 solid transparent;
+}
+
+.hexagon:before {
+  bottom: 100%;
+  border-bottom: $hexagonWidth*0.2886 solid $hexColor;
+}
+
+.hexagon:after {
+  top: 100%;
+  width: 0;
+  border-top: $hexagonWidth*0.2886 solid $hexColor;
+}

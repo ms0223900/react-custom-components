@@ -6,7 +6,7 @@ import {
 } from './style'
 import './style.scss'
 
-const numbers_mockData = [...Array(1 + 6 + 12 + 18 + 24).keys()]
+const numbers_mockData = [...Array(1 + 6 + 12 + 18).keys()]
 
 const getPosition = (width, index) => {
   let deg = 0

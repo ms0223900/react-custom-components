@@ -18,6 +18,7 @@ import {
 } from '../src/components/GameFrame/componentsWithLogIn';
 import ItemList from '../src/components/GameFrame/itemList';
 import { HexSnake } from '../src/components/HexaNumberSnake/hexaSnake';
+import Jewels from '../src/components/HexaNumberSnake/jewelSquare'
 
 storiesOf('single custom components', module)
   .add('chatRoom from gomoku', () => (
@@ -71,5 +72,8 @@ storiesOf('single custom components', module)
   ))
   .add('hexagon', () => (
     <HexSnake />
+  ))
+  .add('jewels', () => (
+    <Jewels />
   ))
   

@@ -22,6 +22,10 @@ module.exports = {
         //     "warn",
         //     "unix"
         // ],
+        "indent": [
+            "warn",
+            2
+        ],
         "quotes": [
             "warn",
             "single"

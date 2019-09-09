@@ -18,7 +18,8 @@ import {
 } from '../src/components/GameFrame/componentsWithLogIn';
 import ItemList from '../src/components/GameFrame/itemList';
 import { HexSnake } from '../src/components/HexaNumberSnake/hexaSnake';
-import Jewels from '../src/components/HexaNumberSnake/jewelSquare'
+import JewelGame from '../src/components/Jewel'
+import TwoPointSlash from '../src/components/Jewel/twoPointSlash'
 
 storiesOf('single custom components', module)
   .add('chatRoom from gomoku', () => (
@@ -73,7 +74,17 @@ storiesOf('single custom components', module)
   .add('hexagon', () => (
     <HexSnake />
   ))
-  .add('jewels', () => (
-    <Jewels />
+  .add('jewelGame', () => (
+    <JewelGame />
+  ))
+  .add('jewelGame with gameFrame', () => (
+    <GameFrame 
+      GameComponent={ JewelGame } 
+      PopupComponent={ ResultContent } />
+  ))
+  .add('single slash component', () => (
+    <TwoPointSlash 
+      point1={{ top: 0, left: 0 }}
+      point2={{ top: 100, left: 100 }} />
   ))
   

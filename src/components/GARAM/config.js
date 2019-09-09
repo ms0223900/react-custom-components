@@ -7,14 +7,14 @@ export const primaryColor = '#0051ff'
 export const gameModes = ['limitTime', 'speedMode', 'multiLevel']
 export const getDifficultyEmptyBlocks = (difficulty) => {
   switch (difficulty) {
-    case 'easy':
-      return 4
-    case 'medium':
-      return 12
-    case 'hard':
-      return 16
-    default:
-      return 8;
+  case 'easy':
+    return 4
+  case 'medium':
+    return 12
+  case 'hard':
+    return 16
+  default:
+    return 8;
   }
 }
 export const getDifficultyByLevel = (level) => {
@@ -162,11 +162,11 @@ export const fillNumsToBlocks = (twoDigitsNums) => {
     let idx
     const arrangeNums = (idx, j) => {
       numRes[idx] = numArr[j]
-        if(j === 0) { //only first
-          opeRes_columnCenter[idx] = operation
-        } else if(j === 1) {
-          opeRes_columnCenter[idx] = '='
-        }
+      if(j === 0) { //only first
+        opeRes_columnCenter[idx] = operation
+      } else if(j === 1) {
+        opeRes_columnCenter[idx] = '='
+      }
     }
     for (let j = 0; j < 4; j++) {
       if(i < 4) {

@@ -3,7 +3,7 @@ import { Box, Typography } from '@material-ui/core';
 import { StarPart } from './multiLevels'
 
 const ResultContent = ({ content={} }) => {
-  const { level, score, star } = content
+  const { level=0, score, star } = content
   //
   return (
     <Box>

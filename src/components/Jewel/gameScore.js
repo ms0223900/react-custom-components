@@ -8,21 +8,21 @@ const useStyles = makeStyles({
   }
 })
 
-const GameScore = ({ score }) => {
+const GameText = ({ title='score', text }) => {
   const classes = useStyles()
   return (
     <Box>
       <Typography variant={ 'subtitle1' }>
-        { 'socre'}
+        { title }
       </Typography>
       <Typography 
         className={ classes.score } 
         variant={ 'h4' } 
       >
-        { score }
+        { text }
       </Typography>
     </Box>
   )
 }
 
-export default GameScore
+export default GameText

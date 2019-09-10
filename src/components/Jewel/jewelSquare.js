@@ -6,18 +6,53 @@ import {
   jewelsPerRow,
   emptyColor,
   jewelColors,
-  specialJewelColors
+  delayTime,
+  specialJewels,
+  explodeImgSrc
 } from './config'
 import TwoPointSlash from './twoPointSlash'
 
-const generateJewels = () => {
-  return [...Array(jewelsPerRow * jewelsPerRow * 2).keys()]
-    .map(id => ({
-      id: id - jewelsPerRow * jewelsPerRow,
+const { bombColor, thunderColor } = specialJewels.colors
+const { bombDestroyCount, thunderDestroyCount } = specialJewels.destroyCount
+
+const amountOfJewels = jewelsPerRow * jewelsPerRow
+const jewelIdxs = [...Array(amountOfJewels * 2).keys()]
+
+const getJewel = (idx, feverMode='bomb', specificSpecial, feverRow) => { //if fever, it will be special jewels at same row
+  if(specificSpecial && idx === specificSpecial) {
+    return ({
+      type: feverMode,
+      color: specialJewels.colors[`${feverMode}Color`]
+    })
+  } else if(feverMode === 'bomb' && feverRow && idx >= feverRow * jewelsPerRow && idx < feverRow * (jewelsPerRow + 1) - 1) {
+    return ({
       type: 'jewel',
-      color: jewelColors[~~(Math.random() * jewelColors.length)],
-      hint: false,
-    }))
+      color: jewelColors[2]
+    })
+  } else if(feverMode === 'thunder') {
+    return
+  } else {
+    return ({
+      type: 'jewel',
+      color: jewelColors[~~(Math.random() * jewelColors.length)]
+    })
+  }
+  
+}
+
+const generateJewels = () => {
+  // const randomRow = ~~(Math.random() * 5) + 5 //from 5 ~ 9
+  return [...Array(amountOfJewels * 2).keys()]
+    .map(idx => {
+      const { type, color } = getJewel(idx, 'bomb', 80)
+      return ({
+        id: idx - amountOfJewels,
+        type,
+        color,
+        hint: false,
+        effect: null,
+      })
+    })
 }
 
 const getNumsSmaller = (num, intervalNum) => {
@@ -60,18 +95,23 @@ const exchangedJewels = (idx1, idx2, jewelData) => {
 }
 
 const checkIsFulfill = (index, jewelAddCount, jewelData) => {
+  const maxCompareAddCount = jewelAddCount === 1 ? (
+    (~~(index / jewelsPerRow) + 1) * jewelsPerRow
+  ) : (
+    amountOfJewels * 2
+  )
+  const { type, color } = jewelData[index] //compared origin jewel
   let sameColorCount = 1
   let jewelIndex = index
   let checkFulfills = [jewelIndex]
   let nextIndex = jewelIndex + jewelAddCount
-  const { type, color } = jewelData[index]
   // console.log(jewelIndex + jewelAddCount)
-  while(jewelData[nextIndex] && jewelData[nextIndex].color === color && type !== 'empty') {
+  while(jewelData[nextIndex] && jewelData[nextIndex].color === color && type !== 'empty' && nextIndex < maxCompareAddCount) {
     sameColorCount += 1
     checkFulfills = [...checkFulfills, nextIndex]
     nextIndex += jewelAddCount
   }
-  if(sameColorCount > 2) {
+  if(sameColorCount >= 3) { //fulfill 3 
     return checkFulfills
     // console.log(fulfilledJewels)
     // return true
@@ -91,6 +131,23 @@ const getThunderPoints = (center, others) => {
     },
   }))
 }
+
+const getEmptyFn = data => {
+  return data.type === 'empty'
+}
+const getIdxsByCondition = (data, conditionFn=getEmptyFn) => {
+  let res = []
+  data.forEach((data, idx) => {
+    if(conditionFn(data) && idx >= amountOfJewels) {
+      res = [...res, idx]
+    }
+  })
+  return res
+}
+
+
+//---
+
 
 const useStyles = makeStyles({
   root: {
@@ -116,49 +173,65 @@ const useStyles = makeStyles({
     borderRadius: props => props.hint ? 100 : 6,
     boxSizing: 'border-box',
     textAlign: 'center',
+    lineHeight: `${ jewelWidth - 2 }px`,
+    fontSize: '20px',
     transition: '0.3s',
     '& svg': {
       fontSize: '2.5em',
+    },
+    '& img': {
+      width: '120%',
+      height: '120%',
     }
   }
 })
 
 const SingleJewel = ({ jewelInfo, pos, isChosen, getIdFn }) => {
-  const { color, type, hint } = jewelInfo
+  const { index, color, type, hint, effect } = jewelInfo
   const classes = useStyles({ ...jewelInfo, pos, isChosen })
-  const Icon = ({ type }) => {
+  const Icon = ({ type, effect }) => {
     if(type === 'thunder') {
       return <FlashOn />
     } else if(type === 'bomb') {
       return <Whatshot />
     }
+    if(effect && effect === 'explode') {
+      return <img src={ explodeImgSrc } />
+    }
+    // return index
     return null
   }
   return (
     <Box onClick={ getIdFn } className={ classes.singleJewel }>
-      { <Icon type={ type } /> }
+      { <Icon {...jewelInfo} /> }
     </Box>
   )
+}
+
+
+
+const thunderIdxs_init = {
+  center: 0,
+  otherPoints: [] 
 }
 
 const Jewels = ({ 
   isPause, 
   hintMode=true,
   cancelHintFn,
-  setScoreFn
+  setScoreFn,
+  setComboFn,
+  setStepFn,
 }, ref) => {
   const classes = useStyles()
-  const [thunderIdxs, setThunderIdxs] = useState({
-    center: 3,
-    otherPoints: [0, 4, 12, 18] 
-  })
+  const [thunderIdxs, setThunderIdxs] = useState(thunderIdxs_init)
   const [jewelData, setJewelData] = useState(generateJewels())
   const [twoJewelsIndex, settwoJewelsIndex] = useState([])
   const getJewelId = useCallback((newIndex) => {
     const checkNotSame = !twoJewelsIndex.find(idx => idx === newIndex)
     //
     const checkHaveEmpty = jewelData.find(data => data.type === 'empty')
-    if(newIndex >= jewelsPerRow * jewelsPerRow && !checkHaveEmpty && !isPause) {
+    if(newIndex >= amountOfJewels && !checkHaveEmpty && !isPause) {
       if(twoJewelsIndex.length < 1) {
         settwoJewelsIndex([newIndex])
       } else if(!checkNotSame) {
@@ -177,6 +250,7 @@ const Jewels = ({
       // console.log(twoJewelsIndex.length)
       const [index1, index2] = twoJewelsIndex
       const newJewelData = exchangedJewels(index1, index2, jewelData)
+      setStepFn && setStepFn(step => step + 1)
       setJewelData(newJewelData)
       // console.log(newJewelData)
       return settwoJewelsIndex([])
@@ -185,17 +259,12 @@ const Jewels = ({
   //handle check is fulfill 3 disappear condition
   useEffect(() => {
     let newJewelData = [...jewelData]
-    // let fulfilledJewels = []
-    let emptyJewelsIdx = []
-    jewelData.forEach((j, idx) => {
-      if(j.type === 'empty') {
-        emptyJewelsIdx = [...emptyJewelsIdx, idx]
-      }
+    const emptyJewelsIdx = getIdxsByCondition(jewelData, (data) => {
+      return data.type === 'empty'
     })
-
+    // console.log('jewelData: ', jewelData)
     //update empty jewels to new jewels
     if(emptyJewelsIdx.length > 0) {
-      // let exchanged = false
       // console.log(newJewelData)
       for (let i = 0; i < emptyJewelsIdx.length; i++) {
         // let emptyIdx = emptyJewelsIdx[i]
@@ -220,47 +289,115 @@ const Jewels = ({
       cancelHintFn && cancelHintFn()
       setTimeout(() => {
         setJewelData(newJewelData)
-      }, 500)
+      }, delayTime)
     } else {  //check have fulfill jewels
       let fulfilledJewels = []
-      for (let i = jewelsPerRow * 5; i < jewelData.length; i++) { //
+      for (let i = amountOfJewels; i < jewelData.length; i++) { 
+        //check column
         fulfilledJewels = [...fulfilledJewels, ...checkIsFulfill(i, jewelsPerRow, jewelData)]
-        //row(expect last 2 jewels)
-        if(i % 5 !== 3 && i % 5 !== 4) {
+        //check row(expect last 2 jewels)
+        if(i % jewelsPerRow !== jewelsPerRow - 1 && i % jewelsPerRow !== jewelsPerRow - 2) {
           fulfilledJewels = [...fulfilledJewels, ...checkIsFulfill(i, 1, jewelData)]
-          // rowRes = checkIsFulfill(i, 1) 
         }
-        if(fulfilledJewels.length > 0) break
+        // if(fulfilledJewels.length > 0) break
       }
+
+      //remove duplicate
+      fulfilledJewels = [...new Set(fulfilledJewels)]
       //set fulfill jewels to empty or special jewels
       const fulfilledJewelsCount = fulfilledJewels.length
       if(fulfilledJewelsCount > 0) {
-
-        console.log(fulfilledJewels)
+        console.log('fulfilledJewels: ' + fulfilledJewels)
+        setComboFn && setComboFn(fulfilledJewelsCount)
         for (let i = 0; i < fulfilledJewelsCount; i++) {
+          const fulfilledIdx = fulfilledJewels[i]
           //trigger special jewels at same time, set to empty blocks
           //check is special jewels is around fulfilled jewels
-
+          const dir4JewelsIndexes = jewelIdxs.filter(idx => {
+            return checkJewelIs4Dir(fulfilledIdx, idx) && idx >= amountOfJewels
+          })
+          const bombJewelIdx = jewelData.findIndex((data, idx) => {
+            return data.type === 'bomb' && dir4JewelsIndexes.find(index => index === idx)
+          })
+          const thunderJewelIdx = jewelData.findIndex((data, idx) => {
+            return data.type === 'thunder' && dir4JewelsIndexes.find(index => index === idx)
+          })
+          // console.log('bombJewelIdx: ' + bombJewelIdx)
+          if(bombJewelIdx !== -1) {
+            //cross set jewel to empty
+            const bombedJewelsIdxs = jewelIdxs.filter(idx => {
+              const bombWhichRow = ~~(bombJewelIdx / jewelsPerRow)
+              const checkColumn = idx >= amountOfJewels 
+                && (bombJewelIdx - idx) % jewelsPerRow === 0 
+                && idx >= bombJewelIdx - jewelsPerRow * bombDestroyCount
+                && idx <= bombJewelIdx + jewelsPerRow * bombDestroyCount
+              const checkRow = idx >= amountOfJewels
+                && idx >= bombWhichRow * jewelsPerRow
+                && idx < (bombWhichRow + 1) * jewelsPerRow
+                && idx >= bombJewelIdx - 1 * bombDestroyCount
+                && idx <= bombJewelIdx + 1 * bombDestroyCount
+              return checkColumn || checkRow
+            })
+            // console.log(bombedJewelsIdxs)
+            bombedJewelsIdxs.forEach(idx => {
+              newJewelData[idx] = {
+                ...jewelData[idx],
+                type: 'empty',
+                color: emptyColor,
+                effect: 'explode',
+              }
+            })
+          }
+          //thunder
+          if(thunderJewelIdx !== -1) {
+            //destroy same color jewels, count depend on thunder jewels
+            const { color: fulfilledJewelColor } = jewelData[fulfilledIdx]
+            const sameColorJewelsIdxs = getIdxsByCondition(jewelData, (data) => {
+              return data.color === fulfilledJewelColor
+            })
+            newJewelData[thunderJewelIdx] = {
+              ...jewelData[thunderJewelIdx],
+              type: 'empty',
+              color: emptyColor,
+            }
+            //destroy same color jewels
+            const thunderDestroyJewels = sameColorJewelsIdxs.filter(idx => {
+              return fulfilledJewels.find(fulIdx => fulIdx !== idx)
+            }).slice(0, thunderDestroyCount)
+            console.log('thunderDestroyJewels', thunderDestroyJewels)
+            thunderDestroyJewels.forEach(idx => {
+              newJewelData[idx] = {
+                ...jewelData[idx],
+                type: 'empty',
+                color: emptyColor,
+              }
+            })
+            //set thunder effect, should minus amount of jewels
+            const thunderPoints = {
+              center: thunderJewelIdx - amountOfJewels,
+              otherPoints: thunderDestroyJewels.map(idx => idx - amountOfJewels)
+            }
+            console.log(thunderPoints)
+            setThunderIdxs(thunderPoints)
+          }
           
-
           //set empty jewels or bomb jewel
-          const idx = fulfilledJewels[i];
-          newJewelData[idx] = {
-            ...jewelData[idx],
+          newJewelData[fulfilledIdx] = {
+            ...jewelData[fulfilledIdx],
             type: 'empty',
             color: emptyColor,
           }
           if(fulfilledJewelsCount >= 5 && i === fulfilledJewelsCount - 1) { //thunder jewel
-            newJewelData[idx] = {
-              ...jewelData[idx],
+            newJewelData[fulfilledIdx] = {
+              ...jewelData[fulfilledIdx],
               type: 'thunder',
-              color: specialJewelColors.thunderColor,
+              color: thunderColor,
             }
-          } else if(fulfilledJewelsCount >= 4 && i === fulfilledJewelsCount - 1) { //bomb jewel
-            newJewelData[idx] = {
-              ...jewelData[idx],
+          } else if(fulfilledJewelsCount === 4 && i === fulfilledJewelsCount - 1) { //bomb jewel
+            newJewelData[fulfilledIdx] = {
+              ...jewelData[fulfilledIdx],
               type: 'bomb',
-              color: specialJewelColors.bombColor,
+              color: bombColor,
             }
           }
         }
@@ -272,12 +409,11 @@ const Jewels = ({
   useEffect(() => {
     let newJewelData = [...jewelData]
     if(hintMode) {
-      const jewelIdxs = [...Array(jewelsPerRow * jewelsPerRow * 2).keys()]
       let fulfilledJewels = []
-      for (let idx1 = jewelsPerRow * 5; idx1 < jewelData.length; idx1++) {
+      for (let idx1 = amountOfJewels; idx1 < jewelData.length; idx1++) {
         // const jewel = jewelData[i]
         const dir4JewelsIndexes = jewelIdxs.filter(idx => {
-          return checkJewelIs4Dir(idx1, idx) && idx >= jewelsPerRow * 5
+          return checkJewelIs4Dir(idx1, idx) && idx >= amountOfJewels
         })
         // console.log('index: ' + i + ', dir4JewelsIndexes: ' + dir4JewelsIndexes)
 
@@ -286,10 +422,10 @@ const Jewels = ({
           const idx2 = dir4JewelsIndexes[j]
           const exchangedData = exchangedJewels(idx1, idx2, jewelData)
           //check whether is fulfill
-          for (let k = jewelsPerRow * 5; k < exchangedData.length; k++) {
+          for (let k = amountOfJewels; k < exchangedData.length; k++) {
             fulfilledJewels = [...fulfilledJewels, ...checkIsFulfill(k, jewelsPerRow, exchangedData)]
             //row(expect last 2 jewels)
-            if(k % 5 !== 3 && k % 5 !== 4) {
+            if(k % jewelsPerRow !== jewelsPerRow - 1 && k % jewelsPerRow !== jewelsPerRow - 2) {
               fulfilledJewels = [...fulfilledJewels, ...checkIsFulfill(k, 1, exchangedData)]
               // rowRes = checkIsFulfill(i, 1) 
             }
@@ -314,6 +450,11 @@ const Jewels = ({
     }
     setJewelData(newJewelData)
   }, [hintMode])
+  useEffect(() => {
+    if(thunderIdxs.otherPoints.length > 0) {
+      setTimeout(() => setThunderIdxs(thunderIdxs_init), delayTime)
+    }
+  }, [thunderIdxs])
   //
   useImperativeHandle(ref, () => ({
     handleNext: () => {
@@ -322,14 +463,16 @@ const Jewels = ({
     },
   }))
   const thunderPoints = getThunderPoints(thunderIdxs.center, thunderIdxs.otherPoints)
-  console.log(thunderPoints)
   return (
     <Box className={ classes.root }>
       <Box className={ classes.jewelContainer }>
         {jewelData.map((data, index) => (
           <SingleJewel 
             key={ data.id }
-            jewelInfo={ data }
+            jewelInfo={{
+              ...data,
+              index: index - amountOfJewels
+            }}
             isChosen={ twoJewelsIndex.find(idx => idx === index) }
             pos={ getJewelPos(index, jewelWidth) } 
             getIdFn={ () => { getJewelId(index) } } />

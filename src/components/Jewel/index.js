@@ -6,10 +6,15 @@ import { calculateScore } from './fn'
 import Jewels from './jewelSquare'
 import Timer from '../Timer'
 import { getResultScoreStars } from '../GARAM/config'
-import { jewelWidth, jewelsPerRow } from './config'
+import { 
+  jewelWidth, 
+  jewelsPerRow,
+  gameMode 
+} from './config'
+
 const { getResultContent } = getResultScoreStars
 
-const timerTime = 600 //s
+const timerTime = 3 //s
 const comboTimeout = 3000 //ms
 const comboAddScoreMagnification = 50
 
@@ -21,9 +26,27 @@ const useStyles = makeStyles({
   }
 })
 
+
+const checkRequirements = (gameOriginInfo, gameReq) => {
+  const { score, movedStep, isTimeover } = gameOriginInfo
+  const {
+    requireScore,
+    limitStep,
+    requireJewels
+  } = gameReq
+  if(requireScore && !limitStep) {
+    return gameMode.scoreAndLimitTimeMode(isTimeover, score, requireScore)
+  }
+  if(requireScore && limitStep) {
+    return gameMode.scoreAndLimitStepMode(movedStep, limitStep, score, requireScore)
+  }
+  return false
+}
+
 const JewelGame = ({ 
   mainGameRef,
-  overFn, 
+  overFn,
+  gameRequirements,
 }, ref) => {
   const classes = useStyles()
   const comboTimeoutRef = useRef()
@@ -31,23 +54,33 @@ const JewelGame = ({
   const [score, setScore] = useState(0)
   const [combo, setCombo] = useState(0)
   const [movedStep, setStep] = useState(0)
-  const [isPause, setPause] = useState(false)
+  const [isPause, setPause] = useState(true)
+  const [isTimeover, setTimeover] = useState(false)
   const [isHint, setHint] = useState(false)
+
   const handleSetScore = jewelCount => {
     setScore(score => score + calculateScore(jewelCount))
   }
-  const handleGameOver = useCallback(() => {
+
+  const handleResetGame = useCallback(() => {
+    setTimeover(false)
     setPause(true)
-    timerRef && timerRef.current.resetTimer()
     setScore(0)
-    overFn && overFn({
-      level: 'no',
-      score,
-    })
-  }, [score])
+    setCombo(0)
+    setStep(0)
+    timerRef && timerRef.current.resetTimer()
+    clearTimeout(comboTimeoutRef.current)
+  }, [isTimeover])
+
+  const handleGameOver = useCallback(result => {
+    overFn && overFn(result)
+    handleResetGame()
+  }, [overFn])
+
   const handleSetCombo = useCallback(newCombo => {
     setCombo(c => c + newCombo)
   }, [combo])
+  //
   useEffect(() => {
     if(combo > 0) {
       comboTimeoutRef.current && clearTimeout(comboTimeoutRef.current)
@@ -59,12 +92,25 @@ const JewelGame = ({
       }, comboTimeout)
     }
   }, [combo])
+  useEffect(() => {
+    const originGameInfo = { score, movedStep, isTimeover }
+    const result = checkRequirements(originGameInfo, gameRequirements)
+    console.log(originGameInfo, result)
+    //time limit requirement
+    if(overFn && result) {
+      if(isTimeover) {
+        handleGameOver(result)
+      }
+      handleGameOver(result)
+    }
+  }, [score, isTimeover, movedStep])
+  //
   return (
     <Container>
       <Box width={ jewelWidth * jewelsPerRow }>
         <Box>
           <Timer 
-            timeoutFn={ handleGameOver }
+            timeoutFn={ () => setTimeover(true) }
             time={ timerTime } 
             isPause={ isPause }
             ref={ timerRef } />

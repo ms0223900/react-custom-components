@@ -9,6 +9,7 @@ import FreeCellGame from '../src/components/FreeCellGame'
 import Gomoku from '../src/components/Gomoku'
 import '../src/styles/style.scss'
 import GARAMGameRouter from '../src/components/GARAM/route';
+import JewelGameRouter from '../src/components/Jewel/route'
 
 storiesOf('custom-components', module)
   .add('calendar', () => (
@@ -34,4 +35,7 @@ storiesOf('custom-components', module)
   ))
   .add('GARAM', () => (
     <GARAMGameRouter />
+  ))
+  .add('Jewel Game', () => (
+    <JewelGameRouter />
   ))

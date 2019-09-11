@@ -37,12 +37,20 @@ export const scoreMagnification = (count) => {
 
 export const explodeImgSrc = 'https://cdn4.iconfinder.com/data/icons/explosion/512/as_906-512.png'
 
+const starByScore = [3000, 10000, 20000]
+const calculateStar = (score) => {
+  return starByScore.filter(sco => score > sco).length
+}
+
 const getResult = (score, isPass) => ({
   score,
   isPass,
+  star: calculateStar(score)
+  //star from star fn
 })
 
 export const gameMode = {
+  //basic check
   checkBigger: (a, b) => {
     return a >= b
   },
@@ -55,25 +63,30 @@ export const gameMode = {
     return false
   },
   checkJewels: (clearedJewels, requiredJewels, scoreNow) => {
-    return 
+    if(clearedJewels >= requiredJewels) return getResult(scoreNow, true)
+    return false
   },
-  scoreAndLimitTimeMode: (timeNow, limitTime, scoreNow, requiredScore) => {
-    const timeRes = this.checkIsFail(timeNow, limitTime, scoreNow)
-    if(timeRes) return timeRes
-    const scoreRes = this.checkScore(scoreNow, requiredScore)
+  //game mode check
+  scoreAndLimitTimeMode(isTimeover, scoreNow, requiredScore) {
+    if(isTimeover) {
+      const scoreRes = gameMode.checkScore(scoreNow, requiredScore)
+      if(scoreRes) return scoreRes
+      return getResult(scoreNow, false)
+    }
+    return false
+  },
+  scoreAndLimitStepMode(stepNow, limitStep, scoreNow, requiredScore) {
+    const stepRes = gameMode.checkIsFail(stepNow, limitStep)
+    if(stepRes) return stepRes
+    const scoreRes = gameMode.checkScore(scoreNow, requiredScore)
     if(scoreRes) return scoreRes
     return false
   },
-  scoreAndLimitStepMode: (stepNow, limitStep, scoreNow, requiredScore) => {
-    const stepRes = this.checkIsFail(stepNow, limitStep)
+  requireJewelsAndLimitStepMode(stepNow, limitStep, clearedJewels, requiredJewels, scoreNow) {
+    const stepRes = gameMode.checkIsFail(stepNow, limitStep)
     if(stepRes) return stepRes
-    const scoreRes = this.checkScore(scoreNow, requiredScore)
-    if(scoreRes) return scoreRes
-    return false
-  },
-  requireJewelsAndLimitStepMode: (stepNow, limitStep, clearedJewels, requiredJewels, scoreNow) => {
-    const stepRes = this.checkIsFail(stepNow, limitStep)
-    if(stepRes) return stepRes
+    const jewelRes = gameMode.checkJewels(clearedJewels, requiredJewels, scoreNow)
+    if(jewelRes) return jewelRes
     return false
   }
 }

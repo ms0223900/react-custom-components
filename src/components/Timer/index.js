@@ -34,7 +34,7 @@ const Timer = ({ timeoutFn=mockFn, time=333, isPause, countDown=true }, ref) => 
   const [timeNow, setTimeNow] = useState(time)
   useEffect(() => {
     if(countDown && timeNow === 0) {
-      timeoutFn()
+      timeoutFn && timeoutFn()
       setTimeNow(time)
     }
     if(!isPause) {

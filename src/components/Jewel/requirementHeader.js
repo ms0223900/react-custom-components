@@ -1,5 +1,6 @@
 import React from 'react'
 import { Box, Typography } from '@material-ui/core'
+import JewelsRequirePart from './jewelsRequirePart'
 
 const RequirementHeader = ({ gameRequirements }) => {
   const { score, jewels, time } = gameRequirements
@@ -13,11 +14,8 @@ const RequirementHeader = ({ gameRequirements }) => {
           <Typography>{ 'score: ' + score }</Typography>
         )}
         {jewels && (
-          <>
-            {jewels.map(jewel => (
-              <Typography>{ 'jewel x ' + jewel }</Typography>
-            ))}
-          </>
+          <JewelsRequirePart 
+            jewels={ jewels } />
         )}
         {time && (
           <Typography>{ 'time: ' + time }</Typography>

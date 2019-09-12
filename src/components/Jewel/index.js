@@ -2,7 +2,10 @@
 import React, { useState, forwardRef, useCallback, useRef, useEffect } from 'react'
 import { Container, Box, Button, Typography, makeStyles } from '@material-ui/core'
 import GameText from './gameScore'
-import { calculateScore } from './fn'
+import { 
+  calculateScore,
+  checkRequirements, 
+} from './fn'
 import Jewels from './jewelSquare'
 import Timer from '../Timer'
 import { getResultScoreStars } from '../GARAM/config'
@@ -27,22 +30,6 @@ const useStyles = makeStyles({
 })
 
 
-const checkRequirements = (gameOriginInfo, gameReq) => {
-  const { score, movedStep, isTimeover } = gameOriginInfo
-  const {
-    requireScore,
-    limitStep,
-    requireJewels
-  } = gameReq
-  if(requireScore && !limitStep) {
-    return gameMode.scoreAndLimitTimeMode(isTimeover, score, requireScore)
-  }
-  if(requireScore && limitStep) {
-    return gameMode.scoreAndLimitStepMode(movedStep, limitStep, score, requireScore)
-  }
-  return false
-}
-
 const JewelGame = ({ 
   mainGameRef,
   overFn,
@@ -54,6 +41,7 @@ const JewelGame = ({
   const [score, setScore] = useState(0)
   const [combo, setCombo] = useState(0)
   const [movedStep, setStep] = useState(0)
+  const [clearedJewels, setJewels] = useState([])
   const [isPause, setPause] = useState(true)
   const [isTimeover, setTimeover] = useState(false)
   const [isHint, setHint] = useState(false)
@@ -80,6 +68,10 @@ const JewelGame = ({
   const handleSetCombo = useCallback(newCombo => {
     setCombo(c => c + newCombo)
   }, [combo])
+
+  const handleSetJewels = useCallback(newJewels => {
+
+  }, [clearedJewels])
   //
   useEffect(() => {
     if(combo > 0) {
@@ -111,7 +103,7 @@ const JewelGame = ({
         <Box>
           <Timer 
             timeoutFn={ () => setTimeover(true) }
-            time={ timerTime } 
+            time={ (gameRequirements && gameRequirements.limitTime) || timerTime } 
             isPause={ isPause }
             ref={ timerRef } />
           <Button onClick={ () => setPause(!isPause) }>
@@ -144,6 +136,7 @@ const JewelGame = ({
           hintMode={ isHint }
           cancelHintFn={ () => setHint(false) }
           isPause={ isPause } 
+          setJewelsFn={ handleSetJewels }
           setStepFn={ setStep }
           setComboFn={ handleSetCombo }
           setScoreFn={ handleSetScore } />

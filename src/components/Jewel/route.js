@@ -1,29 +1,107 @@
-import React from 'react'
+import React, { useState, useCallback } from 'react'
 import { BrowserRouter as Router, Route, Link, Switch } from 'react-router-dom'
 import JewelGame from '.'
 import ResultContent from '../GameFrame/resultContent';
 import GameFrame from '../GameFrame';
+import { Box, Typography, Container } from '@material-ui/core';
+import JewelLevelEnter from './jewelLevelEnter'
+import { jewelColors } from './config'
 
-const gameRequirement_mockData = {
-  requireScore: 5000,
-  limitStep: 3,
-  // requireJewels
+// schema
+// const gameRequirement_mockData = {
+//   requireScore: 0,
+//   limitStep: 0,
+//   requireJewels: [
+//     { color: '', amount: 0 },
+//   ],
+//   limitTime: 0
+// }
+
+const gameRequirements_mockData = [
+  {
+    requireScore: 5000,
+    limitStep: 3,
+    // requireJewels
+  },
+  {
+    requireScore: 10000,
+    limitTime: 5,
+  },
+  {
+    limitTime: 20,
+    requireJewels: [
+      { color: jewelColors[0], amount: 10 },
+      { color: jewelColors[1], amount: 3 },
+      { color: jewelColors[2], amount: 7 },
+    ],
+  }
+]
+
+
+const SingleLevelItem = ({ levelNum, setLevelEnterFn }) => {
+  return (
+    <Box onClick={ setLevelEnterFn }>
+      <Typography variant={ 'h3' }> 
+        { levelNum }
+      </Typography>
+    </Box>
+  )
 }
 
-const GameMode_JewelsRequirement = () => {
+const LevelList = ({ levels=gameRequirements_mockData }) => {
+  const [gameEnterInfo, setInfo] = useState()
+  const handleSetInfo = (level) => {
+    setInfo({
+      level: level + 1,
+      gameRequirements: levels[level]
+    })
+  }
+  const handleResetInfo = () => {
+    setInfo(null)
+  }
+  return (
+    <Container>
+      {levels.map((level, i) => (
+        <SingleLevelItem 
+          key={ i }
+          levelNum={ i + 1 }
+          setLevelEnterFn={ () => handleSetInfo(i) }  />
+      ))}
+      {gameEnterInfo && (
+        <JewelLevelEnter 
+          gameEnterInfo={ gameEnterInfo }
+          cancelFn={ handleResetInfo } />
+      )}
+    </Container>
+  )
+}
+
+const GameMode_JewelsRequirement = ({ 
+  match, 
+  gameRequirements=gameRequirements_mockData 
+}) => {
+  const { level } = match.params
+  const LEVEL = parseInt(level) - 1
   return (
     <GameFrame 
       GameComponent={ JewelGame }
       PopupComponent={ ResultContent }
-      gameRequirements={ gameRequirement_mockData } />
+      gameRequirements={ gameRequirements[LEVEL] } />
   )
 }
 
 const JewelGameRouter = () => {
   return (
     <Router>
+      <Link to={'/jewelGame'}>
+        {'jewel game'}
+      </Link>
       <Route 
-        path={'/'}
+        path={ '/jewelGame' }
+        exact
+        render={ () => <LevelList /> } />
+      <Route 
+        path={'/jewelGame/level/:level'}
         render={ GameMode_JewelsRequirement } />
     </Router>
   )

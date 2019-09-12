@@ -103,12 +103,15 @@ const checkIsFulfill = (index, jewelAddCount, jewelData) => {
   const { type, color } = jewelData[index] //compared origin jewel
   let sameColorCount = 1
   let jewelIndex = index
-  let checkFulfills = [jewelIndex]
+  let checkFulfills = [{
+    color,
+    idx: jewelIndex
+  }]
   let nextIndex = jewelIndex + jewelAddCount
   // console.log(jewelIndex + jewelAddCount)
   while(jewelData[nextIndex] && jewelData[nextIndex].color === color && type !== 'empty' && nextIndex < maxCompareAddCount) {
     sameColorCount += 1
-    checkFulfills = [...checkFulfills, nextIndex]
+    checkFulfills = [...checkFulfills, { color, idx: nextIndex }]
     nextIndex += jewelAddCount
   }
   if(sameColorCount >= 3) { //fulfill 3 
@@ -203,7 +206,7 @@ const SingleJewel = ({ jewelInfo, pos, isChosen, getIdFn }) => {
   }
   return (
     <Box onClick={ getIdFn } className={ classes.singleJewel }>
-      { <Icon {...jewelInfo} /> }
+      <Icon {...jewelInfo} />
     </Box>
   )
 }
@@ -222,6 +225,7 @@ const Jewels = ({
   setScoreFn,
   setComboFn,
   setStepFn,
+  setJewelsFn,
 }, ref) => {
   const classes = useStyles()
   const [thunderIdxs, setThunderIdxs] = useState(thunderIdxs_init)
@@ -263,7 +267,6 @@ const Jewels = ({
       const emptyJewelsIdx = getIdxsByCondition(jewelData, (data) => {
         return data.type === 'empty'
       })
-      // console.log('jewelData: ', jewelData)
       //update empty jewels to new jewels
       if(emptyJewelsIdx.length > 0) {
       // console.log(newJewelData)
@@ -292,23 +295,45 @@ const Jewels = ({
           setJewelData(newJewelData)
         }, delayTime)
       } else {  //check have fulfill jewels
+        const mergeFulfillJewels = (jewels) => {
+          const allIdxs = [...new Set( jewels.map(j => j.idx) )]
+          const allColors = [...new Set( jewels.map(j => j.color) )]
+          const jewelsByColors = allColors.map(color => {
+            const sameColorJewel = jewels.filter(j => j.color === color)
+            const idxs = [...new Set(sameColorJewel.map(j => j.idx))]
+            return ({
+              color,
+              idxs,
+              amount: idxs.length
+            })
+          })
+          return ({
+            jewelsByColors,
+            allIdxs,
+          })
+        }
         let fulfilledJewels = []
         for (let i = amountOfJewels; i < jewelData.length; i++) { 
-        //check column
-          fulfilledJewels = [...fulfilledJewels, ...checkIsFulfill(i, jewelsPerRow, jewelData)]
+          //check column
+          const columnFulfills = checkIsFulfill(i, jewelsPerRow, jewelData)
+          fulfilledJewels = [...fulfilledJewels, ...columnFulfills]
           //check row(expect last 2 jewels)
           if(i % jewelsPerRow !== jewelsPerRow - 1 && i % jewelsPerRow !== jewelsPerRow - 2) {
-            fulfilledJewels = [...fulfilledJewels, ...checkIsFulfill(i, 1, jewelData)]
+            const rowFulfills = checkIsFulfill(i, 1, jewelData)
+            fulfilledJewels = [...fulfilledJewels, ...rowFulfills]
           }
         // if(fulfilledJewels.length > 0) break
         }
 
-        //remove duplicate
-        fulfilledJewels = [...new Set(fulfilledJewels)]
+        //merge color and remove duplicate
+        // fulfilledJewels = [...new Set(fulfilledJewels)]
+        fulfilledJewels = mergeFulfillJewels(fulfilledJewels)
         //set fulfill jewels to empty or special jewels
-        const fulfilledJewelsCount = fulfilledJewels.length
+        const fulfilledJewelsCount = fulfilledJewels.allIdxs.length
         if(fulfilledJewelsCount > 0) {
           console.log('fulfilledJewels: ' + fulfilledJewels)
+          //set infos...
+          // setJewelsFn
           setComboFn && setComboFn(fulfilledJewelsCount)
           for (let i = 0; i < fulfilledJewelsCount; i++) {
             const fulfilledIdx = fulfilledJewels[i]

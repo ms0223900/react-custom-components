@@ -3,8 +3,8 @@ import Strapi from 'strapi-sdk-javascript/build/main'
 
 export const apiUrl = 
   process.env.NODE_ENV === 'production' ? 
-  'https://intense-brushlands-46000.herokuapp.com' : 
-  process.env.STORYBOOK_API || 'http://localhost:1337/' 
+    'https://intense-brushlands-46000.herokuapp.com' : 
+    process.env.STORYBOOK_API || 'http://localhost:1337/' 
 
 export const strapi = new Strapi(apiUrl)
 export const signUp = (sameUsernames, registerRequest, setErr, setUserInfo) => {

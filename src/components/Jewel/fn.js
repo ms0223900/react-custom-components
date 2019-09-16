@@ -10,7 +10,12 @@ export const calculateScore = (clearedEmptyJewels) => {
 }
 
 export const checkRequirements = (gameOriginInfo, gameReq) => {
-  const { score, movedStep, isTimeover } = gameOriginInfo
+  const { 
+    score, 
+    movedStep, 
+    isTimeover, 
+    remainRequireJewels 
+  } = gameOriginInfo
   const {
     requireScore,
     limitStep,
@@ -22,6 +27,9 @@ export const checkRequirements = (gameOriginInfo, gameReq) => {
   }
   if(requireScore && limitStep) {
     return gameMode.scoreAndLimitStepMode(movedStep, limitStep, score, requireScore)
+  }
+  if(limitTime && remainRequireJewels.length > 0) {
+    return gameMode.requireJewelsAndLimitTimeMode(isTimeover, remainRequireJewels, score)
   }
   return false
 }

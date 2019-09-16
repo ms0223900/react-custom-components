@@ -25,16 +25,20 @@ const gameRequirements_mockData = [
   },
   {
     requireScore: 10000,
-    limitTime: 5,
+    limitTime: 500,
   },
   {
-    limitTime: 20,
+    limitTime: 2,
     requireJewels: [
       { color: jewelColors[0], amount: 10 },
       { color: jewelColors[1], amount: 3 },
       { color: jewelColors[2], amount: 7 },
     ],
-  }
+  },
+  {
+    requireScore: 1000,
+    limitTime: 5,
+  },
 ]
 
 
@@ -78,15 +82,27 @@ const LevelList = ({ levels=gameRequirements_mockData }) => {
 
 const GameMode_JewelsRequirement = ({ 
   match, 
+  history,
   gameRequirements=gameRequirements_mockData 
 }) => {
   const { level } = match.params
   const LEVEL = parseInt(level) - 1
+  const handleNextLevel = () => {
+    const nextLevel = parseInt(level) + 1
+    if(nextLevel <= gameRequirements.length) {
+      history.push(`/jewelGame/level/${ parseInt(level) + 1 }`)
+    }
+  }
   return (
+    <>
+    <Typography>{ 'Level: ' + level }</Typography>
     <GameFrame 
+      key={ LEVEL }
       GameComponent={ JewelGame }
       PopupComponent={ ResultContent }
+      resultNextFns={ [handleNextLevel] }
       gameRequirements={ gameRequirements[LEVEL] } />
+    </>
   )
 }
 
@@ -101,7 +117,7 @@ const JewelGameRouter = () => {
         exact
         render={ () => <LevelList /> } />
       <Route 
-        path={'/jewelGame/level/:level'}
+        path={ '/jewelGame/level/:level' }
         render={ GameMode_JewelsRequirement } />
     </Router>
   )

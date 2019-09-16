@@ -148,6 +148,39 @@ const getIdxsByCondition = (data, conditionFn=getEmptyFn) => {
   return res
 }
 
+const mergeFulfillJewels = (jewels) => {
+  const allIdxs = [...new Set( jewels.map(j => j.idx) )]
+  const allColors = [...new Set( jewels.map(j => j.color) )]
+  const jewelsByColors = allColors.map(color => {
+    const sameColorJewel = jewels.filter(j => j.color === color)
+    const idxs = [...new Set(sameColorJewel.map(j => j.idx))]
+    return ({
+      color,
+      idxs,
+      amount: idxs.length
+    })
+  })
+  return ({
+    jewelsByColors,
+    allIdxs,
+  })
+}
+
+
+const getSpecialJewelClearedJewels = (idxs, jewelData) => {
+  const filteredData = jewelData.filter((data, i) => {
+    return idxs.find(idx => idx === i) && data.type === 'jewel'
+  })
+  const allColors = [...new Set( filteredData.map(j => j.color) )]
+  const jewelsByColors = allColors.map(color => {
+    const sameColorJewels = filteredData.filter(j => j.color === color)
+    return ({
+      color,
+      amount: sameColorJewels.length
+    })
+  })
+  return jewelsByColors
+}
 
 //---
 
@@ -295,23 +328,7 @@ const Jewels = ({
           setJewelData(newJewelData)
         }, delayTime)
       } else {  //check have fulfill jewels
-        const mergeFulfillJewels = (jewels) => {
-          const allIdxs = [...new Set( jewels.map(j => j.idx) )]
-          const allColors = [...new Set( jewels.map(j => j.color) )]
-          const jewelsByColors = allColors.map(color => {
-            const sameColorJewel = jewels.filter(j => j.color === color)
-            const idxs = [...new Set(sameColorJewel.map(j => j.idx))]
-            return ({
-              color,
-              idxs,
-              amount: idxs.length
-            })
-          })
-          return ({
-            jewelsByColors,
-            allIdxs,
-          })
-        }
+        
         let fulfilledJewels = []
         for (let i = amountOfJewels; i < jewelData.length; i++) { 
           //check column
@@ -322,21 +339,21 @@ const Jewels = ({
             const rowFulfills = checkIsFulfill(i, 1, jewelData)
             fulfilledJewels = [...fulfilledJewels, ...rowFulfills]
           }
-        // if(fulfilledJewels.length > 0) break
         }
 
         //merge color and remove duplicate
-        // fulfilledJewels = [...new Set(fulfilledJewels)]
         fulfilledJewels = mergeFulfillJewels(fulfilledJewels)
         //set fulfill jewels to empty or special jewels
         const fulfilledJewelsCount = fulfilledJewels.allIdxs.length
         if(fulfilledJewelsCount > 0) {
           console.log('fulfilledJewels: ' + fulfilledJewels)
           //set infos...
-          // setJewelsFn
+          //set jewels fn
+          setJewelsFn && setJewelsFn(fulfilledJewels.jewelsByColors)
           setComboFn && setComboFn(fulfilledJewelsCount)
+          //
           for (let i = 0; i < fulfilledJewelsCount; i++) {
-            const fulfilledIdx = fulfilledJewels[i]
+            const fulfilledIdx = fulfilledJewels.allIdxs[i]
             //trigger special jewels at same time, set to empty blocks
             //check is special jewels is around fulfilled jewels
             const dir4JewelsIndexes = jewelIdxs.filter(idx => {
@@ -354,17 +371,21 @@ const Jewels = ({
               const bombedJewelsIdxs = jewelIdxs.filter(idx => {
                 const bombWhichRow = ~~(bombJewelIdx / jewelsPerRow)
                 const checkColumn = idx >= amountOfJewels 
-                && (bombJewelIdx - idx) % jewelsPerRow === 0 
-                && idx >= bombJewelIdx - jewelsPerRow * bombDestroyCount
-                && idx <= bombJewelIdx + jewelsPerRow * bombDestroyCount
+                  && (bombJewelIdx - idx) % jewelsPerRow === 0 
+                  && idx >= bombJewelIdx - jewelsPerRow * bombDestroyCount
+                  && idx <= bombJewelIdx + jewelsPerRow * bombDestroyCount
                 const checkRow = idx >= amountOfJewels
-                && idx >= bombWhichRow * jewelsPerRow
-                && idx < (bombWhichRow + 1) * jewelsPerRow
-                && idx >= bombJewelIdx - 1 * bombDestroyCount
-                && idx <= bombJewelIdx + 1 * bombDestroyCount
+                  && idx >= bombWhichRow * jewelsPerRow
+                  && idx < (bombWhichRow + 1) * jewelsPerRow
+                  && idx >= bombJewelIdx - 1 * bombDestroyCount
+                  && idx <= bombJewelIdx + 1 * bombDestroyCount
                 return checkColumn || checkRow
               })
               // console.log(bombedJewelsIdxs)
+              const bombedJewels = getSpecialJewelClearedJewels(bombedJewelsIdxs, jewelData)
+              // console.log('bombedJewels: ', bombedJewels)
+              //set jewels fn
+              setJewelsFn(bombedJewels)
               bombedJewelsIdxs.forEach(idx => {
                 newJewelData[idx] = {
                   ...jewelData[idx],
@@ -387,11 +408,14 @@ const Jewels = ({
                 color: emptyColor,
               }
               //destroy same color jewels
-              const thunderDestroyJewels = sameColorJewelsIdxs.filter(idx => {
-                return fulfilledJewels.find(fulIdx => fulIdx !== idx)
+              const thunderDestroyJewelsIdxs = sameColorJewelsIdxs.filter(idx => {
+                return fulfilledJewels.allIdxs.find(fulIdx => fulIdx !== idx)
               }).slice(0, thunderDestroyCount)
-              console.log('thunderDestroyJewels', thunderDestroyJewels)
-              thunderDestroyJewels.forEach(idx => {
+              const thunderedJewels = getSpecialJewelClearedJewels(thunderDestroyJewelsIdxs, jewelData)
+              // console.log('thunderedJewels: ', thunderedJewels)
+              //set jewels fn
+              setJewelsFn(thunderedJewels)
+              thunderDestroyJewelsIdxs.forEach(idx => {
                 newJewelData[idx] = {
                   ...jewelData[idx],
                   type: 'empty',
@@ -401,7 +425,7 @@ const Jewels = ({
               //set thunder effect, should minus amount of jewels
               const thunderPoints = {
                 center: thunderJewelIdx - amountOfJewels,
-                otherPoints: thunderDestroyJewels.map(idx => idx - amountOfJewels)
+                otherPoints: thunderDestroyJewelsIdxs.map(idx => idx - amountOfJewels)
               }
               console.log(thunderPoints)
               setThunderIdxs(thunderPoints)
@@ -439,8 +463,8 @@ const Jewels = ({
   useEffect(() => {
     let newJewelData = [...jewelData]
     if(hintMode) {
-      let fulfilledJewels = []
       for (let idx1 = amountOfJewels; idx1 < jewelData.length; idx1++) {
+        let fulfilledJewels = []
         // const jewel = jewelData[i]
         const dir4JewelsIndexes = jewelIdxs.filter(idx => {
           return checkJewelIs4Dir(idx1, idx) && idx >= amountOfJewels
@@ -453,17 +477,21 @@ const Jewels = ({
           const exchangedData = exchangedJewels(idx1, idx2, jewelData)
           //check whether is fulfill
           for (let k = amountOfJewels; k < exchangedData.length; k++) {
-            fulfilledJewels = [...fulfilledJewels, ...checkIsFulfill(k, jewelsPerRow, exchangedData)]
-            //row(expect last 2 jewels)
+            const columnFulfills = checkIsFulfill(k, jewelsPerRow, exchangedData)
+            fulfilledJewels = [...fulfilledJewels, ...columnFulfills]
+            //check row(expect last 2 jewels)
             if(k % jewelsPerRow !== jewelsPerRow - 1 && k % jewelsPerRow !== jewelsPerRow - 2) {
-              fulfilledJewels = [...fulfilledJewels, ...checkIsFulfill(k, 1, exchangedData)]
-              // rowRes = checkIsFulfill(i, 1) 
+              const rowFulfills = checkIsFulfill(k, 1, exchangedData)
+              fulfilledJewels = [...fulfilledJewels, ...rowFulfills]
             }
           }
         }
-        if(fulfilledJewels.length > 0) {
+        console.log(fulfilledJewels)
+        //merge color and remove duplicate
+        fulfilledJewels = mergeFulfillJewels(fulfilledJewels)
+        if(fulfilledJewels.allIdxs.length > 0) {
           // console.log('fulfilledJewels: ' + fulfilledJewels)
-          fulfilledJewels.forEach(idx => {
+          fulfilledJewels.allIdxs.forEach(idx => {
             newJewelData[idx] = {
               ...jewelData[idx],
               hint: true,
@@ -488,6 +516,10 @@ const Jewels = ({
   //
   useImperativeHandle(ref, () => ({
     handleNext: () => {
+      setJewelData([])
+      settwoJewelsIndex([])
+    },
+    handleResetGame: () => {
       setJewelData([])
       settwoJewelsIndex([])
     },

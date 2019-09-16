@@ -3,26 +3,6 @@ import React, { useState, useCallback, useRef, useEffect } from 'react'
 import { Box, Paper, makeStyles, Typography, Button } from '@material-ui/core';
 import { useStyles_gameFrame, useStyles_gameResultPopup } from './styles'
 
-
-const GameResultPopup = ({ maxWidth=300, closeFn, nextFn, ...props }) => {
-  const classes = useStyles_gameResultPopup({ maxWidth })
-  return (
-    <Box 
-      display={ 'flex' } 
-      className={ classes.root } 
-      // onClick={ closeFn }
-    >
-      <Paper className={ classes.popup }>
-        <Box className={ classes.closeBtn }>
-          <span onClick={ closeFn }>{'x'}</span>
-        </Box>
-        {props.children}
-        <Button onClick={ nextFn }>{ 'next' }</Button>
-      </Paper>
-    </Box>
-  )
-}
-
 const usePopup = (init=false, setGameCoinFn) => {
   const [popup, setPopup] = useState(init)
   const [popupCnt, setCnt] = useState({})
@@ -44,9 +24,40 @@ const usePopup = (init=false, setGameCoinFn) => {
   return [popup, open, close, toggle, popupCnt]
 }
 
+const GameResultPopup = ({ maxWidth=300, closeFn, nextFn, retryFn, ...props }) => {
+  const classes = useStyles_gameResultPopup({ maxWidth })
+  return (
+    <Box 
+      display={ 'flex' } 
+      className={ classes.root } 
+      // onClick={ closeFn }
+    >
+      <Paper className={ classes.popup }>
+        <Box className={ classes.closeBtn }>
+          <span onClick={ closeFn }>{'x'}</span>
+        </Box>
+        {props.children}
+        <Box>
+          <Button onClick={ retryFn }>{ 'retry' }</Button>
+          <Button onClick={ nextFn }>{ 'next' }</Button>
+        </Box>
+        
+      </Paper>
+    </Box>
+  )
+}
 
-const GameFrame = ({ GameComponent, PopupComponent, resultNextFns=[], ...props }) => {
+
+
+const GameFrame = ({ 
+  GameComponent, 
+  PopupComponent, 
+  closeFn,
+  resultNextFns=[], 
+  ...props 
+}) => {
   const gameRef = useRef()
+  const gameContainerRef = useRef()
   const classes = useStyles_gameFrame()
   const [gameCoin, setGameCoin] = useState(parseInt(localStorage.getItem('gameCoin')) || 0)
   const [popup, open, close, toggle, popupCnt] = usePopup(false, setGameCoin)
@@ -56,7 +67,7 @@ const GameFrame = ({ GameComponent, PopupComponent, resultNextFns=[], ...props }
   }
 
   const handleNext = useCallback(() => {
-    close()
+    // close()
     if(resultNextFns.length > 0) {
       resultNextFns.forEach(fn => fn())
       gameRef && gameRef.current.handleResetGame()
@@ -65,6 +76,17 @@ const GameFrame = ({ GameComponent, PopupComponent, resultNextFns=[], ...props }
     }
   }, [resultNextFns])
 
+  const handleClose = useCallback(() => {
+    close()
+    closeFn && closeFn()
+  }, [closeFn])
+
+  const handleRetry = () => {
+    gameRef && gameRef.current.handleResetGame()
+    gameContainerRef && gameContainerRef.current.startGame()
+    close()
+  }
+
   useEffect(() => {
     localStorage.setItem('gameCoin', gameCoin)
   }, [gameCoin])
@@ -72,16 +94,23 @@ const GameFrame = ({ GameComponent, PopupComponent, resultNextFns=[], ...props }
   //
   return (
     <Box className={ classes.root }>
-      <Typography variant={'h5'}>{'game coin: ' + gameCoin }</Typography>
+      <Typography variant={'h5'}>
+        {'game coin: ' + gameCoin }
+      </Typography>
       {GameComponent && (
         <GameComponent 
+          ref={ gameContainerRef }
           mainGameRef={ gameRef } 
           isOver={ popup } 
           overFn={ handleOver }
           {...props} />
       )}
       {popup && (
-        <GameResultPopup closeFn={ close } nextFn={ handleNext }>
+        <GameResultPopup 
+          closeFn={ handleClose } 
+          nextFn={ handleNext }
+          retryFn={ handleRetry }
+        >
           {PopupComponent && (
             <PopupComponent content={ popupCnt } />
           )}

@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import React, { useState, forwardRef, useCallback, useRef, useEffect } from 'react'
+import React, { useState, forwardRef, useCallback, useRef, useEffect, useImperativeHandle } from 'react'
 import { Container, Box, Button, Typography, makeStyles } from '@material-ui/core'
 import GameText from './gameScore'
 import { 
@@ -10,16 +10,22 @@ import Jewels from './jewelSquare'
 import Timer from '../Timer'
 import { getResultScoreStars } from '../GARAM/config'
 import { 
+  jewelColors,
   jewelWidth, 
   jewelsPerRow,
   gameMode 
 } from './config'
+import JewelsRequirePart from './jewelsRequirePart'
 
 const { getResultContent } = getResultScoreStars
 
 const timerTime = 3 //s
 const comboTimeout = 3000 //ms
 const comboAddScoreMagnification = 50
+const clearedJewelsByColors_init = jewelColors.map(color => ({
+  color,
+  amount: 0,
+}))
 
 const useStyles = makeStyles({
   comboAddScore: {
@@ -41,8 +47,9 @@ const JewelGame = ({
   const [score, setScore] = useState(0)
   const [combo, setCombo] = useState(0)
   const [movedStep, setStep] = useState(0)
-  const [clearedJewels, setJewels] = useState([])
-  const [isPause, setPause] = useState(true)
+  const [clearedJewels, setJewels] = useState(clearedJewelsByColors_init)
+  const [remainRequireJewels, setRemains] = useState([])
+  const [isPause, setPause] = useState(false)
   const [isTimeover, setTimeover] = useState(false)
   const [isHint, setHint] = useState(false)
 
@@ -56,6 +63,7 @@ const JewelGame = ({
     setScore(0)
     setCombo(0)
     setStep(0)
+    setJewels(clearedJewelsByColors_init)
     timerRef && timerRef.current.resetTimer()
     clearTimeout(comboTimeoutRef.current)
   }, [isTimeover])
@@ -70,7 +78,18 @@ const JewelGame = ({
   }, [combo])
 
   const handleSetJewels = useCallback(newJewels => {
-
+    let newClearedJewels = [...clearedJewels]
+    // console.log('new jewels from jewel game: ', newJewels)
+    newJewels.forEach(jewel => {
+      const { color, amount } = jewel
+      const idx = clearedJewels.findIndex(jwl => jwl.color === color)
+      newClearedJewels[idx] = {
+        ...newClearedJewels[idx],
+        amount: newClearedJewels[idx].amount + amount
+      }
+    })
+    // console.log(newClearedJewels)
+    setJewels(newClearedJewels)
   }, [clearedJewels])
   //
   useEffect(() => {
@@ -85,17 +104,35 @@ const JewelGame = ({
     }
   }, [combo])
   useEffect(() => {
-    const originGameInfo = { score, movedStep, isTimeover }
+    if(gameRequirements && gameRequirements.requireJewels) {
+      const { requireJewels } = gameRequirements
+      const remainJewels = requireJewels.map(jwl => {
+        const { color, amount } = jwl
+        const jewelsAmountByColor = clearedJewels.find(jewel => jewel.color === color).amount
+        const remainJewels = amount - jewelsAmountByColor
+        return ({
+          color,
+          amount: remainJewels >= 0 ? remainJewels : 0
+        })
+      })
+      setRemains(remainJewels)
+    }
+  }, [clearedJewels])
+  //check result
+  useEffect(() => {
+    const originGameInfo = { score, movedStep, isTimeover, remainRequireJewels }
     const result = checkRequirements(originGameInfo, gameRequirements)
     console.log(originGameInfo, result)
     //time limit requirement
     if(overFn && result) {
-      if(isTimeover) {
-        handleGameOver(result)
-      }
       handleGameOver(result)
     }
-  }, [score, isTimeover, movedStep])
+  }, [score, isTimeover, movedStep, remainRequireJewels])
+  useImperativeHandle(ref, () => ({
+    startGame: () => {
+      setPause(false)
+    },
+  }))
   //
   return (
     <Container>
@@ -116,6 +153,9 @@ const JewelGame = ({
           onClick={() => setHint(!isHint)}>
           { 'hint' }
         </Button>
+        <Box>
+          <JewelsRequirePart jewels={ remainRequireJewels } />
+        </Box>
         <hr />
         <Box 
           position={ 'relative' }

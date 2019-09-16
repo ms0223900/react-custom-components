@@ -62,8 +62,8 @@ export const gameMode = {
     if(scoreNow >= requiredScore) return getResult(scoreNow, true)
     return false
   },
-  checkJewels: (clearedJewels, requiredJewels, scoreNow) => {
-    if(clearedJewels >= requiredJewels) return getResult(scoreNow, true)
+  checkJewels: (remainRequireJewels, scoreNow) => {
+    if(!remainRequireJewels.find(jwl => jwl.amount > 0)) return getResult(scoreNow, true)
     return false
   },
   //game mode check
@@ -82,11 +82,19 @@ export const gameMode = {
     if(scoreRes) return scoreRes
     return false
   },
-  requireJewelsAndLimitStepMode(stepNow, limitStep, clearedJewels, requiredJewels, scoreNow) {
+  requireJewelsAndLimitStepMode(stepNow, limitStep, remainRequireJewels, scoreNow) {
     const stepRes = gameMode.checkIsFail(stepNow, limitStep)
     if(stepRes) return stepRes
-    const jewelRes = gameMode.checkJewels(clearedJewels, requiredJewels, scoreNow)
+    const jewelRes = gameMode.checkJewels(remainRequireJewels, scoreNow)
     if(jewelRes) return jewelRes
     return false
-  }
+  },
+  requireJewelsAndLimitTimeMode(isTimeover, remainRequireJewels, scoreNow) {
+    if(isTimeover) {
+      const jewelRes = gameMode.checkJewels(remainRequireJewels, scoreNow)
+      if(jewelRes) return jewelRes
+      return getResult(scoreNow, false)
+    }
+    return false
+  },
 }

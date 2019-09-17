@@ -19,7 +19,7 @@ import JewelsRequirePart from './jewelsRequirePart'
 
 const { getResultContent } = getResultScoreStars
 
-const timerTime = 3 //s
+const timerTime = 666 //s
 const comboTimeout = 3000 //ms
 const comboAddScoreMagnification = 50
 const clearedJewelsByColors_init = jewelColors.map(color => ({
@@ -39,6 +39,7 @@ const useStyles = makeStyles({
 const JewelGame = ({ 
   mainGameRef,
   overFn,
+  setLevelDataFn,
   gameRequirements,
 }, ref) => {
   const classes = useStyles()
@@ -66,7 +67,7 @@ const JewelGame = ({
     setJewels(clearedJewelsByColors_init)
     timerRef && timerRef.current.resetTimer()
     clearTimeout(comboTimeoutRef.current)
-  }, [isTimeover])
+  }, [])
 
   const handleGameOver = useCallback(result => {
     overFn && overFn(result)
@@ -122,9 +123,10 @@ const JewelGame = ({
   useEffect(() => {
     const originGameInfo = { score, movedStep, isTimeover, remainRequireJewels }
     const result = checkRequirements(originGameInfo, gameRequirements)
-    console.log(originGameInfo, result)
+    // console.log(originGameInfo, result)
     //time limit requirement
     if(overFn && result) {
+      setLevelDataFn(result)
       handleGameOver(result)
     }
   }, [score, isTimeover, movedStep, remainRequireJewels])
@@ -134,13 +136,15 @@ const JewelGame = ({
     },
   }))
   //
+  const isLimitTime = gameRequirements && gameRequirements.limitTime ? gameRequirements.limitTime : false
   return (
     <Container>
       <Box width={ jewelWidth * jewelsPerRow }>
         <Box>
           <Timer 
             timeoutFn={ () => setTimeover(true) }
-            time={ (gameRequirements && gameRequirements.limitTime) || timerTime } 
+            time={ isLimitTime || 0 } 
+            countDown={ isLimitTime }
             isPause={ isPause }
             ref={ timerRef } />
           <Button onClick={ () => setPause(!isPause) }>

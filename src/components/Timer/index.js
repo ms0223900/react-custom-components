@@ -29,7 +29,12 @@ const mockFn = () => {
   window.alert('time out!')
 }
 
-const Timer = ({ timeoutFn=mockFn, time=333, isPause, countDown=true }, ref) => {
+const Timer = ({ 
+  timeoutFn=mockFn, 
+  time=333, 
+  isPause, 
+  countDown=true 
+}, ref) => {
   const classes = useStyles()
   const [timeNow, setTimeNow] = useState(time)
   useEffect(() => {

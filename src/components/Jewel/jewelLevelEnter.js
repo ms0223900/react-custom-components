@@ -1,7 +1,9 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { Box, Typography, Button } from '@material-ui/core'
+import { CloseRounded } from '@material-ui/icons'
+import { Box, Typography, Button, Paper, makeStyles } from '@material-ui/core'
 import JewelsRequirePart from './jewelsRequirePart'
+import { gameRequirements_mockData } from './config'
 
 const getRequirementNameValue = (gameReqObj) => {
   const values = Object.values(gameReqObj)
@@ -11,43 +13,116 @@ const getRequirementNameValue = (gameReqObj) => {
   }))
 }
 
-const JewelLevelEnter = ({ gameEnterInfo, cancelFn }) => {
+const useStyles = makeStyles({
+  root: {
+    position: 'relative',
+    maxWidth: 300,
+    padding: 10,
+    margin: 10,
+    textAlign: 'center',
+  },
+  startButton: {
+    width: 100,
+    marginTop: 10,
+    borderRadius: 100,
+    '& a': {
+      width: '100%',
+      height: '100%',
+      color: '#fff',
+      '&:hover': {
+        
+      }
+    }
+  },
+  closeButton: {
+    position: 'absolute',
+    top: -10,
+    right: -10,
+    width: 30,
+    height: 30,
+    borderRadius: 100,
+    backgroundColor: '#ffad00',
+    color: '#fff',
+    '& svg': {
+      width: '100%',
+      height: '100%',
+    }
+  },
+  requireName: {
+    fontSize: '1em',
+  },
+  requireValue: {
+    fontSize: '1.5em',
+    margin: 4,
+  }
+})
+
+const JewelLevelEnter = ({
+  match={ params: { level: 1, }}, 
+  gameEnterInfo={ allgameRequirements: gameRequirements_mockData }, 
+  cancelFn 
+}) => {
+  const classes = useStyles()
+  const { level } = match.params
   const {
-    level,
-    gameRequirements
+    allgameRequirements
   } = gameEnterInfo
+  const gameRequirements = allgameRequirements[parseInt(level) - 1]
+  const requireNameValues = getRequirementNameValue(gameRequirements)
   return (
-    <Box>
-      <Typography variant={ 'h4' }>
-        {'Level ' + level}
-      </Typography>
-      {getRequirementNameValue(gameRequirements).map((req, i) => {
-        const { name, value } = req
-        if(name === 'requireJewels') {
-          return (
-            <JewelsRequirePart jewels={ value } />
-          )
-        }
-        return (
-          <Typography key={ i }>
-            { `${ name } x ${ value }` }
-          </Typography>
-        )
-      })}
+    <Paper className={ classes.root }>
       <Box>
-        <Button>
-          <Link
-            to={ `/jewelGame/level/${ level }` }
+        <Typography 
+          variant={ 'h5' } 
+          fontWeight={ 'fontWeightLight' }
+        >
+          {'Level ' + level}
+        </Typography>
+        <hr />
+        {requireNameValues.length > 0 ? (
+          requireNameValues.map((req, i) => {
+            const { name, value } = req
+            if(name === 'requireJewels') {
+              return (
+                <JewelsRequirePart 
+                  key={ i } 
+                  jewels={ value } />
+              )
+            }
+            return (
+              <Box 
+                key={ i } 
+                display={'flex'} 
+                justifyContent={'center'}
+                alignItems={'center'}
+              >
+                <Box className={ classes.requireName }>{ name }</Box>
+                <Box className={ classes.requireValue }>{ value }</Box>
+              </Box>
+            )
+          })
+        ) : 'free mode'}
+        <Box>
+          <Button 
+            className={ classes.startButton }
+            color={'primary'} 
+            variant={'contained'}
           >
-            { 'start' }
-          </Link>
-        </Button>
-        <Button onClick={ cancelFn }>
-          { 'cancel' }
-        </Button>
+            <Link
+              to={ `/jewelGame/level/${ level }` }
+            >
+              { 'start' }
+            </Link>
+          </Button>
+        </Box>
+        <Link
+          className={ classes.closeButton }
+          to={ '/jewelGame' }
+        >
+          <CloseRounded />
+        </Link>
       </Box>
-      
-    </Box>
+    </Paper>
   )
 }
 

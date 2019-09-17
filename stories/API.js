@@ -1,4 +1,5 @@
 import React from 'react'
+import { BrowserRouter as Router, Route, Link, Switch } from 'react-router-dom'
 import { InMemoryCache } from 'apollo-cache-inmemory';
 import { createHttpLink } from 'apollo-link-http';
 import { ApolloProvider } from '@apollo/react-hooks';
@@ -20,4 +21,10 @@ export const ApolloProviderWrapper = (props) => (
   <ApolloProvider client={ client }>
     {props.children}
   </ApolloProvider>
+)
+
+export const RouterWrapper = props => (
+  <Router>
+    {props.children}
+  </Router>
 )

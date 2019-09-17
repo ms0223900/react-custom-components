@@ -10,7 +10,7 @@ import GameFrame from '../src/components/GameFrame';
 import ResultContent from '../src/components/GameFrame/resultContent';
 import MultiLevels from '../src/components/GameFrame/multiLevels';
 import ShopList from '../src/components/GameFrame/shopList';
-import { ApolloProviderWrapper } from './API'
+import { ApolloProviderWrapper, RouterWrapper } from './API'
 import { 
   ShopListWithCxt, 
   NavBarWithCxt,
@@ -20,6 +20,7 @@ import ItemList from '../src/components/GameFrame/itemList';
 import { HexSnake } from '../src/components/HexaNumberSnake/hexaSnake';
 import JewelGame from '../src/components/Jewel'
 import TwoPointSlash from '../src/components/Jewel/twoPointSlash'
+import JewelLevelEnter from '../src/components/Jewel/jewelLevelEnter'
 
 storiesOf('single custom components', module)
   .add('chatRoom from gomoku', () => (
@@ -86,5 +87,10 @@ storiesOf('single custom components', module)
     <TwoPointSlash 
       point1={{ top: 0, left: 0 }}
       point2={{ top: 100, left: 100 }} />
+  ))
+  .add('game enter component', () => (
+    <RouterWrapper>
+      <JewelLevelEnter />
+    </RouterWrapper>
   ))
   

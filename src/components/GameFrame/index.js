@@ -2,6 +2,7 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react'
 import { Box, Paper, makeStyles, Typography, Button } from '@material-ui/core';
 import { useStyles_gameFrame, useStyles_gameResultPopup } from './styles'
+import './style/style.scss'
 
 const usePopup = (init=false, setGameCoinFn) => {
   const [popup, setPopup] = useState(init)

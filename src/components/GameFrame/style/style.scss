@@ -1,0 +1,12 @@
+* {
+  // outline: #a02 solid 0.5px;
+}
+
+a {
+  text-decoration: none;
+  color: #111;
+  display: inline-block;
+  &:hover {
+    color: blue;
+  }
+}

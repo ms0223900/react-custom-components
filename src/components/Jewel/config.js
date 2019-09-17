@@ -79,14 +79,16 @@ export const gameMode = {
     const stepRes = gameMode.checkIsFail(stepNow, limitStep)
     if(stepRes) return stepRes
     const scoreRes = gameMode.checkScore(scoreNow, requiredScore)
-    if(scoreRes) return scoreRes
+    if(scoreRes && gameMode.checkBigger(stepNow, limitStep)) return scoreRes
     return false
   },
   requireJewelsAndLimitStepMode(stepNow, limitStep, remainRequireJewels, scoreNow) {
     const stepRes = gameMode.checkIsFail(stepNow, limitStep)
     if(stepRes) return stepRes
-    const jewelRes = gameMode.checkJewels(remainRequireJewels, scoreNow)
-    if(jewelRes) return jewelRes
+    if(gameMode.checkBigger(stepNow, limitStep)) {
+      const jewelRes = gameMode.checkJewels(remainRequireJewels, scoreNow)
+      if(jewelRes) return jewelRes
+    }
     return false
   },
   requireJewelsAndLimitTimeMode(isTimeover, remainRequireJewels, scoreNow) {
@@ -98,3 +100,38 @@ export const gameMode = {
     return false
   },
 }
+
+// schema
+// const gameRequirement_mockData = {
+//   requireScore: 0,
+//   limitStep: 0,
+//   requireJewels: [
+//     { color: '', amount: 0 },
+//   ],
+//   limitTime: 0
+// }
+
+export const gameRequirements_mockData = [
+  {
+    requireScore: 5000,
+    limitStep: 3,
+    // requireJewels
+  },
+  {
+    requireScore: 10000,
+    limitTime: 10,
+  },
+  {
+    limitTime: 20,
+    requireJewels: [
+      { color: jewelColors[0], amount: 10 },
+      { color: jewelColors[1], amount: 3 },
+      { color: jewelColors[2], amount: 7 },
+    ],
+  },
+  {
+    requireScore: 1000,
+    limitTime: 5,
+  },
+  ...[...Array(27).keys()],
+]

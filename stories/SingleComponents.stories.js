@@ -21,6 +21,9 @@ import { HexSnake } from '../src/components/HexaNumberSnake/hexaSnake';
 import JewelGame from '../src/components/Jewel'
 import TwoPointSlash from '../src/components/Jewel/twoPointSlash'
 import JewelLevelEnter from '../src/components/Jewel/jewelLevelEnter'
+import GameStatsFrameWithCtxWrapper, {
+  ButtonsForTest
+} from '../src/components/GameFrame/gameStats'
 
 storiesOf('single custom components', module)
   .add('chatRoom from gomoku', () => (
@@ -92,5 +95,10 @@ storiesOf('single custom components', module)
     <RouterWrapper>
       <JewelLevelEnter />
     </RouterWrapper>
+  ))
+  .add('game stats frame', () => (
+    <GameStatsFrameWithCtxWrapper>
+      <ButtonsForTest />
+    </GameStatsFrameWithCtxWrapper>
   ))
   

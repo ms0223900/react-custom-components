@@ -1,6 +1,6 @@
 import React, { useContext } from 'react'
 import ShopList from './shopList'
-import ContextStore, { ContextValue } from './context';
+import ContextStore, { ContextValue, ContextWrapper } from './context';
 import { Button } from '@material-ui/core';
 import { logInAndSetInfo } from './API'
 import ItemList from './itemList';
@@ -56,28 +56,25 @@ const ShopListWithLogin = (props) => {
 
 
 export const ShopListWithCxt = () => {
-  const value = ContextValue()
   return (
-    <ContextStore.Provider value={ value }>
+    <ContextWrapper>
       <ShopListWithLogin />
-    </ContextStore.Provider>
+    </ContextWrapper>
   )
 }
 
 export const NavBarWithCxt = () => {
-  const value = ContextValue()
   return (
-    <ContextStore.Provider value={ value }>
+    <ContextWrapper>
       <NavBar />
-    </ContextStore.Provider>
+    </ContextWrapper>
   )
 }
 
 export const ChatRoomWithCxt = (props) => {
-  const value = ContextValue()
   return (
-    <ContextStore.Provider value={ value }>
+    <ContextWrapper>
       <ComponentWithLoginSwitch {...props} Component={ ChatRoom } />
-    </ContextStore.Provider>
+    </ContextWrapper>
   )
 }

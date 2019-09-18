@@ -45,7 +45,8 @@ const calculateStar = (score) => {
 const getResult = (score, isPass) => ({
   score,
   isPass,
-  star: calculateStar(score)
+  star: calculateStar(score),
+  coin: ~~(score / 100)
   //star from star fn
 })
 

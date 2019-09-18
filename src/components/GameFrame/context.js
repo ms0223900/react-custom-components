@@ -1,4 +1,5 @@
 import React, { useState, useReducer } from 'react'
+import { statsInfo_init } from './gameStats/config'
 import { statsInfo_reducer } from './actionsAndReducers/reducers'
 
 export const userInfo_init = {
@@ -8,14 +9,6 @@ export const userInfo_init = {
   rank: 0,
   isLoggedIn: false,
 }
-
-const statsInfo_init = [
-  {
-    id: 0,
-    statName: 'life',
-    statNumber: 99,
-  }
-]
 
 export const ContextValue = () => {
   const [userInfo, setUserInfo] = useState(userInfo_init)
@@ -34,6 +27,7 @@ export const ContextValue = () => {
 
 const ContextStore = React.createContext({
   userInfo: userInfo_init,
+  statsInfo: statsInfo_init,
 })
 
 export const ContextWrapper = props => {

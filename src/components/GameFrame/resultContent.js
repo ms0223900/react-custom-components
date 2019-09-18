@@ -3,7 +3,7 @@ import { Box, Typography } from '@material-ui/core';
 import { StarPart } from './multiLevels'
 
 const ResultContent = ({ content={} }) => {
-  const { level, score, star, isPass } = content
+  const { level, score, star, isPass, coin } = content
   //
   return (
     <Box>
@@ -22,6 +22,7 @@ const ResultContent = ({ content={} }) => {
           <StarPart star={ star } />
         )}
       </Box>
+      <Typography variant={'subtitle1'}>{ 'coin: ' + coin }</Typography>
     </Box>
   )
 }

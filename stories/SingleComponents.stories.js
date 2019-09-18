@@ -4,7 +4,7 @@ import '../src/styles/style.scss'
 import ChatRoom from '../src/components/Gomoku/chat/chatRoom'
 import ChatRoomFromGameFrame from '../src/components/GameFrame/chat/chatRoom'
 import { chatData_mockData, userData_mockData } from '../src/components/Gomoku/config'
-import Timer from '../src/components/Timer';
+import Timer, { LittleTimer } from '../src/components/Timer';
 import GARAM from '../src/components/GARAM';
 import GameFrame from '../src/components/GameFrame';
 import ResultContent from '../src/components/GameFrame/resultContent';
@@ -41,7 +41,12 @@ storiesOf('single custom components', module)
     </ApolloProviderWrapper>
   ))
   .add('timer', () => (
-    <Timer />
+    <>
+      {'normal timer'}
+      <Timer />
+      {'little timer'}
+      <LittleTimer />
+    </>
   ))
   .add('GARAM', () => (
     <GARAM />

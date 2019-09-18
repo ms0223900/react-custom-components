@@ -39,7 +39,6 @@ const useStyles = makeStyles({
 const JewelGame = ({ 
   mainGameRef,
   overFn,
-  setLevelDataFn,
   gameRequirements,
 }, ref) => {
   const classes = useStyles()
@@ -126,7 +125,6 @@ const JewelGame = ({
     // console.log(originGameInfo, result)
     //time limit requirement
     if(overFn && result) {
-      setLevelDataFn(result)
       handleGameOver(result)
     }
   }, [score, isTimeover, movedStep, remainRequireJewels])

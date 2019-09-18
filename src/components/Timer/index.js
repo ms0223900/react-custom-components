@@ -1,41 +1,20 @@
-import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react'
-import { Typography, Paper } from '@material-ui/core';
-import { makeStyles } from '@material-ui/styles';
-
-const useStyles = makeStyles({
-  root: {
-    display: 'inline-block',
-    width: 90,
-    margin: 10,
-    padding: 10,
-    textAlign: 'center',
-    '& h5': {
-      fontWeight: 100,
-      letterSpacing: 1,
-    }
-  }
-})
-
-const getTime = (timeSec) => {
-  const min = ~~(timeSec / 60)
-  const sec = timeSec % 60
-  return ({
-    min: min < 10 ? '0' + min : min,
-    sec: sec < 10 ? '0' + sec : sec
-  })
-}
+import React, { useState, useEffect, forwardRef, useImperativeHandle, useRef } from 'react'
+import NormalTimerLayout from './normalTimerLayout'
+import LittleTimerLayout from './littleTimerLayout'
 
 const mockFn = () => {
   window.alert('time out!')
 }
 
 const Timer = ({ 
+  timerRef,
   timeoutFn=mockFn, 
   time=333, 
   isPause, 
-  countDown=true 
-}, ref) => {
-  const classes = useStyles()
+  countDown=true,
+  LayoutComponent, 
+}) => {
+  const thisTimer = useRef()
   const [timeNow, setTimeNow] = useState(time)
   useEffect(() => {
     if(countDown && timeNow === 0) {
@@ -44,14 +23,15 @@ const Timer = ({
     }
     if(!isPause) {
       const newTime = countDown ? timeNow - 1 : timeNow + 1
-      const timer = setTimeout(() => {
+      thisTimer.current = setInterval(() => {
         setTimeNow(newTime)
       }, 1000)
-      return () => clearTimeout(timer)
+      // console.log(document.hidden)
+      return () => clearInterval(thisTimer.current)
     }
   }, [timeNow, isPause])
   //
-  useImperativeHandle(ref, () => ({
+  useImperativeHandle(timerRef, () => ({
     resetTimer() {
       setTimeNow(time)
     },
@@ -59,14 +39,23 @@ const Timer = ({
       return timeNow
     }
   }))
-  //
-  const { min, sec } = getTime(timeNow)
   return (
-    <Paper className={ classes.root }>
-      <Typography variant={ 'h5' }>
-        { min + ':' + sec }
-      </Typography>
-    </Paper>
+    <LayoutComponent timeNow={ timeNow } />
   )
 }
-export default forwardRef(Timer)
+
+const TimerWithLayout = (LayoutComponent) => {
+  return forwardRef((props, ref) => {
+    return (
+      <Timer 
+        {...props} 
+        timerRef={ ref }
+        LayoutComponent={ LayoutComponent } />
+    )
+  })
+}
+
+export const NormalTimer = TimerWithLayout(NormalTimerLayout)
+export const LittleTimer = TimerWithLayout(LittleTimerLayout)
+
+export default NormalTimer

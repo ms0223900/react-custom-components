@@ -1,8 +1,10 @@
 /* eslint-disable no-unused-vars */
-import React, { useState, useCallback, useRef, useEffect } from 'react'
+import React, { useState, useCallback, useRef, useEffect, useContext } from 'react'
 import { Box, Paper, makeStyles, Typography, Button } from '@material-ui/core';
 import { useStyles_gameFrame, useStyles_gameResultPopup } from './styles'
 import './style/style.scss'
+import ContextStore from './context';
+import { addStats } from './actionsAndReducers/actions';
 
 const usePopup = (init=false, setGameCoinFn) => {
   const [popup, setPopup] = useState(init)
@@ -49,22 +51,31 @@ const GameResultPopup = ({ maxWidth=300, closeFn, nextFn, retryFn, ...props }) =
 }
 
 
-
 const GameFrame = ({ 
   GameComponent, 
   PopupComponent, 
   closeFn,
+  gameOverFns=[],
   resultNextFns=[], 
   ...props 
 }) => {
+  const { dispatch } = useContext(ContextStore)
   const gameRef = useRef()
   const gameContainerRef = useRef()
   const classes = useStyles_gameFrame()
   const [gameCoin, setGameCoin] = useState(parseInt(localStorage.getItem('gameCoin')) || 0)
   const [popup, open, close, toggle, popupCnt] = usePopup(false, setGameCoin)
   
-  const handleOver = (resultContent) => {
+  const handleOver = (resultContent={}) => {
     open(resultContent)
+    const resultKeys = Object.keys(resultContent)
+    dispatch && resultKeys.forEach(key => {
+      dispatch( addStats(key, resultContent[key]) )
+    })
+    if(gameOverFns.length > 0) {
+      gameOverFns.forEach(fn => fn(resultContent))
+      gameRef && gameRef.current.handleResetGame()
+    }
   }
 
   const handleNext = useCallback(() => {
@@ -95,9 +106,9 @@ const GameFrame = ({
   //
   return (
     <Box className={ classes.root }>
-      <Typography variant={'h5'}>
+      {/* <Typography variant={'h5'}>
         {'game coin: ' + gameCoin }
-      </Typography>
+      </Typography> */}
       {GameComponent && (
         <GameComponent 
           ref={ gameContainerRef }

@@ -7,6 +7,7 @@ import SUDOKU from './components/SUDOKU'
 import WeatherAPI from './components/WeatherAPI'
 import TomatoTimer from './components/TomatoTimer'
 import GARAMGameRouter from './components/GARAM/route';
+import { LittleTimer } from './components/Timer'
 
 export default () => {
 
@@ -19,6 +20,7 @@ export default () => {
       {/* <WeatherAPI /> */}
       {/* <TomatoTimer /> */}
       <GARAMGameRouter />
+      <LittleTimer />
     </div>
   )
 }

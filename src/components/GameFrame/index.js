@@ -5,6 +5,8 @@ import { useStyles_gameFrame, useStyles_gameResultPopup } from './styles'
 import './style/style.scss'
 import ContextStore from './context';
 import { addStats } from './actionsAndReducers/actions';
+import { AllInboxRounded } from '@material-ui/icons';
+import { ShopListWithCtxWithoutDB } from './shopList';
 
 const usePopup = (init=false, setGameCoinFn) => {
   const [popup, setPopup] = useState(init)
@@ -55,6 +57,7 @@ const GameFrame = ({
   GameComponent, 
   PopupComponent, 
   closeFn,
+  consumedItemFns=[],
   gameOverFns=[],
   resultNextFns=[], 
   ...props 
@@ -63,6 +66,7 @@ const GameFrame = ({
   const gameRef = useRef()
   const gameContainerRef = useRef()
   const classes = useStyles_gameFrame()
+  const [showItemList, setItemListShow] = useState(false)
   const [gameCoin, setGameCoin] = useState(parseInt(localStorage.getItem('gameCoin')) || 0)
   const [popup, open, close, toggle, popupCnt] = usePopup(false, setGameCoin)
   
@@ -103,12 +107,27 @@ const GameFrame = ({
     localStorage.setItem('gameCoin', gameCoin)
   }, [gameCoin])
   // console.log(popupCnt)
+  const consumedItemFnsWithGameRef = consumedItemFns.map(fn => {
+    if(typeof(fn) === 'function') {
+      return fn(gameRef)
+    } return fn
+  })
   //
   return (
     <Box className={ classes.root }>
       {/* <Typography variant={'h5'}>
         {'game coin: ' + gameCoin }
       </Typography> */}
+
+      <Button onClick={ () => setItemListShow(!showItemList) }>
+        <AllInboxRounded />
+      </Button>
+      {showItemList && (
+        <ShopListWithCtxWithoutDB 
+          isShop={ false }
+          consumedItemFns={ consumedItemFnsWithGameRef }
+          closeFn={ () => setItemListShow(false) } />
+      )}
       {GameComponent && (
         <GameComponent 
           ref={ gameContainerRef }

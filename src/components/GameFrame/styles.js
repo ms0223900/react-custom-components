@@ -44,9 +44,10 @@ const absolutePos = {
 
 export const useStyles_shopList = makeStyles({
   root: {
-    position: 'relative',
+    ...absolutePos,
     width: '100%',
     height: '100vh',
+    zIndex: 10,
     // width: 400,
     // height: 400,
   }, 

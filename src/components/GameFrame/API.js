@@ -193,3 +193,58 @@ export const CREATE_USER_EMOTE_LIST = gql`
       }
     }
   }`
+
+//shop list
+
+export const updateUserBuyListFn = 
+  (updateUserBuyListMutation, cancelFn, { userbuylistId, itemCount, numCount }) => {
+    return updateUserBuyListMutation({
+      variables: {
+        id: userbuylistId,
+        itemCount: itemCount + numCount,
+      }
+    }).then(() => cancelFn())
+  }
+
+export const createUserBuyListFn = 
+  (createUserBuyListMutation, createUserEmoteListMutation, cancelFn, {
+    username, itemId, numCount, emoteId
+  }) => {
+    return createUserBuyListMutation({
+      variables: {
+        data: {
+          username,
+          itemId,
+          itemCount: numCount,
+        }
+      }
+    }).then(res => {
+      if(emoteId) {
+        createUserEmoteListMutation({
+          variables: {
+            data: {
+              username,
+              emoteId,
+            }
+          }
+        })
+      } return res
+    }).then(() => cancelFn())
+  }
+
+export const updateUserFn = (updateUserMutation, setUserInfoFn, {
+  userInfo, remainPoints
+}) => {
+  return updateUserMutation({
+    variables: {
+      id: userInfo.id,
+      point: remainPoints
+    }
+  }).then(res => {
+    // console.log(res)
+    setUserInfoFn({
+      ...userInfo,
+      point: res.data.updateUser.user.point
+    })
+  })
+}

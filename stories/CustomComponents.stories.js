@@ -10,6 +10,7 @@ import Gomoku from '../src/components/Gomoku'
 import '../src/styles/style.scss'
 import GARAMGameRouter from '../src/components/GARAM/route';
 import JewelGameRouter from '../src/components/Jewel/route'
+import { ApolloProviderWrapper } from './API'
 
 storiesOf('custom-components', module)
   .add('calendar', () => (
@@ -37,5 +38,7 @@ storiesOf('custom-components', module)
     <GARAMGameRouter />
   ))
   .add('Jewel Game', () => (
-    <JewelGameRouter />
+    <ApolloProviderWrapper>
+      <JewelGameRouter />
+    </ApolloProviderWrapper>
   ))

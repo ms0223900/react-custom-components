@@ -77,7 +77,9 @@ const JewelLevelEnter = ({
   const requireNameValues = getRequirementNameValue(gameRequirements)
   //
   const handleEnterLevel = () => {
-    if(window.confirm('are you sure play this level?(need 1 life)')) {
+    // const confirm = window.confirm('are you sure play this level?(need 1 life)')
+    const confirm = true
+    if(confirm) {
       if(dispatch) {
         history.push(`/jewelGame/level/${ level }`)
         const alertFn = () => window.alert('you life is not enough!')

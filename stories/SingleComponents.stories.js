@@ -9,7 +9,7 @@ import GARAM from '../src/components/GARAM';
 import GameFrame from '../src/components/GameFrame';
 import ResultContent from '../src/components/GameFrame/resultContent';
 import MultiLevels from '../src/components/GameFrame/multiLevels';
-import ShopList from '../src/components/GameFrame/shopList';
+import ShopList, { ShopListWithCtxWithoutDB } from '../src/components/GameFrame/shopList';
 import { ApolloProviderWrapper, RouterWrapper } from './API'
 import { 
   ShopListWithCxt, 
@@ -24,6 +24,7 @@ import JewelLevelEnter from '../src/components/Jewel/jewelLevelEnter'
 import GameStatsFrameWithCtxWrapper, {
   ButtonsForTest
 } from '../src/components/GameFrame/gameStats'
+import { ContextWrapper } from '../src/components/GameFrame/context'
 
 storiesOf('single custom components', module)
   .add('chatRoom from gomoku', () => (
@@ -106,4 +107,17 @@ storiesOf('single custom components', module)
       <ButtonsForTest />
     </GameStatsFrameWithCtxWrapper>
   ))
-  
+  .add('ShopList withCtx withoutDB', () => (
+    <ApolloProviderWrapper>
+      <ContextWrapper>
+        <ShopListWithCtxWithoutDB isShop={ true } />
+      </ContextWrapper>
+    </ApolloProviderWrapper>
+  ))
+  .add('ItemList withCtx withoutDB', () => (
+    <ApolloProviderWrapper>
+      <ContextWrapper>
+        <ShopListWithCtxWithoutDB isShop={ false } />
+      </ContextWrapper>
+    </ApolloProviderWrapper>
+  ))

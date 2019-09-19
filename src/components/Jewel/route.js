@@ -1,9 +1,10 @@
 import React, { useState, useCallback, useContext } from 'react'
 import { BrowserRouter as Router, Route, Link } from 'react-router-dom'
+import { HouseRounded, AllInboxRounded } from '@material-ui/icons'
+import { Box, Typography, Button } from '@material-ui/core';
 import JewelGame from '.'
 import ResultContent from '../GameFrame/resultContent';
 import GameFrame from '../GameFrame';
-import { Typography } from '@material-ui/core';
 import JewelLevelEnter from './jewelLevelEnter'
 import { 
   gameRequirements_mockData 
@@ -11,12 +12,31 @@ import {
 import MultiLevels from '../GameFrame/multiLevels';
 import ContextStore, { ContextWrapper } from '../GameFrame/context'
 import { GameStatsFrameWithCtx } from '../GameFrame/gameStats';
+import { ShopListWithCtxWithoutDB } from '../GameFrame/shopList';
+import { addStats } from '../GameFrame/actionsAndReducers/actions';
+import { allStats } from '../GameFrame/gameStats/config';
 
 const levelData_init = gameRequirements_mockData.map((data, i) => ({
   id: i,
   level: i + 1,
   star: 0
 }))
+
+// const itemFn_potion = ({
+// itemName: 'Potion',
+// fn: () => {
+//   window.alert(`your life increase ${1}!`)
+//   dispatch && dispatch( addStats(allStats.life, 1) )
+// }
+// })
+
+const itemFn_bomb = (gameRef) => ({
+  itemName: 'Bomb',
+  fn: () => {
+    window.alert(`bomb x ${1}!`)
+    gameRef && gameRef.current.handleResetGame()
+  }
+})
 
 const GameMode_JewelsRequirement = ({ 
   match, 
@@ -43,6 +63,7 @@ const GameMode_JewelsRequirement = ({
       key={ LEVEL }
       GameComponent={ JewelGame }
       PopupComponent={ ResultContent }
+      consumedItemFns={ [itemFn_bomb] }
       resultNextFns={ [handleNextLevel] }
       gameOverFns={ [handleSetLevelData] }
       gameRequirements={ gameRequirements[LEVEL] } />
@@ -63,6 +84,10 @@ const JewelMultiLevels = ({ levelData }) => {
 
 
 const JewelGameRouter = () => {
+  const { dispatch } = useContext(ContextStore)
+  const [showShop, setShopShow] = useState(false)
+  const [showItemList, setItemListShow] = useState(false)
+  // const [showShop, setShow] = useState(false)
   const [levelData, setLevelData] = useState(levelData_init)
   const handleSetLevelData = useCallback((id, star, highScore) => {
     let newLevelData = [...levelData]
@@ -73,12 +98,41 @@ const JewelGameRouter = () => {
     }
     setLevelData(newLevelData)
   }, [levelData])
+  //
+  const itemFn_potion = ({
+    itemName: 'Potion',
+    fn: () => {
+      window.alert(`your life increase ${1}!`)
+      dispatch && dispatch( addStats(allStats.life, 1) )
+    }
+  })
+  //
   return (
     <Router>
       <Link to={'/jewelGame'}>
         {'jewel game'}
       </Link>
-      <GameStatsFrameWithCtx />
+      <Box>
+        <GameStatsFrameWithCtx />
+        <Button onClick={ () => setShopShow(!showShop) }>
+          <HouseRounded />
+        </Button>
+        <Button onClick={ () => setItemListShow(!showItemList) }>
+          <AllInboxRounded />
+        </Button>
+        {showShop && (
+          <ShopListWithCtxWithoutDB 
+            isShop={ true }
+            closeFn={ () => setShopShow(false) } />
+        )}
+        {showItemList && (
+          <ShopListWithCtxWithoutDB 
+            isShop={ false }
+            consumedItemFns={ [itemFn_potion] }
+            closeFn={ () => setItemListShow(false) } />
+        )}
+      </Box>
+     
       <Route 
         path={ '/jewelGame' }
         exact

@@ -39,3 +39,32 @@ export const statsInfo_reducer = (state, action) => {
     return state
   }
 }
+
+export const shopList_reducer = (state, action) => {
+  const { type, id, count } = action
+  const item = state.find(item => item.id === id)
+  let newShopList = [...state]
+  switch (type) {
+  case ACTIONs.BUY_ITEM: {
+    const { itemCount } = item
+    newShopList[id] = {
+      ...newShopList[id],
+      itemCount: itemCount + count
+    }
+    return newShopList
+  }
+  case ACTIONs.CONSUME_ITEM: {
+    const { itemCount } = item
+    const newAmount = itemCount - count
+    if(newAmount >= 0) {
+      newShopList[id] = {
+        ...newShopList[id],
+        itemCount: newAmount
+      }
+      return newShopList
+    } return state
+  }
+  default:
+    return state
+  }
+}

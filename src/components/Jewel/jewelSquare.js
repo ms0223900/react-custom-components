@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useEffect, forwardRef, useImperativeHandle } from 'react'
+import _ from 'lodash'
 import { Box, makeStyles } from '@material-ui/core'
 import { FlashOn, Whatshot } from '@material-ui/icons'
 import {
@@ -281,6 +282,28 @@ const Jewels = ({
       }
     }
   }, [isPause, twoJewelsIndex, jewelData])
+
+  const handleSetSpecialJewels = useCallback((specialJewelType='bomb', amount=2) => {
+    //random 2 bombs
+    let newJewelData = [...jewelData]
+    let jewelIdxs = []
+    jewelData.forEach((data, idx) => {
+      if(data.type === 'jewel' && idx >= amountOfJewels) {
+        jewelIdxs = [...jewelIdxs, idx]
+      }
+    })
+    const randomIdxs = _.shuffle(jewelIdxs.slice(0, amount))
+    console.log(randomIdxs)
+    randomIdxs.forEach(idx => {
+      newJewelData[idx] = {
+        ...newJewelData[idx],
+        type: specialJewelType,
+        color: bombColor
+      }
+    })
+    setJewelData(newJewelData)
+  }, [jewelData])
+
   //handle exchange jewels
   useEffect(() => {
     if(twoJewelsIndex.length === 2) {
@@ -523,6 +546,12 @@ const Jewels = ({
       setJewelData([])
       settwoJewelsIndex([])
     },
+    handleSetBomb: (amount) => {
+      handleSetSpecialJewels('bomb', amount)
+    },
+    handleSetThunder: (amount) => {
+      handleSetSpecialJewels('thunder', amount)
+    },
   }))
   const thunderPoints = getThunderPoints(thunderIdxs.center, thunderIdxs.otherPoints)
   return (
@@ -539,8 +568,11 @@ const Jewels = ({
             pos={ getJewelPos(index, jewelWidth) } 
             getIdFn={ () => { getJewelId(index) } } />
         ))}
-        {thunderPoints.map(pts => (
-          <TwoPointSlash point1={pts.point1} point2={pts.point2} />
+        {thunderPoints.map((pts, i) => (
+          <TwoPointSlash
+            key={ i } 
+            point1={pts.point1} 
+            point2={pts.point2} />
         ))}
       </Box>
       

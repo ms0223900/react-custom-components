@@ -33,7 +33,7 @@ export const useStyles_gameResultPopup = makeStyles({
   }
 })
 
-const absolutePos = {
+export const absolutePos = {
   position: 'absolute',
   top: 0,
   left: 0,

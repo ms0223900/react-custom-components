@@ -15,6 +15,7 @@ import { GameStatsFrameWithCtx } from '../GameFrame/gameStats';
 import { ShopListWithCtxWithoutDB } from '../GameFrame/shopList';
 import { addStats } from '../GameFrame/actionsAndReducers/actions';
 import { allStats } from '../GameFrame/gameStats/config';
+import { jewelShopList_init } from './jewelShopList';
 
 const levelData_init = gameRequirements_mockData.map((data, i) => ({
   id: i,
@@ -33,8 +34,16 @@ const levelData_init = gameRequirements_mockData.map((data, i) => ({
 const itemFn_bomb = (gameRef) => ({
   itemName: 'Bomb',
   fn: () => {
-    window.alert(`bomb x ${1}!`)
-    gameRef && gameRef.current.handleResetGame()
+    // window.alert(`bomb x ${1}!`)
+    gameRef && gameRef.current.handleSetBomb(3)
+  }
+})
+
+const itemFn_thunder = (gameRef) => ({
+  itemName: 'Thunder',
+  fn: () => {
+    // window.alert(`bomb x ${1}!`)
+    gameRef && gameRef.current.handleSetThunder(2)
   }
 })
 
@@ -56,6 +65,10 @@ const GameMode_JewelsRequirement = ({
   const handleSetLevelData = ({ star, score }) => {
     setLevelDataFn(LEVEL, star, score)
   }
+  const consumedItemFns = [
+    itemFn_bomb,
+    itemFn_thunder,
+  ]
   return (
     <>
     <Typography>{ 'Level: ' + level }</Typography>
@@ -63,7 +76,7 @@ const GameMode_JewelsRequirement = ({
       key={ LEVEL }
       GameComponent={ JewelGame }
       PopupComponent={ ResultContent }
-      consumedItemFns={ [itemFn_bomb] }
+      consumedItemFns={ consumedItemFns }
       resultNextFns={ [handleNextLevel] }
       gameOverFns={ [handleSetLevelData] }
       gameRequirements={ gameRequirements[LEVEL] } />
@@ -160,7 +173,9 @@ const JewelGameRouter = () => {
 }
 
 export default () => (
-  <ContextWrapper>
+  <ContextWrapper customCtx={{
+    shopList_custom: jewelShopList_init
+  }}>
     <JewelGameRouter />
   </ContextWrapper>
 )

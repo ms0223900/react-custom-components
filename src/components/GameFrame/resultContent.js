@@ -3,7 +3,8 @@ import { Box, Typography } from '@material-ui/core';
 import { StarPart } from './multiLevels'
 
 const ResultContent = ({ content={} }) => {
-  const { level, score, star, isPass, coin } = content
+  const { level, score, star, isPass, ...bonuses } = content
+  const allBonuses = Object.keys(bonuses)
   //
   return (
     <Box>
@@ -22,7 +23,14 @@ const ResultContent = ({ content={} }) => {
           <StarPart star={ star } />
         )}
       </Box>
-      <Typography variant={'subtitle1'}>{ 'coin: ' + coin }</Typography>
+      <hr />
+      <Box>
+        {allBonuses.map(bonus => (
+          <Typography variant={'subtitle1'}>
+            { `${ bonus } +${ bonuses[bonus] }` }
+          </Typography>
+        ))}
+      </Box>
     </Box>
   )
 }

@@ -9,7 +9,7 @@ export const calculateScore = (clearedEmptyJewels) => {
   return singleJewelScore * scoreMagnification(clearedEmptyJewels)
 }
 
-export const checkRequirements = (gameOriginInfo, gameReq) => {
+export const checkRequirementsAndGetResult = (gameOriginInfo, gameReq) => {
   if(gameOriginInfo && gameReq) {
     const { 
       score, 

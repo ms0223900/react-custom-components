@@ -11,10 +11,17 @@ export const userInfo_init = {
   isLoggedIn: false,
 }
 
-export const ContextValue = () => {
-  const [userInfo, setUserInfo] = useState(userInfo_init)
-  const [statsInfo, dispatchStatsInfo] = useReducer(statsInfo_reducer, statsInfo_init)
-  const [shopList, dispatchShopList] = useReducer(shopList_reducer, shopList_init)
+export const ContextValue = (customCtx={}) => {
+  const ctx = {
+    userInfo_custom: userInfo_init,
+    statsInfo_custom: statsInfo_init,
+    shopList_custom: shopList_init,
+    ...customCtx
+  }
+  const { userInfo_custom, statsInfo_custom, shopList_custom } = ctx
+  const [userInfo, setUserInfo] = useState(userInfo_custom)
+  const [statsInfo, dispatchStatsInfo] = useReducer(statsInfo_reducer, statsInfo_custom)
+  const [shopList, dispatchShopList] = useReducer(shopList_reducer, shopList_custom)
   const dispatch = (params) => [
     dispatchStatsInfo,
     dispatchShopList,
@@ -35,8 +42,8 @@ const ContextStore = React.createContext({
   shopList: shopList_init,
 })
 
-export const ContextWrapper = props => {
-  const value = ContextValue()
+export const ContextWrapper = ({ customCtx, ...props }) => {
+  const value = ContextValue(customCtx)
   return (
     <ContextStore.Provider value={ value }>
       {props.children}

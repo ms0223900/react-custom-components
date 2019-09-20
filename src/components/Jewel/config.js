@@ -1,3 +1,5 @@
+import { allShopItems } from './jewelShopList'
+import { allStats } from '../GameFrame/gameStats/config'
 export const jewelWidth = 50
 export const jewelsPerRow = 7
 export const delayTime = 800
@@ -42,13 +44,31 @@ const calculateStar = (score) => {
   return starByScore.filter(sco => score > sco).length
 }
 
-const getResult = (score, isPass) => ({
-  score,
-  isPass,
-  star: calculateStar(score),
-  coin: ~~(score / 100)
-  //star from star fn
-})
+const getResultBonus = (star, score) => {
+  const basicBonus = {
+    [allStats.exp]: star * 10,
+  }
+  let finalBonus = {}
+  if(star >= 1) {
+    finalBonus = {
+      ...basicBonus,
+      [allShopItems.Potion]: 10,
+    }
+  }
+  return finalBonus
+}
+
+const getResult = (score, isPass) => {
+  const star = calculateStar(score)
+  return ({
+    score,
+    isPass,
+    //star from star fn
+    star,
+    coin: ~~(score / 100),
+    ...getResultBonus(star, score)
+  })
+}
 
 export const gameMode = {
   //basic check

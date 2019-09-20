@@ -62,12 +62,15 @@ export const shopData_mockData = [
 ]
 
 //test for jewel game
-
+const allShopItems = {
+  Potion: 'Potion',
+  Bomb: 'Bomb'
+}
 
 export const shopList_init = [
   {
     id: 0,
-    itemName: 'Potion', 
+    itemName: allShopItems.Potion, 
     itemPrice: 200, 
     itemImgSrc: {
       url: potionImgSrc
@@ -78,7 +81,7 @@ export const shopList_init = [
   },
   {
     id: 1,
-    itemName: 'Bomb', 
+    itemName: allShopItems.Bomb, 
     itemPrice: 1000, 
     itemImgSrc: {
       url: bombImgSrc

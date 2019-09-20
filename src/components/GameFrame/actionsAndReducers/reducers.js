@@ -1,4 +1,5 @@
 import * as ACTIONs from './actionTypes'
+import { allStats, getLevelUpCount } from '../gameStats/config'
 
 export const statsInfo_reducer = (state, action) => {
   const { type, statName, number } = action
@@ -9,9 +10,21 @@ export const statsInfo_reducer = (state, action) => {
   case ACTIONs.ADD_STATS: {
     if(stat) {
       const { id, statNumber: originStatNum } = stat
+      let newNumber = originStatNum + number
+      if(stat.statName === allStats.exp) {
+        const levelStat = state.find(stats => stats.statName === allStats.level)
+        const { statNumber: level, id: levelId } = levelStat
+        //level up
+        const { levelUpCount, remainExp } = getLevelUpCount(level, newNumber)
+        newStats[levelId] = {
+          ...newStats[levelId],
+          statNumber: level + levelUpCount
+        }
+        newNumber = remainExp
+      }
       newStats[id] = {
         ...newStats[id],
-        statNumber: originStatNum + number
+        statNumber: newNumber
       }
       return newStats
     }

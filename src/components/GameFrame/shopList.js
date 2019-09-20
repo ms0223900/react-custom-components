@@ -249,7 +249,7 @@ export const ShopList = ({
 
   return (
     <Box className={ classes.root }>
-      <Box className={ classes.back } />
+      <Box className={ classes.back } onClick={ closeFn } />
       <Paper className={ classes.shopList }>
         <ShopHeader 
           gameCoin={ userInfo && userInfo.point }

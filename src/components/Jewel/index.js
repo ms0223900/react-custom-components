@@ -4,7 +4,7 @@ import { Container, Box, Button, Typography, makeStyles } from '@material-ui/cor
 import GameText from './gameScore'
 import { 
   calculateScore,
-  checkRequirements, 
+  checkRequirementsAndGetResult, 
 } from './fn'
 import Jewels from './jewelSquare'
 import Timer from '../Timer'
@@ -121,7 +121,7 @@ const JewelGame = ({
   //check result
   useEffect(() => {
     const originGameInfo = { score, movedStep, isTimeover, remainRequireJewels }
-    const result = checkRequirements(originGameInfo, gameRequirements)
+    const result = checkRequirementsAndGetResult(originGameInfo, gameRequirements)
     // console.log(originGameInfo, result)
     //time limit requirement
     if(overFn && result) {

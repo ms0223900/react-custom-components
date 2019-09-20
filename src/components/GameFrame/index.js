@@ -4,7 +4,7 @@ import { Box, Paper, makeStyles, Typography, Button } from '@material-ui/core';
 import { useStyles_gameFrame, useStyles_gameResultPopup } from './styles'
 import './style/style.scss'
 import ContextStore from './context';
-import { addStats } from './actionsAndReducers/actions';
+import { addStats, buyItem } from './actionsAndReducers/actions';
 import { AllInboxRounded } from '@material-ui/icons';
 import { ShopListWithCtxWithoutDB } from './shopList';
 
@@ -62,7 +62,7 @@ const GameFrame = ({
   resultNextFns=[], 
   ...props 
 }) => {
-  const { dispatch } = useContext(ContextStore)
+  const { dispatch, statsInfo, shopList } = useContext(ContextStore)
   const gameRef = useRef()
   const gameContainerRef = useRef()
   const classes = useStyles_gameFrame()
@@ -72,14 +72,20 @@ const GameFrame = ({
   
   const handleOver = (resultContent={}) => {
     open(resultContent)
-    const resultKeys = Object.keys(resultContent)
-    dispatch && resultKeys.forEach(key => {
-      dispatch( addStats(key, resultContent[key]) )
+    const resultNames = Object.keys(resultContent)
+    const allStatNames = statsInfo ? statsInfo.map(stat => stat.statName) : []
+    const allShopItemNames = shopList ? shopList.map(item => item.itemName) : []
+    dispatch && resultNames.forEach(name => {
+      //stats
+      allStatNames.find(stat => stat === name) && dispatch( addStats(name, resultContent[name]) )
+      //items
+      if( allShopItemNames.find(item => item === name) ) {
+        const { id } = shopList.find(item => item.itemName === name)
+        dispatch( buyItem(id, resultContent[name]) )
+      }
     })
-    if(gameOverFns.length > 0) {
-      gameOverFns.forEach(fn => fn(resultContent))
-      gameRef && gameRef.current.handleResetGame()
-    }
+    gameOverFns.forEach(fn => fn(resultContent))
+    gameRef && gameRef.current.handleResetGame()
   }
 
   const handleNext = useCallback(() => {

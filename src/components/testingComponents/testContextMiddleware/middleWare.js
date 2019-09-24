@@ -1,6 +1,7 @@
-import allActions, { ActionTypes, getUser } from './actions'
+import allActions, { ActionTypes, getUser, minusCount } from './actions'
 import { useLazyQuery } from '@apollo/react-hooks'
 import { QUERY_USERS, apiUrl } from '../../GameFrame/API'
+import { match } from './fn'
 
 const timeoutPromise = (time=1000) => (
   new Promise(res => {
@@ -13,7 +14,7 @@ const timeoutPromise = (time=1000) => (
 const middleware_addUser = (action, dispatch) => {
   const { userData, mutationFn } = action
   // console.log(mutationFn)
-  mutationFn ? 
+  return mutationFn ? 
     // mutationFn({
     //   variables: {
     //     data: {
@@ -22,7 +23,7 @@ const middleware_addUser = (action, dispatch) => {
     //     }
     //   },
     // })
-    timeoutPromise()
+    timeoutPromise(2000)
       .then(res => {
         window.alert('user added successful!' + userData)
         console.log(res)
@@ -31,35 +32,41 @@ const middleware_addUser = (action, dispatch) => {
     : (
       window.alert('added without db!')
     )
-  return
+  
 }
 
-const middleware_getUser = (action, dispatch) => (
-  fetch(apiUrl + 'users')
-    .then(res => {
-      return res.json()
-    })
-    .then(res => {
-      dispatch( getUser(res) )
-    })
-)
+const middleware_getUser = (action, dispatch) => {
+  return (
+    fetch(apiUrl + 'users')
+      .then(res => {
+        return res.json()
+      })
+      .then(res => {
+        dispatch( getUser(res) )
+      })
+      .catch(err => window.alert(err))
+  )
+}
 
 const middleWares = (action, dispatch) => {
-  switch (action.type) {
-  case ActionTypes.ADD_COUNT: 
-    // return middleware_getUser(action, dispatch)
-    return
-  case ActionTypes.ADD_USER: {
-    return middleware_addUser(action, dispatch)
-  }
-  default:
-    return null
-  }
+  return (
+    match(action.type)
+      .equals(ActionTypes.ADD_USER)
+      .then( () => middleware_addUser(action, dispatch) )
+      .equals(ActionTypes.ADD_COUNT)
+      .then( () => middleware_getUser(action, dispatch) )
+      .equals(ActionTypes.MINUS_COUNT)
+      .then()
+      .else('')
+  )
 }
 
 const applyMiddleware = dispatch => action => {
-  dispatch(action) ||
   middleWares(action, dispatch)
+    .then(res => {
+      dispatch(action)
+    })
+  
 }
 
 export default applyMiddleware

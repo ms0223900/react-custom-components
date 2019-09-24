@@ -41,7 +41,7 @@ export const user = (state, action) => {
       users: [
         ...state.users,
         {
-          id: parseInt(state.users[state.users.length - 1].id) + 1,
+          id: state.users.length > 0 ? parseInt(state.users[state.users.length - 1].id) + 1 : 0,
           username: userData,
         }
       ]

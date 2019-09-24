@@ -46,6 +46,9 @@ const TestComponent = () => {
       <Button onClick={ handleAction }>
         { 'add: ' + count }
       </Button>
+      <Button onClick={ actions.minusCount_action }>
+        { 'minus: ' + count }
+      </Button>
       { users.length == 0 && 'click to fetch users' }
       {users.slice(0, count).map(user => {
         return (

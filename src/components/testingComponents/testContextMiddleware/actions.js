@@ -6,10 +6,10 @@ export const ActionTypes = {
   ADD_USER: 'ADD_USER',
 }
 
-const addCount = () => ({
+export const addCount = () => ({
   type: ActionTypes.ADD_COUNT,
 })
-const minusCount = () => ({
+export const minusCount = () => ({
   type: ActionTypes.MINUS_COUNT,
 })
 

@@ -3,6 +3,7 @@ import { storiesOf } from '@storybook/react'
 import UploadField from '../src/components/testingComponents/testStrapiUpload'
 import TestComponent from '../src/components/testingComponents/testContextMiddleware'
 import { ApolloProviderWrapper } from './API'
+import TestPage from '../src/components/Pages'
 
 storiesOf('test components', module)
   .add('test upload images to strapi', () => (
@@ -12,4 +13,7 @@ storiesOf('test components', module)
     <ApolloProviderWrapper>
       <TestComponent />
     </ApolloProviderWrapper>
+  ))
+  .add('test page component', () => (
+    <TestPage />
   ))

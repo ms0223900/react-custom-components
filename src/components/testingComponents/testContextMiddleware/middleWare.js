@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import allActions, { ActionTypes, getUser, minusCount } from './actions'
 import { useLazyQuery } from '@apollo/react-hooks'
 import { QUERY_USERS, apiUrl } from '../../GameFrame/API'

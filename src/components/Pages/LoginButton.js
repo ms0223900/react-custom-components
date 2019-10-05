@@ -1,22 +1,32 @@
+/* eslint-disable no-unused-vars */
 import React, { useState, useCallback } from 'react'
 import { Button } from '@material-ui/core'
+import { LOG_IN_STATUS } from './config'
+import { logInAndSetInfo } from '../GameFrame/API'
 
-const loggedUser = 'logged-user'
-const LoginButton = () => {
-  const isLogged = localStorage.getItem(loggedUser)
-  const [logged, setLog] = useState(isLogged)
+const user_defaultUser = {
+  username: 'aaa',
+  pwd: 'aaaaaaaa'
+}
+const removeUserInfo = () => {
+  localStorage.removeItem('USER_NAME')
+  localStorage.removeItem('USER_ID')
+  localStorage.removeItem('jwt')
+}
+
+const LoginButton = ({ isAuth }) => {
   const handleLogin = useCallback(() => {
-    if(!logged) {
-      localStorage.setItem(loggedUser, 'hi')
+    if(!isAuth) {
+      logInAndSetInfo(user_defaultUser.username, user_defaultUser.pwd, () => null, () => location.reload())
     } else {
-      localStorage.removeItem(loggedUser)
+      removeUserInfo()
+      location.reload()
     }
-
-    location.reload()
-  }, [logged])
+  }, [isAuth])
+  const username = localStorage.getItem('USER_NAME')
   return (
-    <Button onClick={ handleLogin }>
-      {!logged ? 'log in' : 'log out'}
+    <Button onClick={ handleLogin } variant={'contained'}>
+      {!isAuth ? 'click to log in' : `hi: ${username}, log out`}
     </Button>
   )
 }

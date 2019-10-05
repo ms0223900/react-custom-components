@@ -36,10 +36,12 @@ export const ContextValue = (customCtx={}) => {
   }
 }
 
-const ContextStore = React.createContext({
+export const ContextStore = React.createContext({
   userInfo: userInfo_init,
   statsInfo: statsInfo_init,
   shopList: shopList_init,
+  setUserInfo: () => {},
+  dispatch: () => {},
 })
 
 export const ContextWrapper = ({ customCtx, ...props }) => {

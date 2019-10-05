@@ -33,14 +33,16 @@ export const signUp = (sameUsernames, registerRequest, setErr, setUserInfo) => {
     setErr(e.message)
   }
 }
+
+const USER_NAME = 'USER_NAME'
+const USER_ID = 'USER_ID'
 const logIn = (username, pwd, setErr) => (
   strapi
     .login(username, pwd)
     .then(res => {
-      console.log(res)
-      const { id, user } = res
-      localStorage.setItem('username', user.username)
-      localStorage.setItem('userId', id)
+      const { user } = res
+      localStorage.setItem(USER_NAME, user.username)
+      localStorage.setItem(USER_ID, user.id)
       return user
       // location.reload()
     })

@@ -98,7 +98,6 @@ const protectedPage = Page => ({ ...passedProps }) => {
   const isAuth = loggedStatus === LOGGED_IN
   return (
     <>
-      <LoginButton isAuth={isAuth} />
       <AllPages 
         {...passedProps}
         loggedStatus={loggedStatus} 

@@ -14,7 +14,8 @@ const removeUserInfo = () => {
   localStorage.removeItem('jwt')
 }
 
-const LoginButton = ({ isAuth }) => {
+const LoginButton = () => {
+  const isAuth = localStorage.getItem('USER_NAME') && localStorage.getItem('jwt')
   const handleLogin = useCallback(() => {
     if(!isAuth) {
       logInAndSetInfo(user_defaultUser.username, user_defaultUser.pwd, () => null, () => location.reload())

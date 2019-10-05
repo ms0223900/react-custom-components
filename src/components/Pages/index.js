@@ -8,9 +8,12 @@ import KeyValueObjComponent from '../common-components/KeyValueObjects'
 const ProtectedPrivatePage = protectedPage(props => {
   const { userInfo } = useContext(ContextStore)
   return (
-    <Box>
+    <Box style={{ padding: 10, }}>
       {'you are logged in! :)'}
       <hr />
+      <Typography variant={'h4'}>
+        {'User Page'}
+      </Typography>
       <KeyValueObjComponent obj={userInfo} />
     </Box>
   )

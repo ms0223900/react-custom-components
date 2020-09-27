@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import React, { useState, useCallback } from 'react'
-import { BrowserRouter as Router, Route, Link, Switch } from 'react-router-dom'
+import { BrowserRouter as Router, Route, Link, Switch, MemoryRouter } from 'react-router-dom'
 import { Paper, Typography, Container, Box } from '@material-ui/core';
 import {
   ShutterSpeed,
@@ -112,7 +112,7 @@ const GARAMGameRouter = () => {
   }, [levelData])
   //
   return (
-    <Router>
+    <MemoryRouter initialEntries={['/gameMode']}>
       <Link to={'/gameMode'}>{'Game Mode Choose'}</Link>
       <Route 
         path={ '/gameMode' } 
@@ -140,7 +140,7 @@ const GARAMGameRouter = () => {
             setLevelData={ handleSetLevelData } />
         ) } 
       />
-    </Router>
+    </MemoryRouter>
   )
 }
 

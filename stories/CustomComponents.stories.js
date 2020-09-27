@@ -9,6 +9,7 @@ import '../src/styles/style.scss'
 import GARAMGameRouter from '../src/components/GARAM/route';
 import JewelGameRouter from '../src/components/Jewel/route'
 import { ApolloProviderWrapper } from './API'
+import { MemoryRouter } from 'react-router-dom'
 
 storiesOf('custom-components', module)
   // .add('calendar', () => (
@@ -17,11 +18,13 @@ storiesOf('custom-components', module)
   // .add('SUDOKU', () => (
   //   <SUDOKU />
   // ))
+  // .add('FreeCellGame', () => (
+  //   <FreeCellGame />
+  // ))
   .add('WeatherAPI', () => (
+    // <MemoryRouter initialEntries={['/weather']}>
     <WeatherAPI />
-  ))
-  .add('FreeCellGame', () => (
-    <FreeCellGame />
+    // </MemoryRouter>
   ))
   .add('Gomoku', () => (
     <Gomoku />

@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import React, { useEffect, useState } from 'react'
 import { renderRoutes, matchRoutes } from 'react-router-config'
-import { BrowserRouter as Router, Route, Link } from 'react-router-dom'
+import { BrowserRouter as Router, Route, Link, MemoryRouter, useHistory } from 'react-router-dom'
 import { ThemeProvider, useTheme } from '@material-ui/styles'
 import Star from '@material-ui/icons/StarRounded'
 import { 
@@ -78,7 +78,7 @@ const useStyles = makeStyles({
   weatherPage: {
     '& a': {
       margin: '10px',
-      maxWidth: 300,
+      width: 200,
       display: 'inline-block',
       textAlign: 'center',
       padding: 10,
@@ -215,15 +215,15 @@ const getData = (weatherEl) => {
 //轉換單位
 const convertMeasures = (measure) => {
   switch (measure) {
-    case '攝氏度' || '百分比':
-      return '°C'
-    case '百分比':
-      return '%'
-    case '公尺/秒':
-    case '16方位':
-      return measure
-    default:
-      return ''
+  case '攝氏度' || '百分比':
+    return '°C'
+  case '百分比':
+    return '%'
+  case '公尺/秒':
+  case '16方位':
+    return measure
+  default:
+    return ''
   }
 }
 //fn end
@@ -316,9 +316,12 @@ const WeatherInfo = ({ match, location, themeTone='light' }) => {
                   <Link to={ locationData }>{ `鄉鎮市: ${ locationName } ` }</Link>
                   {/* //用themeProvide來抓theme, star自己theme的相關東西會抓不到 */}
                   <Star 
-                    style={{ fill: checkIsStared(i) ? '#0000f1' : '#aaa' }}
+                    style={{ 
+                      fill: checkIsStared(i) ? '#0000f1' : '#aaa',
+                      cursor: 'pointer',
+                    }}
                     onClick={ handleStarTownLink.bind(this, i, data.locationsName, cityNow, locationName, `/weather/${ cityNow }/${ locationName }`, ) }>
-                    { checkIsStared(i) ? '以收藏' : '收藏' } 
+                    { checkIsStared(i) ? '已收藏' : '收藏' } 
                   </Star>
                 </h3>
                 <hr />
@@ -394,20 +397,20 @@ const TownWeatherInfo = ({ match, location }) => {
       <div>
         {!townData ? 
           <h2>Loading...</h2> : (
-          <div>
-            <h2>{  town + ' 近三小時天氣概況' }</h2>
-            {townData[0].weatherElement.map((el, i) => (
-              <div key={ i } className={ classes.townWeatherInfo }>
-                <h4>{ el.description }: </h4>
-                <p>
-                  <span>{ getData(el).value }</span>
-                  { ' ' + convertMeasures( getData(el).measures ) } 
-                </p>
-                <hr />
-              </div>
-            ))}
-          </div>
-        )}
+            <div>
+              <h2>{  town + ' 近三小時天氣概況' }</h2>
+              {townData[0].weatherElement.map((el, i) => (
+                <div key={ i } className={ classes.townWeatherInfo }>
+                  <h4>{ el.description }: </h4>
+                  <p>
+                    <span>{ getData(el).value }</span>
+                    { ' ' + convertMeasures( getData(el).measures ) } 
+                  </p>
+                  <hr />
+                </div>
+              ))}
+            </div>
+          )}
       </div> 
     </div>
   )
@@ -449,7 +452,7 @@ const BreadCrumb = ({ location, onMatchRoutes }) => {
           const isActive = path === location.pathname
           return isActive ? 
             (
-              <li key={ i }>{ breadCrumbName } / </li>
+              <li key={ i }>{ breadCrumbName } </li>
             ) : (
               <li key={ i }><Link to={ path }>{ breadCrumbName } / </Link></li>
             )
@@ -464,12 +467,17 @@ const Main = ({ themeTone }) => {
   // const theme = useTheme()
   const { backgroundColor: mainBg, color: mainColor } = theme[themeTone].mainColor
   const { backgroundColor: revBg, color: revColor } = theme[themeTone].reverseColor
+
   return (
     <div style={{ minHeight: '100vh', backgroundColor: mainBg, color: mainColor }}>
-      {/* { renderRoutes(routes) } */}
-      <Route exact path={ '/' } component={ Home } />
+      { renderRoutes(routes) }
+      {/* <Route exact path={ '/' } component={ Home } />
       <Route path={ '/about' } component={ About } />
-      <Route path={ '/weather' } render={ (routeProps) => <Weather themeTone={ themeTone } {...routeProps} /> } />
+      <Route 
+        path={routes[2].path} 
+        render={ (routeProps) => (
+          <Weather themeTone={ themeTone } {...routeProps} />
+        )} /> */}
     </div>
   )
 }
@@ -485,11 +493,11 @@ export default () => {
     }
   }
   return (
-    // <ThemeProvider theme={ theme }>
-      <Router>
-        <Navbar themeTone={ themeTone } setThemeFn={ handleSetThemeTone } />
-        <Main themeTone={ themeTone } />
-      </Router>
-    // </ThemeProvider>
+    <MemoryRouter initialEntries={['/weather']}>
+      {/* <Router> */}
+      <Navbar themeTone={ themeTone } setThemeFn={ handleSetThemeTone } />
+      <Main themeTone={ themeTone } />
+      {/* </Router> */}
+    </MemoryRouter>
   )
 }

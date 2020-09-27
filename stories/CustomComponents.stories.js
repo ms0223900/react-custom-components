@@ -1,8 +1,6 @@
 import React from 'react'
 import { storiesOf } from '@storybook/react'
 import Calendar from '../src/components/Calendar'
-import Calculator from '../src/legacy/Calculator'
-import ComicViewer from '../src/legacy/ComicViewer'
 import SUDOKU from '../src/components/SUDOKU'
 import WeatherAPI from '../src/components/WeatherAPI'
 import FreeCellGame from '../src/components/FreeCellGame'
@@ -13,12 +11,12 @@ import JewelGameRouter from '../src/components/Jewel/route'
 import { ApolloProviderWrapper } from './API'
 
 storiesOf('custom-components', module)
-  .add('calendar', () => (
-    <Calendar />
-  ))
-  .add('SUDOKU', () => (
-    <SUDOKU />
-  ))
+  // .add('calendar', () => (
+  //   <Calendar />
+  // ))
+  // .add('SUDOKU', () => (
+  //   <SUDOKU />
+  // ))
   .add('WeatherAPI', () => (
     <WeatherAPI />
   ))

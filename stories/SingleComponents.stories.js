@@ -26,98 +26,98 @@ import GameStatsFrameWithCtxWrapper, {
 } from '../src/components/GameFrame/gameStats'
 import { ContextWrapper } from '../src/components/GameFrame/context'
 
-storiesOf('single custom components', module)
-  .add('chatRoom from gomoku', () => (
-    <ChatRoom
-      userData={ userData_mockData }
-      userNow={ 'penguin_541' }
-      chatData_mock={ chatData_mockData } />
-  ))
-  .add('chat room with userBuyEmotes', () => (
-    <ApolloProviderWrapper>
-      <ChatRoomWithCxt
-        userData={ userData_mockData }
-        userNow={ 'penguin_541' }
-        chatData_mock={ chatData_mockData } />
-    </ApolloProviderWrapper>
-  ))
-  .add('timer', () => (
-    <>
-      {'normal timer'}
-      <Timer />
-      {'little timer'}
-      <LittleTimer />
-    </>
-  ))
-  .add('GARAM', () => (
-    <GARAM />
-  ))
-  .add('Game Frame', () => (
-    <GameFrame />
-  ))
-  .add('GARAM with Game Frame', () => (
-    <GameFrame GameComponent={ GARAM } PopupComponent={ ResultContent } />
-  ))
-  .add('Game Frame (multi levels)', () => (
-    <MultiLevels />
-  ))
-  .add('shop list', () => (
-    <ApolloProviderWrapper>
-      <ShopList />
-    </ApolloProviderWrapper>
-  ))
-  .add('item list', () => (
-    <ApolloProviderWrapper>
-      <ItemList />
-    </ApolloProviderWrapper>
-  ))
-  .add('ShopListWithCxt', () => (
-    <ApolloProviderWrapper>
-      <ShopListWithCxt /> 
-    </ApolloProviderWrapper>
-  ))
-  .add('Nav bar', () => (
-    <ApolloProviderWrapper>
-      <NavBarWithCxt /> 
-    </ApolloProviderWrapper>
-  ))
-  .add('hexagon', () => (
-    <HexSnake />
-  ))
-  .add('jewelGame', () => (
-    <JewelGame />
-  ))
-  .add('jewelGame with gameFrame', () => (
-    <GameFrame 
-      GameComponent={ JewelGame } 
-      PopupComponent={ ResultContent } />
-  ))
-  .add('single slash component', () => (
-    <TwoPointSlash 
-      point1={{ top: 0, left: 0 }}
-      point2={{ top: 100, left: 100 }} />
-  ))
-  .add('game enter component', () => (
-    <RouterWrapper>
-      <JewelLevelEnter />
-    </RouterWrapper>
-  ))
-  .add('game stats frame', () => (
-    <GameStatsFrameWithCtxWrapper>
-      <ButtonsForTest />
-    </GameStatsFrameWithCtxWrapper>
-  ))
-  .add('ShopList withCtx withoutDB', () => (
-    <ApolloProviderWrapper>
-      <ContextWrapper>
-        <ShopListWithCtxWithoutDB isShop={ true } />
-      </ContextWrapper>
-    </ApolloProviderWrapper>
-  ))
-  .add('ItemList withCtx withoutDB', () => (
-    <ApolloProviderWrapper>
-      <ContextWrapper>
-        <ShopListWithCtxWithoutDB isShop={ false } />
-      </ContextWrapper>
-    </ApolloProviderWrapper>
-  ))
+// storiesOf('single custom components', module)
+//   .add('chatRoom from gomoku', () => (
+//     <ChatRoom
+//       userData={ userData_mockData }
+//       userNow={ 'penguin_541' }
+//       chatData_mock={ chatData_mockData } />
+//   ))
+//   .add('chat room with userBuyEmotes', () => (
+//     <ApolloProviderWrapper>
+//       <ChatRoomWithCxt
+//         userData={ userData_mockData }
+//         userNow={ 'penguin_541' }
+//         chatData_mock={ chatData_mockData } />
+//     </ApolloProviderWrapper>
+//   ))
+//   .add('timer', () => (
+//     <>
+//       {'normal timer'}
+//       <Timer />
+//       {'little timer'}
+//       <LittleTimer />
+//     </>
+//   ))
+//   .add('GARAM', () => (
+//     <GARAM />
+//   ))
+//   .add('Game Frame', () => (
+//     <GameFrame />
+//   ))
+//   .add('GARAM with Game Frame', () => (
+//     <GameFrame GameComponent={ GARAM } PopupComponent={ ResultContent } />
+//   ))
+//   .add('Game Frame (multi levels)', () => (
+//     <MultiLevels />
+//   ))
+//   .add('shop list', () => (
+//     <ApolloProviderWrapper>
+//       <ShopList />
+//     </ApolloProviderWrapper>
+//   ))
+//   .add('item list', () => (
+//     <ApolloProviderWrapper>
+//       <ItemList />
+//     </ApolloProviderWrapper>
+//   ))
+//   .add('ShopListWithCxt', () => (
+//     <ApolloProviderWrapper>
+//       <ShopListWithCxt /> 
+//     </ApolloProviderWrapper>
+//   ))
+//   .add('Nav bar', () => (
+//     <ApolloProviderWrapper>
+//       <NavBarWithCxt /> 
+//     </ApolloProviderWrapper>
+//   ))
+//   .add('hexagon', () => (
+//     <HexSnake />
+//   ))
+//   .add('jewelGame', () => (
+//     <JewelGame />
+//   ))
+//   .add('jewelGame with gameFrame', () => (
+//     <GameFrame 
+//       GameComponent={ JewelGame } 
+//       PopupComponent={ ResultContent } />
+//   ))
+//   .add('single slash component', () => (
+//     <TwoPointSlash 
+//       point1={{ top: 0, left: 0 }}
+//       point2={{ top: 100, left: 100 }} />
+//   ))
+//   .add('game enter component', () => (
+//     <RouterWrapper>
+//       <JewelLevelEnter />
+//     </RouterWrapper>
+//   ))
+//   .add('game stats frame', () => (
+//     <GameStatsFrameWithCtxWrapper>
+//       <ButtonsForTest />
+//     </GameStatsFrameWithCtxWrapper>
+//   ))
+//   .add('ShopList withCtx withoutDB', () => (
+//     <ApolloProviderWrapper>
+//       <ContextWrapper>
+//         <ShopListWithCtxWithoutDB isShop={ true } />
+//       </ContextWrapper>
+//     </ApolloProviderWrapper>
+//   ))
+//   .add('ItemList withCtx withoutDB', () => (
+//     <ApolloProviderWrapper>
+//       <ContextWrapper>
+//         <ShopListWithCtxWithoutDB isShop={ false } />
+//       </ContextWrapper>
+//     </ApolloProviderWrapper>
+//   ))

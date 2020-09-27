@@ -4,15 +4,15 @@ import TestComponent from '../src/components/testingComponents/testContextMiddle
 import { ApolloProviderWrapper } from './API'
 import TestPage from '../src/components/Pages'
 
-storiesOf('test components', module)
-  // .add('test upload images to strapi', () => (
-  //   <UploadField />
-  // ))
-  .add('test context middleware', () => (
-    <ApolloProviderWrapper>
-      <TestComponent />
-    </ApolloProviderWrapper>
-  ))
-  .add('test page component', () => (
-    <TestPage />
-  ))
+// storiesOf('test components', module)
+//   .add('test upload images to strapi', () => (
+//     <UploadField />
+//   ))
+//   .add('test context middleware', () => (
+//     <ApolloProviderWrapper>
+//       <TestComponent />
+//     </ApolloProviderWrapper>
+//   ))
+//   .add('test page component', () => (
+//     <TestPage />
+//   ))
